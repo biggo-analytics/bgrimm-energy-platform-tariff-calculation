@@ -1,0 +1,26 @@
+name: koa-electricity-bill-api
+services:
+  - name: api
+    source_dir: /
+    github:
+      repo: your-username/bgrimm-energy-platform-tariff-calculation
+      branch: main
+    run_command: npm start
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 3000
+    routes:
+      - path: /
+    health_check:
+      http_path: /health
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+    alerts:
+      - rule: DEPLOYMENT_FAILED
+      - rule: DOMAIN_FAILED
+      - rule: HIGH_CPU_UTILIZATION
+      - rule: HIGH_MEMORY_UTILIZATION
