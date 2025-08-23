@@ -94,10 +94,12 @@ deploy_to_do() {
     print_status "Deploying to DigitalOcean App Platform..."
     
     if command -v doctl &> /dev/null; then
-        # Check if app exists
-        if doctl apps list | grep -q $APP_NAME; then
-            print_status "Updating existing app..."
-            doctl apps update $APP_NAME --spec .do/app.yaml
+        # Check if app exists using exact name matching and get app ID
+        app_id=$(doctl apps list --format ID,Spec.Name --no-header | awk -v app_name="$APP_NAME" '$2 == app_name {print $1}')
+        
+        if [ -n "$app_id" ]; then
+            print_status "Updating existing app (ID: $app_id)..."
+            doctl apps update "$app_id" --spec .do/app.yaml
         else
             print_status "Creating new app..."
             doctl apps create --spec .do/app.yaml
