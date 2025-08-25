@@ -1,16 +1,40 @@
 /**
- * Electricity Service
- * Contains all electricity bill calculation logic
+ * MEA Electricity Service
+ * Handles electricity bill calculations for Metropolitan Electricity Authority (MEA)
+ * 
+ * This service implements the MEA tariff structure for different customer types:
+ * - Type 2: Small General Service (residential and small business)
+ * - Type 3: Medium General Service 
+ * - Type 4: Large General Service
+ * - Type 5: Specific Business Service
+ * 
+ * Each type supports multiple tariff options:
+ * - Normal: Fixed rate structure
+ * - Time of Use (TOU): Different rates for peak/off-peak hours
+ * - Time of Day (TOD): Three-tier demand pricing (Type 4 only)
+ * 
+ * Calculations include:
+ * - Energy charges (kWh-based)
+ * - Demand charges (kW-based, Types 3-5)
+ * - Power factor penalties/credits
+ * - Service charges
+ * - Fuel adjustment charges
+ * - 7% VAT
+ * 
+ * @author BGrimm Energy Platform
+ * @version 1.0.0
  */
 
-// Constants
-const SERVICE_CHARGE = 312.24;
-const PF_PENALTY_RATE = 56.07;
-const PF_THRESHOLD_FACTOR = 0.6197;
-const MINIMUM_BILL_FACTOR = 0.70;
-const VAT_RATE = 0.07;
+// MEA Business Constants
+// These constants are based on MEA's official tariff structure
+const SERVICE_CHARGE = 312.24; // Standard service charge (baht/month) for Types 3-5
+const PF_PENALTY_RATE = 56.07; // Power factor penalty rate (baht/kVAR/month)
+const PF_THRESHOLD_FACTOR = 0.6197; // Power factor threshold (61.97%)
+const MINIMUM_BILL_FACTOR = 0.70; // Minimum bill protection factor (70% of peak demand)
+const VAT_RATE = 0.07; // Value Added Tax rate (7%)
 
-// Rate tables
+// MEA Tariff Rate Tables
+// These rates are updated periodically by MEA and should be maintained accordingly
 const TYPE_2_RATES = {
   normal: {
     '<12kV': {
@@ -80,6 +104,18 @@ const TYPE_5_RATES = {
 };
 
 // Helper functions
+/**
+ * Calculates energy charge for Type 2 (Small General Service) customers
+ * Implements tiered rate structure for <12kV and flat rate for 12-24kV
+ * 
+ * @param {number} totalKwh - Total energy consumption in kWh
+ * @param {string} voltageLevel - Voltage level ('<12kV' or '12-24kV')
+ * @returns {number} Energy charge in baht
+ * 
+ * Rate Structure:
+ * <12kV: Tiered rates (0-150, 151-400, 401+ kWh)
+ * 12-24kV: Flat rate for all consumption
+ */
 const calculateEnergyChargeType2 = (totalKwh, voltageLevel) => {
   if (voltageLevel === '12-24kV') {
     return totalKwh * TYPE_2_RATES.normal['12-24kV'].energyRate;
@@ -106,12 +142,33 @@ const calculateEnergyChargeType2 = (totalKwh, voltageLevel) => {
   }
 };
 
+/**
+ * Calculates power factor penalty charge
+ * Applied when reactive power exceeds 61.97% of active power
+ * 
+ * @param {number} peakKvar - Peak reactive power in kVAR
+ * @param {number} overallPeakKw - Overall peak active power in kW
+ * @returns {number} Power factor charge in baht (0 if no penalty)
+ * 
+ * Formula: max(0, kVAR - (kW * 0.6197)) * penalty_rate
+ */
 const calculatePowerFactorCharge = (peakKvar, overallPeakKw) => {
   const excessKvar = Math.max(0, peakKvar - (overallPeakKw * PF_THRESHOLD_FACTOR));
   return Math.round(excessKvar) * PF_PENALTY_RATE;
 };
 
 // Type 2 calculation functions
+/**
+ * Calculates bill for Type 2 Normal tariff
+ * Small General Service with standard rate structure
+ * 
+ * @param {Object} data - Input data
+ * @param {string} data.voltageLevel - Voltage level
+ * @param {number} data.ftRateSatang - Fuel adjustment rate in satang/kWh
+ * @param {Object} data.usage - Usage data
+ * @param {number} data.usage.total_kwh - Total energy consumption
+ * @returns {Object} Calculation results
+ */
 const _calculateType2Normal = (data) => {
   const { voltageLevel, ftRateSatang, usage } = data;
   const { total_kwh } = usage;
@@ -136,6 +193,16 @@ const _calculateType2Normal = (data) => {
   };
 };
 
+/**
+ * Calculates bill for Type 2 Time of Use tariff
+ * Different rates for peak and off-peak hours
+ * 
+ * @param {Object} data - Input data
+ * @param {string} data.voltageLevel - Voltage level
+ * @param {number} data.ftRateSatang - Fuel adjustment rate
+ * @param {Object} data.usage - Usage data with peak/off-peak breakdown
+ * @returns {Object} Calculation results
+ */
 const _calculateType2Tou = (data) => {
   const { voltageLevel, ftRateSatang, usage } = data;
   const { on_peak_kwh, off_peak_kwh } = usage;
@@ -160,6 +227,18 @@ const _calculateType2Tou = (data) => {
 };
 
 // Type 3 calculation function
+/**
+ * Calculates bill for Type 3 Medium General Service
+ * Includes demand charges and power factor calculations
+ * 
+ * @param {Object} data - Input data
+ * @param {string} data.tariffType - 'normal' or 'tou'
+ * @param {string} data.voltageLevel - Voltage level
+ * @param {number} data.peakKvar - Peak reactive power
+ * @param {number} data.highestDemandChargeLast12m - Historical demand charge
+ * @param {Object} data.usage - Usage data
+ * @returns {Object} Calculation results with demand charges
+ */
 const _calculateType3 = (data) => {
   const { tariffType, voltageLevel, ftRateSatang, peakKvar, highestDemandChargeLast12m, usage } = data;
   const rates = TYPE_3_RATES[tariffType][voltageLevel];
@@ -201,6 +280,18 @@ const _calculateType3 = (data) => {
 };
 
 // Type 4 calculation function
+/**
+ * Calculates bill for Type 4 Large General Service
+ * Supports both TOD (Time of Day) and TOU tariffs
+ * 
+ * @param {Object} data - Input data
+ * @param {string} data.tariffType - 'tod' or 'tou'
+ * @param {string} data.voltageLevel - Voltage level
+ * @param {number} data.peakKvar - Peak reactive power
+ * @param {number} data.highestDemandChargeLast12m - Historical demand charge
+ * @param {Object} data.usage - Usage data (varies by tariff type)
+ * @returns {Object} Calculation results
+ */
 const _calculateType4 = (data) => {
   const { tariffType, voltageLevel, ftRateSatang, peakKvar, highestDemandChargeLast12m, usage } = data;
   const rates = TYPE_4_RATES[tariffType][voltageLevel];
@@ -244,6 +335,18 @@ const _calculateType4 = (data) => {
 };
 
 // Type 5 calculation function
+/**
+ * Calculates bill for Type 5 Specific Business Service
+ * Similar to Type 3 but with different rate structure
+ * 
+ * @param {Object} data - Input data
+ * @param {string} data.tariffType - 'normal' or 'tou'
+ * @param {string} data.voltageLevel - Voltage level
+ * @param {number} data.peakKvar - Peak reactive power
+ * @param {number} data.highestDemandChargeLast12m - Historical demand charge
+ * @param {Object} data.usage - Usage data
+ * @returns {Object} Calculation results
+ */
 const _calculateType5 = (data) => {
   const { tariffType, voltageLevel, ftRateSatang, peakKvar, highestDemandChargeLast12m, usage } = data;
   const rates = TYPE_5_RATES[tariffType][voltageLevel];
@@ -285,24 +388,72 @@ const _calculateType5 = (data) => {
 };
 
 // Main dispatcher function
+/**
+ * Main calculation entry point
+ * Routes to appropriate calculation function based on customer type
+ * 
+ * @param {string} calculationType - Customer type ('type-2', 'type-3', 'type-4', 'type-5')
+ * @param {Object} data - Input data for calculation
+ * @returns {Object} Complete bill calculation results
+ * 
+ * @throws {Error} If calculation type is invalid or calculation fails
+ * 
+ * @example
+ * const result = calculateBill('type-2', {
+ *   tariffType: 'normal',
+ *   voltageLevel: '<12kV',
+ *   ftRateSatang: 19.72,
+ *   usage: { total_kwh: 500 }
+ * });
+ */
 const calculateBill = (calculationType, data) => {
-  switch (calculationType) {
-    case 'type-2':
-      if (data.tariffType === 'normal') {
-        return _calculateType2Normal(data);
-      } else if (data.tariffType === 'tou') {
-        return _calculateType2Tou(data);
-      } else {
-        throw new Error('Invalid tariff type for Type 2. Must be "normal" or "tou"');
-      }
-    case 'type-3':
-      return _calculateType3(data);
-    case 'type-4':
-      return _calculateType4(data);
-    case 'type-5':
-      return _calculateType5(data);
-    default:
-      throw new Error(`Invalid calculation type: ${calculationType}`);
+  // Try to get result from cache first
+  const cacheKey = cache.generateKey(calculationType, data);
+  const cachedResult = cache.get(cacheKey);
+  
+  if (cachedResult) {
+    logger.debug('Cache hit for calculation', { calculationType });
+    return { ...cachedResult, cached: true };
+  }
+  
+  let result;
+  
+  try {
+    switch (calculationType) {
+      case 'type-2':
+        if (data.tariffType === 'normal') {
+          result = _calculateType2Normal(data);
+        } else if (data.tariffType === 'tou') {
+          result = _calculateType2Tou(data);
+        } else {
+          throw new Error('Invalid tariff type for Type 2. Must be "normal" or "tou"');
+        }
+        break;
+      case 'type-3':
+        result = _calculateType3(data);
+        break;
+      case 'type-4':
+        result = _calculateType4(data);
+        break;
+      case 'type-5':
+        result = _calculateType5(data);
+        break;
+      default:
+        throw new Error(`Invalid calculation type: ${calculationType}`);
+    }
+    
+    // Cache the result
+    cache.set(cacheKey, result);
+    logger.debug('Cached calculation result', { calculationType });
+    
+    return result;
+    
+  } catch (error) {
+    logger.error('Calculation failed', {
+      calculationType,
+      error: error.message
+    });
+    throw error;
   }
 };
 

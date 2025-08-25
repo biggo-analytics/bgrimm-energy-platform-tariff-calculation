@@ -1,4 +1,6 @@
 const electricityService = require('../services/electricity.service');
+const { ValidationError, asyncErrorHandler } = require('../utils/error-handler');
+const { logger } = require('../utils/logger');
 
 /**
  * Electricity Controller
@@ -6,20 +8,14 @@ const electricityService = require('../services/electricity.service');
  */
 
 // Input validation helper
-const validateCalculationInput = (ctx, requiredFields) => {
-  const { body } = ctx.request;
-  
+const validateCalculationInput = (body, requiredFields) => {
   if (!body) {
-    ctx.status = 400;
-    ctx.body = { error: 'Request body is required' };
-    return false;
+    throw new ValidationError('Request body is required');
   }
 
   for (const field of requiredFields) {
     if (!body[field]) {
-      ctx.status = 400;
-      ctx.body = { error: `Missing required field: ${field}` };
-      return false;
+      throw new ValidationError(`Missing required field: ${field}`, field);
     }
   }
 
@@ -27,72 +23,72 @@ const validateCalculationInput = (ctx, requiredFields) => {
 };
 
 // Type 2 - Small General Service
-const calculateType2 = async (ctx) => {
+const calculateType2 = asyncErrorHandler(async (ctx) => {
   const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'usage'];
+  const { body } = ctx.request;
   
-  if (!validateCalculationInput(ctx, requiredFields)) {
-    return;
-  }
-
-  try {
-    const result = electricityService.calculateBill('type-2', ctx.request.body);
-    ctx.body = result;
-  } catch (error) {
-    ctx.status = 400;
-    ctx.body = { error: error.message };
-  }
-};
+  validateCalculationInput(body, requiredFields);
+  
+  logger.logCalculation('mea', 'type-2', body);
+  const result = electricityService.calculateBill('type-2', body);
+  
+  ctx.body = {
+    ...result,
+    success: true,
+    timestamp: new Date().toISOString()
+  };
+});
 
 // Type 3 - Medium General Service
-const calculateType3 = async (ctx) => {
+const calculateType3 = asyncErrorHandler(async (ctx) => {
   const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
+  const { body } = ctx.request;
   
-  if (!validateCalculationInput(ctx, requiredFields)) {
-    return;
-  }
-
-  try {
-    const result = electricityService.calculateBill('type-3', ctx.request.body);
-    ctx.body = result;
-  } catch (error) {
-    ctx.status = 400;
-    ctx.body = { error: error.message };
-  }
-};
+  validateCalculationInput(body, requiredFields);
+  
+  logger.logCalculation('mea', 'type-3', body);
+  const result = electricityService.calculateBill('type-3', body);
+  
+  ctx.body = {
+    ...result,
+    success: true,
+    timestamp: new Date().toISOString()
+  };
+});
 
 // Type 4 - Large General Service
-const calculateType4 = async (ctx) => {
+const calculateType4 = asyncErrorHandler(async (ctx) => {
   const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
+  const { body } = ctx.request;
   
-  if (!validateCalculationInput(ctx, requiredFields)) {
-    return;
-  }
-
-  try {
-    const result = electricityService.calculateBill('type-4', ctx.request.body);
-    ctx.body = result;
-  } catch (error) {
-    ctx.status = 400;
-    ctx.body = { error: error.message };
-  }
-};
+  validateCalculationInput(body, requiredFields);
+  
+  logger.logCalculation('mea', 'type-4', body);
+  const result = electricityService.calculateBill('type-4', body);
+  
+  ctx.body = {
+    ...result,
+    success: true,
+    timestamp: new Date().toISOString()
+  };
+});
 
 // Type 5 - Specific Business
-const calculateType5 = async (ctx) => {
+const calculateType5 = asyncErrorHandler(async (ctx) => {
   const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
+  const { body } = ctx.request;
   
-  if (!validateCalculationInput(ctx, requiredFields)) {
-    return;
-  }
-
-  try {
-    const result = electricityService.calculateBill('type-5', ctx.request.body);
-    ctx.body = result;
-  } catch (error) {
-    ctx.status = 400;
-    ctx.body = { error: error.message };
-  }
-};
+  validateCalculationInput(body, requiredFields);
+  
+  logger.logCalculation('mea', 'type-5', body);
+  const result = electricityService.calculateBill('type-5', body);
+  
+  ctx.body = {
+    ...result,
+    success: true,
+    timestamp: new Date().toISOString()
+  };
+});
 
 module.exports = {
   calculateType2,
