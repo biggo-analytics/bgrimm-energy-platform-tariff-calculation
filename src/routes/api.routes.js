@@ -18,5 +18,6 @@ router.post('/mea/calculate/type-5', electricityController.calculateType5);
 router.post('/pea/calculate/type-2', peaElectricityController.calculateType2);
 router.post('/pea/calculate/type-3', peaElectricityController.calculateType3);
 router.post('/pea/calculate/type-4', peaElectricityController.calculateType4);
+router.post('/pea/calculate/type-5', peaElectricityController.calculateType5);
 
 module.exports = router;

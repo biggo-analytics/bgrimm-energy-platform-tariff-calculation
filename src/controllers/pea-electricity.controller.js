@@ -147,6 +147,54 @@ const PEA_TYPE_4_RATES = {
   }
 };
 
+const PEA_TYPE_5_RATES = {
+  // Corresponds to 'อัตราสำหรับผู้ใช้ไฟฟ้าที่ยังไม่ได้ติดตั้งมิเตอร์ TOU' (Normal rates)
+  normal: {
+    // Corresponds to 'แรงดันตั้งแต่ 69 กิโลโวลต์ขึ้นไป'
+    '>=69kV': {
+      demand: 220.56,
+      energy: 3.1097,
+      serviceCharge: 312.24
+    },
+    // Corresponds to 'แรงดัน 22 – 33 กิโลโวลต์'
+    '22-33kV': {
+      demand: 256.07,
+      energy: 3.1471,
+      serviceCharge: 312.24
+    },
+    // Corresponds to 'แรงดันต่ำกว่า 22 กิโลโวลต์'
+    '<22kV': {
+      demand: 276.64,
+      energy: 3.1751,
+      serviceCharge: 312.24
+    }
+  },
+  // Corresponds to 'อัตราตามช่วงเวลาของการใช้ (Time of Use Rate : TOU)'
+  tou: {
+    // Corresponds to 'แรงดันตั้งแต่ 69 กิโลโวลต์ขึ้นไป'
+    '>=69kV': {
+      demand_on: 74.14,
+      energy_on: 4.1025,
+      energy_off: 2.5849,
+      serviceCharge: 312.24
+    },
+    // Corresponds to 'แรงดัน 22 – 33 กิโลโวลต์'
+    '22-33kV': {
+      demand_on: 132.93,
+      energy_on: 4.1839,
+      energy_off: 2.6037,
+      serviceCharge: 312.24
+    },
+    // Corresponds to 'แรงดันต่ำกว่า 22 กิโลโวลต์'
+    '<22kV': {
+      demand_on: 210.00,
+      energy_on: 4.3297,
+      energy_off: 2.6369,
+      serviceCharge: 312.24
+    }
+  }
+};
+
 // Input validation helper
 const validateCalculationInput = (ctx, requiredFields) => {
   const { body } = ctx.request;
@@ -343,6 +391,58 @@ const _calculateType4 = (data) => {
   };
 };
 
+// Type 5 calculation function
+const _calculateType5 = (data) => {
+  const { tariffType, voltageLevel, ftRateSatang, peakKvar, highestDemandChargeLast12m, usage } = data;
+  
+  // Validate tariff type
+  if (!PEA_TYPE_5_RATES[tariffType]) {
+    throw new Error(`Invalid tariff type for Type 5. Must be "normal" or "tou", received: ${tariffType}`);
+  }
+  
+  // Validate voltage level
+  if (!PEA_TYPE_5_RATES[tariffType][voltageLevel]) {
+    throw new Error(`Invalid voltage level for Type 5 ${tariffType}. Must be ">=69kV", "22-33kV", or "<22kV", received: ${voltageLevel}`);
+  }
+  
+  const rates = PEA_TYPE_5_RATES[tariffType][voltageLevel];
+  
+  let calculatedDemandCharge, energyCharge, totalKwhForFt, overallPeakKw;
+  
+  if (tariffType === 'normal') {
+    calculatedDemandCharge = usage.peak_kw * rates.demand;
+    energyCharge = usage.total_kwh * rates.energy;
+    totalKwhForFt = usage.total_kwh;
+    overallPeakKw = usage.peak_kw;
+  } else {
+    calculatedDemandCharge = usage.on_peak_kw * rates.demand_on;
+    energyCharge = (usage.on_peak_kwh * rates.energy_on) + (usage.off_peak_kwh * rates.energy_off);
+    totalKwhForFt = usage.on_peak_kwh + usage.off_peak_kwh;
+    overallPeakKw = Math.max(usage.on_peak_kw, usage.off_peak_kw);
+  }
+  
+  const minimumCharge = highestDemandChargeLast12m * MINIMUM_BILL_FACTOR;
+  const effectiveDemandCharge = Math.max(calculatedDemandCharge, minimumCharge);
+  const pfCharge = calculatePowerFactorCharge(peakKvar, overallPeakKw);
+  const totalBaseTariff = effectiveDemandCharge + energyCharge + pfCharge + rates.serviceCharge;
+  const ftCharge = totalKwhForFt * (ftRateSatang / 100);
+  const subTotal = totalBaseTariff + ftCharge;
+  const vat = subTotal * VAT_RATE;
+  const grandTotal = subTotal + vat;
+  
+  return {
+    calculatedDemandCharge: Math.round(calculatedDemandCharge * 10) / 10,
+    energyCharge: Math.round(energyCharge * 10) / 10,
+    effectiveDemandCharge: Math.round(effectiveDemandCharge * 10) / 10,
+    pfCharge: Math.round(pfCharge * 1000) / 1000,
+    serviceCharge: rates.serviceCharge,
+    ftCharge: Math.round(ftCharge * 10) / 10,
+    subTotal: Math.round(subTotal * 1000) / 1000,
+    vat: Math.round(vat * 100000) / 100000,
+    grandTotal: Math.round(grandTotal * 100000) / 100000
+  };
+};
+
 // Main calculation dispatcher
 const calculateBill = (calculationType, data) => {
   switch (calculationType) {
@@ -358,6 +458,8 @@ const calculateBill = (calculationType, data) => {
       return _calculateType3(data);
     case 'type-4':
       return _calculateType4(data);
+    case 'type-5':
+      return _calculateType5(data);
     default:
       throw new Error(`Invalid calculation type: ${calculationType}`);
   }
@@ -414,8 +516,26 @@ const calculateType4 = async (ctx) => {
   }
 };
 
+// PEA Type 5 - Specific Business Service
+const calculateType5 = async (ctx) => {
+  const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
+  
+  if (!validateCalculationInput(ctx, requiredFields)) {
+    return;
+  }
+
+  try {
+    const result = calculateBill('type-5', ctx.request.body);
+    ctx.body = result;
+  } catch (error) {
+    ctx.status = 400;
+    ctx.body = { error: error.message };
+  }
+};
+
 module.exports = {
   calculateType2,
   calculateType3,
-  calculateType4
+  calculateType4,
+  calculateType5
 };
