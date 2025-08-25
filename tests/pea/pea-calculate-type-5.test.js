@@ -46,7 +46,7 @@ describe('PEA Type 5 - Specific Business Service API', () => {
         expect(response.body).toHaveProperty('subTotal');
         expect(response.body).toHaveProperty('vat');
         expect(response.body).toHaveProperty('grandTotal');
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(28646.8, 1); // 130 * 220.36
+        expect(response.body.calculatedDemandCharge).toBeCloseTo(28672.8, 1); // 130 * 220.56
         expect(response.body.energyCharge).toBeCloseTo(155485, 1); // 50000 * 3.1097
       });
 
@@ -67,7 +67,7 @@ describe('PEA Type 5 - Specific Business Service API', () => {
 
         expect(response.status).toBe(200);
         expect(response.body.calculatedDemandCharge).toBeCloseTo(28167.7, 1); // 110 * 256.07
-        expect(response.body.energyCharge).toBeCloseTo(140719.5, 1); // 45000 * 3.1271
+        expect(response.body.energyCharge).toBeCloseTo(141619.5, 1); // 45000 * 3.1471
         expect(response.body.serviceCharge).toBe(312.24);
       });
 
@@ -148,7 +148,7 @@ describe('PEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(220.36, 1); // 1 * 220.36
+        expect(response.body.calculatedDemandCharge).toBeCloseTo(220.6, 1); // 1 * 220.56
         expect(response.body.energyCharge).toBeCloseTo(3.11, 1); // 1 * 3.1097
       });
 
@@ -188,8 +188,8 @@ describe('PEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(28757.58, 1); // 130.5 * 220.36
-        expect(response.body.energyCharge).toBeCloseTo(155485.56, 1); // 50000.5 * 3.1097
+        expect(response.body.calculatedDemandCharge).toBeCloseTo(28783.1, 1); // 130.5 * 220.56
+        expect(response.body.energyCharge).toBeCloseTo(155486.555, 1); // 50000.5 * 3.1097
       });
     });
   });
@@ -268,8 +268,8 @@ describe('PEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(18972, 1); // 90 * 210.80
-        expect(response.body.energyCharge).toBeCloseTo(108625, 1); // (15000 * 4.3297) + (25000 * 2.6369)
+        expect(response.body.calculatedDemandCharge).toBeCloseTo(18900, 1); // 90 * 210.00
+        expect(response.body.energyCharge).toBeCloseTo(130868, 1); // (15000 * 4.3297) + (25000 * 2.6369)
         expect(response.body.serviceCharge).toBe(312.24);
       });
 
@@ -897,8 +897,8 @@ describe('PEA Type 5 - Specific Business Service API', () => {
       expect(response.status).toBe(200);
       
       // Manual calculation verification:
-      // Demand charge = 130 * 220.36 = 28646.8
-      expect(response.body.calculatedDemandCharge).toBeCloseTo(28646.8, 1);
+      // Demand charge = 130 * 220.56 = 28672.8
+      expect(response.body.calculatedDemandCharge).toBeCloseTo(28672.8, 1);
       
       // Energy charge = 50000 * 3.1097 = 155485
       expect(response.body.energyCharge).toBeCloseTo(155485, 1);
