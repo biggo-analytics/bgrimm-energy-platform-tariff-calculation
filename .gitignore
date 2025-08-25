@@ -5,6 +5,27 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+
 # Runtime data
 pids
 *.pid
