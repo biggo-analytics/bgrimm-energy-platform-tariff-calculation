@@ -589,7 +589,8 @@ describe('PEA Type 3 - Medium Business Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative usage values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
 
       test('should return 400 for negative total_kwh', async () => {
@@ -607,7 +608,8 @@ describe('PEA Type 3 - Medium Business Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative usage values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
     });
 

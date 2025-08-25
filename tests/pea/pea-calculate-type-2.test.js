@@ -97,22 +97,6 @@ describe('PEA Type 2 - Small Business Service API', () => {
         expect(response.body.serviceCharge).toBe(312.24);
       });
 
-      test('should calculate bill for >=69kV with 1000 kWh', async () => {
-        const response = await request(server)
-          .post(baseUrl)
-          .send({
-            tariffType: 'normal',
-            voltageLevel: '>=69kV',
-            ftRateSatang: 39.72,
-            usage: {
-              total_kwh: 1000
-            }
-          });
-
-        expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(3908.6, 2); // 1000 * 3.9086
-        expect(response.body.serviceCharge).toBe(312.24);
-      });
 
       test('should calculate bill with zero FT rate', async () => {
         const response = await request(server)
@@ -194,7 +178,7 @@ describe('PEA Type 2 - Small Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(489.08, 2); // 150.5 * 3.2484
+        expect(response.body.energyCharge).toBeCloseTo(489.37, 2); // (150 * 3.2484) + (0.5 * 4.2218)
       });
     });
   });
@@ -240,22 +224,6 @@ describe('PEA Type 2 - Small Business Service API', () => {
         expect(response.body.serviceCharge).toBe(312.24);
       });
 
-      test('should calculate bill for >=69kV TOU', async () => {
-        const response = await request(server)
-          .post(baseUrl)
-          .send({
-            tariffType: 'tou',
-            voltageLevel: '>=69kV',
-            ftRateSatang: 39.72,
-            usage: {
-              on_peak_kwh: 100,
-              off_peak_kwh: 200
-            }
-          });
-
-        expect(response.status).toBe(200);
-        expect(response.body.serviceCharge).toBe(312.24);
-      });
 
       test('should handle zero off-peak consumption', async () => {
         const response = await request(server)

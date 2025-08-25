@@ -12,7 +12,7 @@
 const validateCalculationInput = (ctx, requiredFields) => {
   const { body } = ctx.request;
   
-  if (!body) {
+  if (!body || (typeof body === 'object' && Object.keys(body).length === 0)) {
     ctx.status = 400;
     ctx.body = { error: 'Request body is required' };
     return false;
@@ -147,6 +147,18 @@ const validateUsageFields = (usage, tariffType, calculationType) => {
       if (!usage.off_peak_kwh && usage.off_peak_kwh !== 0) {
         return { isValid: false, error: 'Missing required field: off_peak_kwh' };
       }
+    }
+  }
+
+  // Validate usage field values are valid numbers and not negative
+  const usageFields = Object.keys(usage);
+  for (const field of usageFields) {
+    const value = usage[field];
+    if (typeof value !== 'number' || isNaN(value)) {
+      return { isValid: false, error: `${field} must be a valid number` };
+    }
+    if (value < 0) {
+      return { isValid: false, error: `${field} must be a positive number, received: ${value}` };
     }
   }
 
