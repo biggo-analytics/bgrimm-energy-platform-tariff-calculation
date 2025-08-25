@@ -12,6 +12,8 @@ const {
   getTariffTypeErrorMessage,
   getVoltageLevelErrorMessage
 } = require('../utils/validation');
+const { ValidationError, CalculationError, asyncErrorHandler } = require('../utils/error-handler');
+const { logger } = require('../utils/logger');
 
 class BaseElectricityController {
   constructor(electricityService, provider) {
@@ -26,66 +28,83 @@ class BaseElectricityController {
    * @param {string} calculationType - Type of calculation
    * @returns {Promise<void>}
    */
-  async handleCalculation(ctx, requiredFields, calculationType) {
-    // Validate required fields
-    if (!validateCalculationInput(ctx, requiredFields)) {
-      return;
-    }
+  handleCalculation(ctx, requiredFields, calculationType) {
+    return asyncErrorHandler(async () => {
+      const { body } = ctx.request;
+      
+      // Validate required fields manually to throw proper ValidationError
+      if (!body || (typeof body === 'object' && Object.keys(body).length === 0)) {
+        throw new ValidationError('Request body is required');
+      }
 
-    const { body } = ctx.request;
-
-    // Validate tariff type
-    if (!validateTariffType(body.tariffType)) {
-      ctx.status = 400;
-      ctx.body = { 
-        error: getTariffTypeErrorMessage(calculationType, body.tariffType)
-      };
-      return;
-    }
-
-    // Validate voltage level
-    if (!validateVoltageLevel(body.voltageLevel, this.provider)) {
-      ctx.status = 400;
-      ctx.body = { 
-        error: getVoltageLevelErrorMessage(calculationType, body.tariffType || 'unknown', body.voltageLevel, this.provider)
-      };
-      return;
-    }
-
-    // Validate numeric fields
-    const numericFields = [
-      { field: body.ftRateSatang, name: 'ftRateSatang' },
-      { field: body.peakKvar, name: 'peakKvar' },
-      { field: body.highestDemandChargeLast12m, name: 'highestDemandChargeLast12m' }
-    ];
-
-    for (const { field, name } of numericFields) {
-      if (field !== undefined && field !== null) {
-        const validation = validateNumericValue(field, name);
-        if (!validation.isValid) {
-          ctx.status = 400;
-          ctx.body = { error: validation.error };
-          return;
+      for (const field of requiredFields) {
+        if (body[field] === undefined || body[field] === null || body[field] === '') {
+          throw new ValidationError(`Missing required field: ${field}`, field);
         }
       }
-    }
 
-    // Validate usage fields
-    const usageValidation = validateUsageFields(body.usage, body.tariffType, calculationType);
-    if (!usageValidation.isValid) {
-      ctx.status = 400;
-      ctx.body = { error: usageValidation.error };
-      return;
-    }
+      // Validate tariff type
+      if (!validateTariffType(body.tariffType)) {
+        throw new ValidationError(
+          getTariffTypeErrorMessage(calculationType, body.tariffType),
+          'tariffType'
+        );
+      }
 
-    try {
-      const result = this.electricityService.calculateBill(calculationType, body);
-      ctx.status = 200;
-      ctx.body = result;
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = { error: 'Internal server error' };
-    }
+      // Validate voltage level
+      if (!validateVoltageLevel(body.voltageLevel, this.provider)) {
+        throw new ValidationError(
+          getVoltageLevelErrorMessage(calculationType, body.tariffType || 'unknown', body.voltageLevel, this.provider),
+          'voltageLevel'
+        );
+      }
+
+      // Validate numeric fields
+      const numericFields = [
+        { field: body.ftRateSatang, name: 'ftRateSatang' },
+        { field: body.peakKvar, name: 'peakKvar' },
+        { field: body.highestDemandChargeLast12m, name: 'highestDemandChargeLast12m' }
+      ];
+
+      for (const { field, name } of numericFields) {
+        if (field !== undefined && field !== null) {
+          const validation = validateNumericValue(field, name);
+          if (!validation.isValid) {
+            throw new ValidationError(validation.error, name);
+          }
+        }
+      }
+
+      // Validate usage fields
+      const usageValidation = validateUsageFields(body.usage, body.tariffType, calculationType);
+      if (!usageValidation.isValid) {
+        throw new ValidationError(usageValidation.error, 'usage');
+      }
+
+      // Log calculation request
+      logger.logCalculation(this.provider, calculationType, body);
+      
+      try {
+        const result = this.electricityService.calculateBill(calculationType, body);
+        
+        ctx.status = 200;
+        ctx.body = {
+          ...result,
+          success: true,
+          timestamp: new Date().toISOString(),
+          provider: this.provider,
+          calculationType
+        };
+      } catch (error) {
+        logger.error('Calculation failed', {
+          provider: this.provider,
+          calculationType,
+          error: error.message,
+          input: body
+        });
+        throw new CalculationError(`Failed to calculate ${calculationType}: ${error.message}`);
+      }
+    })(ctx);
   }
 
   /**
@@ -116,25 +135,25 @@ class BaseElectricityController {
   }
 
   // Type 2 calculation methods
-  async calculateType2(ctx) {
+  calculateType2(ctx) {
     const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'usage'];
-    await this.handleCalculation(ctx, requiredFields, 'type-2');
+    return this.handleCalculation(ctx, requiredFields, 'type-2');
   }
 
   // Type 3 calculation methods
-  async calculateType3(ctx) {
+  calculateType3(ctx) {
     const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
-    await this.handleCalculation(ctx, requiredFields, 'type-3');
+    return this.handleCalculation(ctx, requiredFields, 'type-3');
   }
 
-  async calculateType4(ctx) {
+  calculateType4(ctx) {
     const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
-    await this.handleCalculation(ctx, requiredFields, 'type-4');
+    return this.handleCalculation(ctx, requiredFields, 'type-4');
   }
 
-  async calculateType5(ctx) {
+  calculateType5(ctx) {
     const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
-    await this.handleCalculation(ctx, requiredFields, 'type-5');
+    return this.handleCalculation(ctx, requiredFields, 'type-5');
   }
 }
 

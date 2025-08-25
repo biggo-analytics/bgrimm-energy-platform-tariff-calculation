@@ -3,6 +3,8 @@
  * Centralized error handling for consistent error responses
  */
 
+const { logger } = require('./logger');
+
 /**
  * Custom error classes for different types of errors
  */
@@ -62,22 +64,45 @@ const formatErrorResponse = (error) => {
 const handleError = (ctx, error) => {
   let statusCode = 500;
   let message = 'Internal Server Error';
+  let logLevel = 'error';
 
   if (error instanceof ValidationError) {
     statusCode = error.statusCode;
     message = error.message;
+    logLevel = 'warn';
   } else if (error instanceof CalculationError) {
     statusCode = error.statusCode;
     message = error.message;
+    logLevel = 'error';
   } else if (error instanceof ConfigurationError) {
     statusCode = error.statusCode;
     message = error.message;
+    logLevel = 'error';
   } else if (error.name === 'ValidationError') {
     statusCode = 400;
     message = error.message;
+    logLevel = 'warn';
   } else {
-    // Log unexpected errors
-    console.error('Unexpected error:', error);
+    // Log unexpected errors with full details
+    logLevel = 'error';
+  }
+
+  // Log error with appropriate level
+  const logData = {
+    url: ctx.url,
+    method: ctx.method,
+    statusCode,
+    errorType: error.name || 'Unknown',
+    field: error.field,
+    userAgent: ctx.get('User-Agent'),
+    ip: ctx.ip,
+    stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+  };
+
+  if (logLevel === 'error') {
+    logger.error(message, logData);
+  } else {
+    logger.warn(message, logData);
   }
 
   ctx.status = statusCode;
