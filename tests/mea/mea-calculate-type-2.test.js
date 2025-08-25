@@ -177,7 +177,7 @@ describe('MEA Type 2 - Small General Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(489.08, 2); // 150.5 * 3.2484
+        expect(response.body.energyCharge).toBeCloseTo(489.371, 2); // Tiered: (150 * 3.2484) + (0.5 * 4.2218)
       });
     });
   });
