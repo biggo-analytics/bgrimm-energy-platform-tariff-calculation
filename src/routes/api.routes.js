@@ -17,5 +17,6 @@ router.post('/mea/calculate/type-5', electricityController.calculateType5);
 // PEA electricity calculation endpoints
 router.post('/pea/calculate/type-2', peaElectricityController.calculateType2);
 router.post('/pea/calculate/type-3', peaElectricityController.calculateType3);
+router.post('/pea/calculate/type-4', peaElectricityController.calculateType4);
 
 module.exports = router;
