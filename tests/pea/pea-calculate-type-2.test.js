@@ -429,7 +429,7 @@ describe('PEA Type 2 - Small Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Invalid voltage level for Type 2 normal. Must be ">=69kV", "22-33kV", "<22kV", received: invalid');
+        expect(response.body).toHaveProperty('error', 'Invalid voltage level for Type 2 normal. Must be ">=69kV", "22-33kV", or "<22kV", received: invalid');
       });
 
       test('should return 400 for negative ftRateSatang', async () => {
@@ -444,7 +444,8 @@ describe('PEA Type 2 - Small Business Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
 
       test('should return 400 for negative total_kwh', async () => {
@@ -459,7 +460,8 @@ describe('PEA Type 2 - Small Business Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
 
       test('should return 400 for negative on_peak_kwh', async () => {
@@ -475,7 +477,8 @@ describe('PEA Type 2 - Small Business Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
 
       test('should return 400 for negative off_peak_kwh', async () => {
@@ -491,7 +494,8 @@ describe('PEA Type 2 - Small Business Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
     });
 

@@ -179,7 +179,10 @@ const getVoltageLevelErrorMessage = (calculationType, tariffType, voltageLevel, 
     ? ['>=69kV', '12-24kV', '<12kV']
     : ['>=69kV', '22-33kV', '<22kV'];
   
-  return `Invalid voltage level for Type ${typeNumber} ${tariffType}. Must be "${validLevels.join('", "')}", received: ${voltageLevel}`;
+  const levelsText = validLevels.length > 1 
+    ? `"${validLevels.slice(0, -1).join('", "')}", or "${validLevels[validLevels.length - 1]}"`
+    : `"${validLevels[0]}"`;
+  return `Invalid voltage level for Type ${typeNumber} ${tariffType}. Must be ${levelsText}, received: ${voltageLevel}`;
 };
 
 module.exports = {

@@ -540,7 +540,7 @@ describe('MEA Type 4 - Large General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Invalid voltage level for Type 4 tod. Must be ">=69kV", "12-24kV", "<12kV", received: invalid');
+        expect(response.body).toHaveProperty('error', 'Invalid voltage level for Type 4 tod. Must be ">=69kV", "12-24kV", or "<12kV", received: invalid');
       });
 
       test('should return 400 for negative ftRateSatang', async () => {
@@ -560,7 +560,8 @@ describe('MEA Type 4 - Large General Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
 
       test('should return 400 for negative peakKvar', async () => {
@@ -580,7 +581,8 @@ describe('MEA Type 4 - Large General Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
 
       test('should return 400 for negative highestDemandChargeLast12m', async () => {
@@ -600,7 +602,8 @@ describe('MEA Type 4 - Large General Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
 
       test('should return 400 for negative on_peak_kw', async () => {
@@ -620,7 +623,8 @@ describe('MEA Type 4 - Large General Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
 
       test('should return 400 for negative total_kwh', async () => {
@@ -640,7 +644,8 @@ describe('MEA Type 4 - Large General Service API', () => {
             }
           });
 
-        expect(response.status).toBe(200); // Currently accepts negative values
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
       });
     });
 
