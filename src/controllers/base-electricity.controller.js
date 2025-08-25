@@ -22,89 +22,114 @@ class BaseElectricityController {
   }
 
   /**
-   * Generic calculation handler
-   * @param {Object} ctx - Koa context
-   * @param {Array} requiredFields - Required fields for validation
-   * @param {string} calculationType - Type of calculation
-   * @returns {Promise<void>}
+   * Generic calculation handler for all tariff calculation requests
+   * 
+   * This method provides centralized request handling including comprehensive validation,
+   * calculation execution, and standardized response formatting. It ensures consistent
+   * behavior across all calculation types and providers.
+   * 
+   * @param {Object} koaContext - Koa HTTP context containing request and response
+   * @param {Array<string>} mandatoryFieldNames - List of required field names for validation
+   * @param {string} customerCalculationType - Type of calculation (type-2, type-3, type-4, type-5)
+   * @returns {Promise<void>} - Async function that sets response on context
    */
-  handleCalculation(ctx, requiredFields, calculationType) {
+  handleCalculation(koaContext, mandatoryFieldNames, customerCalculationType) {
     return asyncErrorHandler(async () => {
-      const { body } = ctx.request;
+      const { body: requestBody } = koaContext.request;
       
-      // Validate required fields manually to throw proper ValidationError
-      if (!body || (typeof body === 'object' && Object.keys(body).length === 0)) {
-        throw new ValidationError('Request body is required');
-      }
-
-      for (const field of requiredFields) {
-        if (body[field] === undefined || body[field] === null || body[field] === '') {
-          throw new ValidationError(`Missing required field: ${field}`, field);
-        }
-      }
+      // Validate request body exists and is not empty
+      this._validateRequestBodyExists(requestBody);
+      
+      // Validate all mandatory fields are provided
+      this._validateMandatoryFields(requestBody, mandatoryFieldNames);
 
       // Validate tariff type
-      if (!validateTariffType(body.tariffType)) {
+      if (!validateTariffType(requestBody.tariffType)) {
         throw new ValidationError(
-          getTariffTypeErrorMessage(calculationType, body.tariffType),
+          getTariffTypeErrorMessage(customerCalculationType, requestBody.tariffType),
           'tariffType'
         );
       }
 
       // Validate voltage level
-      if (!validateVoltageLevel(body.voltageLevel, this.provider)) {
+      if (!validateVoltageLevel(requestBody.voltageLevel, this.provider)) {
         throw new ValidationError(
-          getVoltageLevelErrorMessage(calculationType, body.tariffType || 'unknown', body.voltageLevel, this.provider),
+          getVoltageLevelErrorMessage(customerCalculationType, requestBody.tariffType || 'unknown', requestBody.voltageLevel, this.provider),
           'voltageLevel'
         );
       }
 
-      // Validate numeric fields
-      const numericFields = [
-        { field: body.ftRateSatang, name: 'ftRateSatang' },
-        { field: body.peakKvar, name: 'peakKvar' },
-        { field: body.highestDemandChargeLast12m, name: 'highestDemandChargeLast12m' }
+      // Validate numeric fields that must be positive numbers
+      const numericFieldsToValidate = [
+        { 
+          fieldValue: requestBody.ftRateSatang, 
+          fieldName: 'ftRateSatang',
+          description: 'Fuel Adjustment Rate'
+        },
+        { 
+          fieldValue: requestBody.peakKvar, 
+          fieldName: 'peakKvar',
+          description: 'Peak Reactive Power'
+        },
+        { 
+          fieldValue: requestBody.highestDemandChargeLast12m, 
+          fieldName: 'highestDemandChargeLast12m',
+          description: 'Historical Peak Demand Charge'
+        }
       ];
 
-      for (const { field, name } of numericFields) {
-        if (field !== undefined && field !== null) {
-          const validation = validateNumericValue(field, name);
-          if (!validation.isValid) {
-            throw new ValidationError(validation.error, name);
+      // Validate each numeric field if provided
+      for (const { fieldValue, fieldName, description } of numericFieldsToValidate) {
+        if (this._isFieldProvided(fieldValue)) {
+          const numericValidationResult = validateNumericValue(fieldValue, fieldName);
+          if (!numericValidationResult.isValid) {
+            throw new ValidationError(
+              `${description} (${fieldName}): ${numericValidationResult.error}`, 
+              fieldName
+            );
           }
         }
       }
 
       // Validate usage fields
-      const usageValidation = validateUsageFields(body.usage, body.tariffType, calculationType);
+      const usageValidation = validateUsageFields(requestBody.usage, requestBody.tariffType, customerCalculationType);
       if (!usageValidation.isValid) {
         throw new ValidationError(usageValidation.error, 'usage');
       }
 
       // Log calculation request
-      logger.logCalculation(this.provider, calculationType, body);
+      logger.logCalculation(this.provider, customerCalculationType, requestBody);
       
       try {
-        const result = this.electricityService.calculateBill(calculationType, body);
+        // Execute the billing calculation using the appropriate service
+        const calculationResult = this.electricityService.calculateBill(
+          customerCalculationType, 
+          requestBody
+        );
         
-        ctx.status = 200;
-        ctx.body = {
-          ...result,
-          success: true,
-          timestamp: new Date().toISOString(),
+        // Set successful response with standardized format
+        koaContext.status = 200;
+        koaContext.body = this._formatSuccessfulCalculationResponse(
+          calculationResult,
+          customerCalculationType
+        );
+        
+      } catch (calculationError) {
+        // Log calculation failure with context for debugging
+        logger.error('Billing calculation failed', {
           provider: this.provider,
-          calculationType
-        };
-      } catch (error) {
-        logger.error('Calculation failed', {
-          provider: this.provider,
-          calculationType,
-          error: error.message,
-          input: body
+          calculationType: customerCalculationType,
+          errorMessage: calculationError.message,
+          inputData: requestBody,
+          timestamp: new Date().toISOString()
         });
-        throw new CalculationError(`Failed to calculate ${calculationType}: ${error.message}`);
+        
+        // Throw user-friendly error
+        throw new CalculationError(
+          `Failed to calculate ${customerCalculationType} bill: ${calculationError.message}`
+        );
       }
-    })(ctx);
+    })(koaContext);
   }
 
   /**
@@ -154,6 +179,68 @@ class BaseElectricityController {
   calculateType5(ctx) {
     const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
     return this.handleCalculation(ctx, requiredFields, 'type-5');
+  }
+  
+  /**
+   * Validate that request body exists and is not empty
+   * @private
+   * @param {*} requestBody - Request body to validate
+   * @throws {ValidationError} - If body is missing or empty
+   */
+  _validateRequestBodyExists(requestBody) {
+    if (!requestBody || (typeof requestBody === 'object' && Object.keys(requestBody).length === 0)) {
+      throw new ValidationError('Request body is required and cannot be empty');
+    }
+  }
+  
+  /**
+   * Validate that all mandatory fields are provided in request
+   * @private
+   * @param {Object} requestBody - Request body containing fields
+   * @param {Array<string>} mandatoryFieldNames - List of required field names
+   * @throws {ValidationError} - If any mandatory field is missing
+   */
+  _validateMandatoryFields(requestBody, mandatoryFieldNames) {
+    for (const requiredFieldName of mandatoryFieldNames) {
+      const fieldValue = requestBody[requiredFieldName];
+      if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
+        throw new ValidationError(
+          `Missing required field: ${requiredFieldName}. This field is mandatory for the calculation.`,
+          requiredFieldName
+        );
+      }
+    }
+  }
+  
+  /**
+   * Check if a field value is provided (not undefined or null)
+   * @private
+   * @param {*} fieldValue - Value to check
+   * @returns {boolean} - True if field is provided
+   */
+  _isFieldProvided(fieldValue) {
+    return fieldValue !== undefined && fieldValue !== null;
+  }
+  
+  /**
+   * Format successful calculation response with standard structure
+   * @private
+   * @param {Object} calculationResult - Result from calculation service
+   * @param {string} calculationType - Type of calculation performed
+   * @returns {Object} - Formatted response object
+   */
+  _formatSuccessfulCalculationResponse(calculationResult, calculationType) {
+    return {
+      ...calculationResult,
+      success: true,
+      timestamp: new Date().toISOString(),
+      provider: this.provider,
+      calculationType,
+      metadata: {
+        version: '2.0.0',
+        processingTime: new Date().toISOString()
+      }
+    };
   }
 }
 

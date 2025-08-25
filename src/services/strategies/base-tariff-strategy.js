@@ -68,46 +68,98 @@ class BaseTariffStrategy {
   }
 
   /**
-   * Calculate usage totals from usage data
-   * @param {Object} usage - Usage data
-   * @param {string} calculationType - Type of calculation
-   * @returns {Object} - Calculated totals
+   * Calculate and normalize usage totals from raw usage data
+   * 
+   * This method processes different usage data formats and calculates totals needed
+   * for billing calculations. It handles both simple (total values) and complex
+   * (time-based breakdown) usage patterns.
+   * 
+   * @param {Object} rawUsageData - Raw usage data from customer meter
+   * @param {string} customerCalculationType - Type of calculation (type-2, type-3, type-4, type-5)
+   * @returns {Object} - Normalized usage totals for billing calculations
    */
-  calculateUsageTotals(usage, calculationType) {
-    const totals = {};
+  calculateUsageTotals(rawUsageData, customerCalculationType) {
+    const normalizedUsageTotals = {};
     
-    // For type-2, calculate total kWh if needed
-    if (calculationType === 'type-2') {
-      if (usage.total_kwh !== undefined) {
-        totals.totalKwh = usage.total_kwh;
-      } else if (usage.on_peak_kwh !== undefined && usage.off_peak_kwh !== undefined) {
-        totals.totalKwh = usage.on_peak_kwh + usage.off_peak_kwh;
-        totals.onPeakKwh = usage.on_peak_kwh;
-        totals.offPeakKwh = usage.off_peak_kwh;
+    // Process Type 2 (Small General Service) usage data
+    if (customerCalculationType === 'type-2') {
+      normalizedUsageTotals.totalKwh = this._calculateTotalEnergyConsumption(rawUsageData);
+      
+      // For TOU tariff, preserve peak/off-peak breakdown
+      if (this._hasTimeOfUsageBreakdown(rawUsageData)) {
+        normalizedUsageTotals.onPeakKwh = rawUsageData.on_peak_kwh;
+        normalizedUsageTotals.offPeakKwh = rawUsageData.off_peak_kwh;
       }
     }
     
-    // For type-3, type-4, type-5, calculate overall peak kW
-    if (['type-3', 'type-4', 'type-5'].includes(calculationType)) {
-      if (usage.peak_kw !== undefined) {
-        totals.overallPeakKw = usage.peak_kw;
-      } else if (usage.on_peak_kw !== undefined && usage.off_peak_kw !== undefined) {
-        totals.overallPeakKw = Math.max(usage.on_peak_kw, usage.off_peak_kw);
-      }
+    // Process Type 3, 4, 5 (Medium/Large General Service) usage data
+    const DEMAND_BASED_CALCULATION_TYPES = ['type-3', 'type-4', 'type-5'];
+    if (DEMAND_BASED_CALCULATION_TYPES.includes(customerCalculationType)) {
+      // Calculate peak demand for demand charge calculation
+      normalizedUsageTotals.overallPeakKw = this._calculateOverallPeakDemand(rawUsageData);
       
-      if (usage.partial_peak_kw !== undefined) {
-        totals.overallPeakKw = Math.max(totals.overallPeakKw || 0, usage.partial_peak_kw);
-      }
-      
-      // Calculate total kWh for FT calculation
-      if (usage.total_kwh !== undefined) {
-        totals.totalKwhForFt = usage.total_kwh;
-      } else if (usage.on_peak_kwh !== undefined && usage.off_peak_kwh !== undefined) {
-        totals.totalKwhForFt = usage.on_peak_kwh + usage.off_peak_kwh;
-      }
+      // Calculate total energy consumption for FT (fuel adjustment) charge
+      normalizedUsageTotals.totalKwhForFt = this._calculateTotalEnergyConsumption(rawUsageData);
     }
     
-    return totals;
+    return normalizedUsageTotals;
+  }
+  
+  /**
+   * Calculate total energy consumption from usage data
+   * @private
+   * @param {Object} usageData - Usage data object
+   * @returns {number} - Total energy consumption in kWh
+   */
+  _calculateTotalEnergyConsumption(usageData) {
+    // Use direct total if available
+    if (usageData.total_kwh !== undefined) {
+      return usageData.total_kwh;
+    }
+    
+    // Calculate from time-of-use breakdown if available
+    if (usageData.on_peak_kwh !== undefined && usageData.off_peak_kwh !== undefined) {
+      return usageData.on_peak_kwh + usageData.off_peak_kwh;
+    }
+    
+    throw new Error('Insufficient energy consumption data: missing total_kwh or peak/off-peak breakdown');
+  }
+  
+  /**
+   * Calculate overall peak demand from usage data
+   * @private
+   * @param {Object} usageData - Usage data object
+   * @returns {number} - Overall peak demand in kW
+   */
+  _calculateOverallPeakDemand(usageData) {
+    // Use direct peak if available (normal tariff)
+    if (usageData.peak_kw !== undefined) {
+      return usageData.peak_kw;
+    }
+    
+    // Calculate from time-based demand data
+    const demandValues = [];
+    
+    if (usageData.on_peak_kw !== undefined) demandValues.push(usageData.on_peak_kw);
+    if (usageData.off_peak_kw !== undefined) demandValues.push(usageData.off_peak_kw);
+    if (usageData.partial_peak_kw !== undefined) demandValues.push(usageData.partial_peak_kw);
+    
+    if (demandValues.length === 0) {
+      throw new Error('Insufficient demand data: missing peak_kw or time-based demand breakdown');
+    }
+    
+    // Return the maximum demand across all time periods
+    return Math.max(...demandValues);
+  }
+  
+  /**
+   * Check if usage data includes time-of-use breakdown
+   * @private
+   * @param {Object} usageData - Usage data object
+   * @returns {boolean} - True if TOU breakdown is available
+   */
+  _hasTimeOfUsageBreakdown(usageData) {
+    return usageData.on_peak_kwh !== undefined && usageData.off_peak_kwh !== undefined;
   }
 }
 
