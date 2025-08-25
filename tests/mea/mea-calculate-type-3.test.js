@@ -367,7 +367,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           .send();
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Request body is required');
+        expect(response.body).toHaveProperty('error', 'Request body is required and cannot be empty');
       });
 
       test('should return 400 for missing tariffType', async () => {
@@ -385,7 +385,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: tariffType');
+        expect(response.body).toHaveProperty('error', 'Missing required field: tariffType. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for missing voltageLevel', async () => {
@@ -403,7 +403,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel');
+        expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for missing ftRateSatang', async () => {
@@ -421,7 +421,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang');
+        expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for missing peakKvar', async () => {
@@ -439,7 +439,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: peakKvar');
+        expect(response.body).toHaveProperty('error', 'Missing required field: peakKvar. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for missing highestDemandChargeLast12m', async () => {
@@ -457,7 +457,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: highestDemandChargeLast12m');
+        expect(response.body).toHaveProperty('error', 'Missing required field: highestDemandChargeLast12m. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for missing usage', async () => {
@@ -472,7 +472,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: usage');
+        expect(response.body).toHaveProperty('error', 'Missing required field: usage. This field is mandatory for the calculation.');
       });
     });
 
@@ -720,7 +720,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: tariffType');
+        expect(response.body).toHaveProperty('error', 'Missing required field: tariffType. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for empty voltageLevel', async () => {
@@ -739,7 +739,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel');
+        expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for empty ftRateSatang', async () => {
@@ -758,7 +758,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang');
+        expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for empty peakKvar', async () => {
@@ -777,7 +777,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: peakKvar');
+        expect(response.body).toHaveProperty('error', 'Missing required field: peakKvar. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for empty highestDemandChargeLast12m', async () => {
@@ -796,7 +796,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: highestDemandChargeLast12m');
+        expect(response.body).toHaveProperty('error', 'Missing required field: highestDemandChargeLast12m. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for empty usage', async () => {
@@ -833,7 +833,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: tariffType');
+        expect(response.body).toHaveProperty('error', 'Missing required field: tariffType. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for undefined voltageLevel', async () => {
@@ -852,7 +852,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel');
+        expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel. This field is mandatory for the calculation.');
       });
 
       test('should return 400 for null ftRateSatang', async () => {
@@ -871,7 +871,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang');
+        expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang. This field is mandatory for the calculation.');
       });
     });
   });
