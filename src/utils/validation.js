@@ -19,7 +19,7 @@ const validateCalculationInput = (ctx, requiredFields) => {
   }
 
   for (const field of requiredFields) {
-    if (!body[field]) {
+    if (body[field] === undefined || body[field] === null || body[field] === '') {
       ctx.status = 400;
       ctx.body = { error: `Missing required field: ${field}` };
       return false;
@@ -36,79 +36,150 @@ const validateCalculationInput = (ctx, requiredFields) => {
  * @returns {boolean} - True if valid, false otherwise
  */
 const validateVoltageLevel = (voltageLevel, provider) => {
-  const validLevels = {
-    mea: ['<12kV', '12-24kV', '>=69kV'],
-    pea: ['<22kV', '22-33kV', '>=69kV']
-  };
+  if (!voltageLevel) return false;
   
-  return validLevels[provider]?.includes(voltageLevel) || false;
+  const validLevels = provider === 'mea' 
+    ? ['>=69kV', '12-24kV', '<12kV']
+    : ['>=69kV', '22-33kV', '<22kV'];
+  
+  return validLevels.includes(voltageLevel);
 };
 
 /**
  * Validates tariff type
  * @param {string} tariffType - Tariff type to validate
- * @param {string} calculationType - Calculation type (type-2, type-3, etc.)
  * @returns {boolean} - True if valid, false otherwise
  */
-const validateTariffType = (tariffType, calculationType) => {
-  const validTypes = {
-    'type-2': ['normal', 'tou'],
-    'type-3': ['normal', 'tou'],
-    'type-4': ['tod', 'tou'],
-    'type-5': ['normal', 'tou']
-  };
-  
-  return validTypes[calculationType]?.includes(tariffType) || false;
+const validateTariffType = (tariffType) => {
+  if (!tariffType) return false;
+  const validTypes = ['normal', 'tou', 'tod'];
+  return validTypes.includes(tariffType);
 };
 
 /**
- * Validates numeric values
- * @param {number} value - Value to validate
- * @param {string} fieldName - Field name for error message
+ * Validates numeric value
+ * @param {any} value - Value to validate
+ * @param {string} fieldName - Name of the field for error message
  * @returns {Object} - { isValid: boolean, error?: string }
  */
 const validateNumericValue = (value, fieldName) => {
+  if (value === 0) return { isValid: true }; // Allow zero values
   if (typeof value !== 'number' || isNaN(value)) {
     return { isValid: false, error: `${fieldName} must be a valid number` };
   }
-  
   if (value < 0) {
     return { isValid: false, error: `${fieldName} must be non-negative` };
   }
-  
   return { isValid: true };
 };
 
 /**
- * Get validation error message for tariff type
+ * Validates usage fields based on tariff type and calculation type
+ * @param {Object} usage - Usage object to validate
+ * @param {string} tariffType - Tariff type (normal, tou, tod)
+ * @param {string} calculationType - Calculation type (type-2, type-3, type-4, type-5)
+ * @returns {Object} - { isValid: boolean, error?: string }
+ */
+const validateUsageFields = (usage, tariffType, calculationType) => {
+  if (!usage) {
+    return { isValid: false, error: 'Usage object is required' };
+  }
+
+  if (calculationType === 'type-2') {
+    if (tariffType === 'normal') {
+      if (!usage.total_kwh && usage.total_kwh !== 0) {
+        return { isValid: false, error: 'Missing required field: total_kwh' };
+      }
+    } else if (tariffType === 'tou') {
+      if (!usage.on_peak_kwh && usage.on_peak_kwh !== 0) {
+        return { isValid: false, error: 'Missing required field: on_peak_kwh' };
+      }
+      if (!usage.off_peak_kwh && usage.off_peak_kwh !== 0) {
+        return { isValid: false, error: 'Missing required field: off_peak_kwh' };
+      }
+    }
+  } else if (calculationType === 'type-3' || calculationType === 'type-5') {
+    if (tariffType === 'normal') {
+      if (!usage.peak_kw && usage.peak_kw !== 0) {
+        return { isValid: false, error: 'Missing required field: peak_kw' };
+      }
+      if (!usage.total_kwh && usage.total_kwh !== 0) {
+        return { isValid: false, error: 'Missing required field: total_kwh' };
+      }
+    } else if (tariffType === 'tou') {
+      if (!usage.on_peak_kw && usage.on_peak_kw !== 0) {
+        return { isValid: false, error: 'Missing required field: on_peak_kw' };
+      }
+      if (!usage.on_peak_kwh && usage.on_peak_kwh !== 0) {
+        return { isValid: false, error: 'Missing required field: on_peak_kwh' };
+      }
+      if (!usage.off_peak_kw && usage.off_peak_kw !== 0) {
+        return { isValid: false, error: 'Missing required field: off_peak_kw' };
+      }
+      if (!usage.off_peak_kwh && usage.off_peak_kwh !== 0) {
+        return { isValid: false, error: 'Missing required field: off_peak_kwh' };
+      }
+    }
+  } else if (calculationType === 'type-4') {
+    if (tariffType === 'tod') {
+      if (!usage.on_peak_kw && usage.on_peak_kw !== 0) {
+        return { isValid: false, error: 'Missing required field: on_peak_kw' };
+      }
+      if (!usage.partial_peak_kw && usage.partial_peak_kw !== 0) {
+        return { isValid: false, error: 'Missing required field: partial_peak_kw' };
+      }
+      if (!usage.off_peak_kw && usage.off_peak_kw !== 0) {
+        return { isValid: false, error: 'Missing required field: off_peak_kw' };
+      }
+      if (!usage.total_kwh && usage.total_kwh !== 0) {
+        return { isValid: false, error: 'Missing required field: total_kwh' };
+      }
+    } else if (tariffType === 'tou') {
+      if (!usage.on_peak_kw && usage.on_peak_kw !== 0) {
+        return { isValid: false, error: 'Missing required field: on_peak_kw' };
+      }
+      if (!usage.on_peak_kwh && usage.on_peak_kwh !== 0) {
+        return { isValid: false, error: 'Missing required field: on_peak_kwh' };
+      }
+      if (!usage.off_peak_kw && usage.off_peak_kw !== 0) {
+        return { isValid: false, error: 'Missing required field: off_peak_kw' };
+      }
+      if (!usage.off_peak_kwh && usage.off_peak_kwh !== 0) {
+        return { isValid: false, error: 'Missing required field: off_peak_kwh' };
+      }
+    }
+  }
+
+  return { isValid: true };
+};
+
+/**
+ * Gets tariff type error message
  * @param {string} calculationType - Calculation type
  * @param {string} tariffType - Invalid tariff type
  * @returns {string} - Error message
  */
 const getTariffTypeErrorMessage = (calculationType, tariffType) => {
-  const validTypes = {
-    'type-2': ['normal', 'tou'],
-    'type-3': ['normal', 'tou'],
-    'type-4': ['tod', 'tou'],
-    'type-5': ['normal', 'tou']
-  };
-  
-  const valid = validTypes[calculationType] || [];
-  const typeDisplay = calculationType.replace('type-', 'Type ');
-  return `Invalid tariff type for ${typeDisplay}. Must be "${valid.join('" or "')}", received: ${tariffType}`;
+  const typeNumber = calculationType.replace('type-', '');
+  const validTypes = calculationType === 'type-4' ? ['tod', 'tou'] : ['normal', 'tou'];
+  return `Invalid tariff type for Type ${typeNumber}. Must be "${validTypes.join('" or "')}", received: ${tariffType}`;
 };
 
 /**
- * Get validation error message for voltage level
+ * Gets voltage level error message
  * @param {string} calculationType - Calculation type
  * @param {string} tariffType - Tariff type
  * @param {string} voltageLevel - Invalid voltage level
+ * @param {string} provider - Provider (mea or pea)
  * @returns {string} - Error message
  */
-const getVoltageLevelErrorMessage = (calculationType, tariffType, voltageLevel) => {
-  const validLevels = ['>=69kV', '22-33kV', '<22kV'];
-  const typeDisplay = calculationType.replace('type-', 'Type ');
-  return `Invalid voltage level for ${typeDisplay} ${tariffType}. Must be "${validLevels.join('", "')}", received: ${voltageLevel}`;
+const getVoltageLevelErrorMessage = (calculationType, tariffType, voltageLevel, provider) => {
+  const typeNumber = calculationType.replace('type-', '');
+  const validLevels = provider === 'mea' 
+    ? ['>=69kV', '12-24kV', '<12kV']
+    : ['>=69kV', '22-33kV', '<22kV'];
+  
+  return `Invalid voltage level for Type ${typeNumber} ${tariffType}. Must be "${validLevels.join('", "')}", received: ${voltageLevel}`;
 };
 
 module.exports = {
@@ -116,6 +187,7 @@ module.exports = {
   validateVoltageLevel,
   validateTariffType,
   validateNumericValue,
+  validateUsageFields,
   getTariffTypeErrorMessage,
   getVoltageLevelErrorMessage
 };

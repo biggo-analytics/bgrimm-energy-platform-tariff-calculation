@@ -7,6 +7,8 @@ const {
   validateCalculationInput, 
   validateVoltageLevel, 
   validateTariffType,
+  validateNumericValue,
+  validateUsageFields,
   getTariffTypeErrorMessage,
   getVoltageLevelErrorMessage
 } = require('../utils/validation');
@@ -25,23 +27,15 @@ class BaseElectricityController {
    * @returns {Promise<void>}
    */
   async handleCalculation(ctx, requiredFields, calculationType) {
+    // Validate required fields
     if (!validateCalculationInput(ctx, requiredFields)) {
       return;
     }
 
     const { body } = ctx.request;
-    
-    // Validate voltage level
-    if (!validateVoltageLevel(body.voltageLevel, this.provider)) {
-      ctx.status = 400;
-      ctx.body = { 
-        error: getVoltageLevelErrorMessage(calculationType, body.tariffType || 'unknown', body.voltageLevel)
-      };
-      return;
-    }
 
     // Validate tariff type
-    if (!validateTariffType(body.tariffType, calculationType)) {
+    if (!validateTariffType(body.tariffType)) {
       ctx.status = 400;
       ctx.body = { 
         error: getTariffTypeErrorMessage(calculationType, body.tariffType)
@@ -49,12 +43,48 @@ class BaseElectricityController {
       return;
     }
 
+    // Validate voltage level
+    if (!validateVoltageLevel(body.voltageLevel, this.provider)) {
+      ctx.status = 400;
+      ctx.body = { 
+        error: getVoltageLevelErrorMessage(calculationType, body.tariffType || 'unknown', body.voltageLevel, this.provider)
+      };
+      return;
+    }
+
+    // Validate numeric fields
+    const numericFields = [
+      { field: body.ftRateSatang, name: 'ftRateSatang' },
+      { field: body.peakKvar, name: 'peakKvar' },
+      { field: body.highestDemandChargeLast12m, name: 'highestDemandChargeLast12m' }
+    ];
+
+    for (const { field, name } of numericFields) {
+      if (field !== undefined && field !== null) {
+        const validation = validateNumericValue(field, name);
+        if (!validation.isValid) {
+          ctx.status = 400;
+          ctx.body = { error: validation.error };
+          return;
+        }
+      }
+    }
+
+    // Validate usage fields
+    const usageValidation = validateUsageFields(body.usage, body.tariffType, calculationType);
+    if (!usageValidation.isValid) {
+      ctx.status = 400;
+      ctx.body = { error: usageValidation.error };
+      return;
+    }
+
     try {
       const result = this.electricityService.calculateBill(calculationType, body);
+      ctx.status = 200;
       ctx.body = result;
     } catch (error) {
-      ctx.status = 400;
-      ctx.body = { error: error.message };
+      ctx.status = 500;
+      ctx.body = { error: 'Internal server error' };
     }
   }
 
@@ -85,37 +115,23 @@ class BaseElectricityController {
     return validTypes[calculationType] || [];
   }
 
-  /**
-   * Calculate Type 2
-   * @param {Object} ctx - Koa context
-   */
+  // Type 2 calculation methods
   async calculateType2(ctx) {
     const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'usage'];
     await this.handleCalculation(ctx, requiredFields, 'type-2');
   }
 
-  /**
-   * Calculate Type 3
-   * @param {Object} ctx - Koa context
-   */
+  // Type 3 calculation methods
   async calculateType3(ctx) {
     const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
     await this.handleCalculation(ctx, requiredFields, 'type-3');
   }
 
-  /**
-   * Calculate Type 4
-   * @param {Object} ctx - Koa context
-   */
   async calculateType4(ctx) {
     const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
     await this.handleCalculation(ctx, requiredFields, 'type-4');
   }
 
-  /**
-   * Calculate Type 5
-   * @param {Object} ctx - Koa context
-   */
   async calculateType5(ctx) {
     const requiredFields = ['tariffType', 'voltageLevel', 'ftRateSatang', 'peakKvar', 'highestDemandChargeLast12m', 'usage'];
     await this.handleCalculation(ctx, requiredFields, 'type-5');
