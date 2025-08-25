@@ -187,3 +187,6 @@ docs/build/
 # Local configuration files
 config/local.js
 config/local.json
+
+# Claude Code documentation
+CLAUDE.md
