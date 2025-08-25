@@ -738,3 +738,442 @@ describe('MEA Electricity Bill Calculation API', () => {
     });
   });
 });
+
+describe('PEA Electricity Bill Calculation API', () => {
+  let server;
+
+  beforeAll(() => {
+    server = app.listen(0); // Use random port for testing
+  });
+
+  afterAll((done) => {
+    server.close(done);
+  });
+
+  describe('Type 2 - Small Business Service', () => {
+    const baseUrl = '/api/pea/calculate/type-2';
+
+    describe('Normal Tariff', () => {
+      test('should calculate bill for <22kV with 500 kWh', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 500
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('energyCharge');
+        expect(response.body).toHaveProperty('serviceCharge');
+        expect(response.body).toHaveProperty('baseTariff');
+        expect(response.body).toHaveProperty('ftCharge');
+        expect(response.body).toHaveProperty('vat');
+        expect(response.body).toHaveProperty('totalBill');
+        
+        // Verify calculations: 150*3.2484 + 250*4.2218 + 100*4.4217 = 487.26 + 1055.45 + 442.17 = 1984.88
+        expect(response.body.energyCharge).toBeCloseTo(1984.88, 2);
+        expect(response.body.serviceCharge).toBe(33.29);
+        expect(response.body.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
+      });
+
+      test('should calculate bill for <22kV with 150 kWh (first tier only)', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 150
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.energyCharge).toBeCloseTo(487.26, 2); // 150 * 3.2484
+        expect(response.body.serviceCharge).toBe(33.29);
+      });
+
+      test('should calculate bill for <22kV with 400 kWh (two tiers)', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 400
+            }
+          });
+
+        expect(response.status).toBe(200);
+        // 150 * 3.2484 + 250 * 4.2218 = 487.26 + 1055.45 = 1542.71
+        expect(response.body.energyCharge).toBeCloseTo(1542.71, 2);
+      });
+
+      test('should calculate bill for 22-33kV with 1000 kWh', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '22-33kV',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 1000
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.energyCharge).toBeCloseTo(3908.6, 2); // 1000 * 3.9086
+        expect(response.body.serviceCharge).toBe(312.24);
+      });
+
+      test('should calculate bill for 22-33kV with 500 kWh', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '22-33kV',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 500
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.energyCharge).toBeCloseTo(1954.3, 2); // 500 * 3.9086
+        expect(response.body.serviceCharge).toBe(312.24);
+        expect(response.body.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
+      });
+    });
+
+    describe('TOU Tariff', () => {
+      test('should calculate bill for <22kV TOU', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'tou',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              on_peak_kwh: 200,
+              off_peak_kwh: 300
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('energyCharge');
+        expect(response.body).toHaveProperty('serviceCharge');
+        expect(response.body).toHaveProperty('baseTariff');
+        expect(response.body).toHaveProperty('ftCharge');
+        expect(response.body).toHaveProperty('vat');
+        expect(response.body).toHaveProperty('totalBill');
+        
+        // Verify calculations: (200 * 5.7982) + (300 * 2.6369) = 1159.64 + 791.07 = 1950.71
+        expect(response.body.energyCharge).toBeCloseTo(1950.71, 2);
+        expect(response.body.serviceCharge).toBe(33.29);
+        expect(response.body.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
+      });
+
+      test('should calculate bill for 22-33kV TOU', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'tou',
+            voltageLevel: '22-33kV',
+            ftRateSatang: 19.72,
+            usage: {
+              on_peak_kwh: 150,
+              off_peak_kwh: 250
+            }
+          });
+
+        expect(response.status).toBe(200);
+        // (150 * 5.1135) + (250 * 2.6037) = 767.025 + 650.925 = 1417.95
+        expect(response.body.energyCharge).toBeCloseTo(1417.95, 2);
+        expect(response.body.serviceCharge).toBe(312.24);
+        expect(response.body.ftCharge).toBeCloseTo(78.88, 2); // 400 * 19.72 / 100
+      });
+
+      test('should calculate bill for <22kV TOU with equal on/off peak usage', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'tou',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
+            }
+          });
+
+        expect(response.status).toBe(200);
+        // (250 * 5.7982) + (250 * 2.6369) = 1449.55 + 659.225 = 2108.775
+        expect(response.body.energyCharge).toBeCloseTo(2108.775, 2);
+        expect(response.body.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
+      });
+    });
+
+    describe('Validation Errors', () => {
+      test('should return 400 for missing tariffType', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 500
+            }
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'Missing required field: tariffType');
+      });
+
+      test('should return 400 for missing voltageLevel', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 500
+            }
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel');
+      });
+
+      test('should return 400 for missing ftRateSatang', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '<22kV',
+            usage: {
+              total_kwh: 500
+            }
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang');
+      });
+
+      test('should return 400 for missing usage', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'Missing required field: usage');
+      });
+
+      test('should return 400 for invalid tariff type', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'invalid',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 500
+            }
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
+        expect(response.body.error).toContain('Invalid tariff type');
+      });
+
+      test('should return 400 for missing request body', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send();
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'Request body is required');
+      });
+    });
+
+    describe('Edge Cases', () => {
+      test('should handle zero usage gracefully', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 0
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.energyCharge).toBeCloseTo(0);
+        expect(response.body.ftCharge).toBeCloseTo(0);
+        expect(response.body.serviceCharge).toBe(33.29);
+        expect(response.body.vat).toBeCloseTo(2.33, 2); // Only service charge * VAT rate (33.29 * 0.07)
+      });
+
+      test('should handle very high usage values for <22kV', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 1000000
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.energyCharge).toBeGreaterThan(0);
+        expect(response.body.totalBill).toBeGreaterThan(0);
+        // For very high usage, most will be at the highest tier (4.4217)
+        const expectedEnergyCharge = 150 * 3.2484 + 250 * 4.2218 + (1000000 - 400) * 4.4217;
+        expect(response.body.energyCharge).toBeCloseTo(expectedEnergyCharge, 2);
+      });
+
+      test('should handle very high usage values for 22-33kV', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '22-33kV',
+            ftRateSatang: 19.72,
+            usage: {
+              total_kwh: 1000000
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.energyCharge).toBeCloseTo(3908600, 1); // 1000000 * 3.9086
+        expect(response.body.totalBill).toBeGreaterThan(0);
+      });
+
+      test('should handle zero FT rate', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '<22kV',
+            ftRateSatang: 0,
+            usage: {
+              total_kwh: 500
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.ftCharge).toBeCloseTo(0);
+        expect(response.body.energyCharge).toBeCloseTo(1984.88, 2);
+      });
+
+      test('should handle TOU with zero on-peak usage', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'tou',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              on_peak_kwh: 0,
+              off_peak_kwh: 400
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.energyCharge).toBeCloseTo(1054.76, 2); // 400 * 2.6369
+        expect(response.body.ftCharge).toBeCloseTo(78.88, 2); // 400 * 19.72 / 100
+      });
+
+      test('should handle TOU with zero off-peak usage', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'tou',
+            voltageLevel: '<22kV',
+            ftRateSatang: 19.72,
+            usage: {
+              on_peak_kwh: 300,
+              off_peak_kwh: 0
+            }
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.energyCharge).toBeCloseTo(1739.46, 2); // 300 * 5.7982
+        expect(response.body.ftCharge).toBeCloseTo(59.16, 2); // 300 * 19.72 / 100
+      });
+    });
+
+    describe('Bill Component Calculations', () => {
+      test('should correctly calculate all bill components for normal tariff', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'normal',
+            voltageLevel: '<22kV',
+            ftRateSatang: 20.00,
+            usage: {
+              total_kwh: 300
+            }
+          });
+
+        expect(response.status).toBe(200);
+        
+        const energyCharge = 150 * 3.2484 + 150 * 4.2218; // 487.26 + 633.27 = 1120.53
+        const serviceCharge = 33.29;
+        const baseTariff = energyCharge + serviceCharge; // 1120.53 + 33.29 = 1153.82
+        const ftCharge = 300 * 0.20; // 60.00
+        const vat = (baseTariff + ftCharge) * 0.07; // 1213.82 * 0.07 = 84.9674
+        const totalBill = baseTariff + ftCharge + vat; // 1298.7874
+        
+        expect(response.body.energyCharge).toBeCloseTo(energyCharge, 2);
+        expect(response.body.serviceCharge).toBe(serviceCharge);
+        expect(response.body.baseTariff).toBeCloseTo(baseTariff, 2);
+        expect(response.body.ftCharge).toBeCloseTo(ftCharge, 2);
+        expect(response.body.vat).toBeCloseTo(vat, 2);
+        expect(response.body.totalBill).toBeCloseTo(totalBill, 2);
+      });
+
+      test('should correctly calculate all bill components for TOU tariff', async () => {
+        const response = await request(server)
+          .post(baseUrl)
+          .send({
+            tariffType: 'tou',
+            voltageLevel: '22-33kV',
+            ftRateSatang: 15.50,
+            usage: {
+              on_peak_kwh: 100,
+              off_peak_kwh: 200
+            }
+          });
+
+        expect(response.status).toBe(200);
+        
+        const energyCharge = (100 * 5.1135) + (200 * 2.6037); // 511.35 + 520.74 = 1032.09
+        const serviceCharge = 312.24;
+        const baseTariff = energyCharge + serviceCharge; // 1032.09 + 312.24 = 1344.33
+        const ftCharge = 300 * 0.155; // 46.50
+        const vat = (baseTariff + ftCharge) * 0.07; // 1390.83 * 0.07 = 97.3581
+        const totalBill = baseTariff + ftCharge + vat; // 1488.1881
+        
+        expect(response.body.energyCharge).toBeCloseTo(energyCharge, 2);
+        expect(response.body.serviceCharge).toBe(serviceCharge);
+        expect(response.body.baseTariff).toBeCloseTo(baseTariff, 2);
+        expect(response.body.ftCharge).toBeCloseTo(ftCharge, 2);
+        expect(response.body.vat).toBeCloseTo(vat, 2);
+        expect(response.body.totalBill).toBeCloseTo(totalBill, 2);
+      });
+    });
+  });
+});
