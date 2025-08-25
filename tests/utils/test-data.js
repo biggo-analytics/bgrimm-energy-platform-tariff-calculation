@@ -652,7 +652,7 @@ const ERROR_TEST_DATA = {
         }
       },
       expectedStatus: 400,
-      expectedError: 'Invalid voltage level for Type 2 normal. Must be ">=69kV", "22-33kV", "<22kV", received: invalid'
+      expectedError: 'Invalid voltage level for Type 2 normal. Must be ">=69kV", "22-33kV", or "<22kV", received: invalid'
     },
     NEGATIVE_FT_RATE: {
       input: {
@@ -663,7 +663,8 @@ const ERROR_TEST_DATA = {
           total_kwh: 500
         }
       },
-      expectedStatus: 200 // Currently accepts negative values
+      expectedStatus: 400,
+      expectedError: expect.stringContaining('must be a positive number')
     },
     NEGATIVE_TOTAL_KWH: {
       input: {
@@ -674,7 +675,8 @@ const ERROR_TEST_DATA = {
           total_kwh: -100
         }
       },
-      expectedStatus: 200 // Currently accepts negative values
+      expectedStatus: 400,
+      expectedError: expect.stringContaining('must be a positive number')
     }
   },
   INVALID_DATA_TYPES: {

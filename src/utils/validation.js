@@ -12,7 +12,7 @@
 const validateCalculationInput = (ctx, requiredFields) => {
   const { body } = ctx.request;
   
-  if (!body) {
+  if (!body || (typeof body === 'object' && Object.keys(body).length === 0)) {
     ctx.status = 400;
     ctx.body = { error: 'Request body is required' };
     return false;
@@ -150,6 +150,18 @@ const validateUsageFields = (usage, tariffType, calculationType) => {
     }
   }
 
+  // Validate usage field values are valid numbers and not negative
+  const usageFields = Object.keys(usage);
+  for (const field of usageFields) {
+    const value = usage[field];
+    if (typeof value !== 'number' || isNaN(value)) {
+      return { isValid: false, error: `${field} must be a valid number` };
+    }
+    if (value < 0) {
+      return { isValid: false, error: `${field} must be a positive number, received: ${value}` };
+    }
+  }
+
   return { isValid: true };
 };
 
@@ -179,7 +191,10 @@ const getVoltageLevelErrorMessage = (calculationType, tariffType, voltageLevel, 
     ? ['>=69kV', '12-24kV', '<12kV']
     : ['>=69kV', '22-33kV', '<22kV'];
   
-  return `Invalid voltage level for Type ${typeNumber} ${tariffType}. Must be "${validLevels.join('", "')}", received: ${voltageLevel}`;
+  const levelsText = validLevels.length > 1 
+    ? `"${validLevels.slice(0, -1).join('", "')}", or "${validLevels[validLevels.length - 1]}"`
+    : `"${validLevels[0]}"`;
+  return `Invalid voltage level for Type ${typeNumber} ${tariffType}. Must be ${levelsText}, received: ${voltageLevel}`;
 };
 
 module.exports = {

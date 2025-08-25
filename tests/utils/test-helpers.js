@@ -354,7 +354,7 @@ const generateErrorTestScenarios = (provider, calculationType) => {
     name: 'Invalid voltage level',
     data: { ...baseData, voltageLevel: 'invalid' },
     expectedStatus: 400,
-    expectedError: `Invalid voltage level for ${calculationType.replace('type-', 'Type ')} normal. Must be ">=69kV", "22-33kV", "<22kV", received: invalid`
+    expectedError: `Invalid voltage level for ${calculationType.replace('type-', 'Type ')} normal. Must be ">=69kV", "22-33kV", or "<22kV", received: invalid`
   });
   
   // Invalid data types
