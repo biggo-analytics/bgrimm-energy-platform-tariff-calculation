@@ -13,6 +13,19 @@ async function calculateElectricityBill(ctx, calculationType) {
   try {
     const { tariffType, voltageLevel, ...params } = ctx.request.body;
 
+    // Check if calculation type is supported
+    const supportedTypes = ['type-2', 'type-3', 'type-4', 'type-5'];
+    if (!supportedTypes.includes(calculationType)) {
+      ctx.status = 400;
+      ctx.body = {
+        success: false,
+        error: 'Unsupported Calculation Type',
+        message: `${calculationType} is not supported. Supported types: ${supportedTypes.join(', ')}`,
+        timestamp: new Date().toISOString()
+      };
+      return;
+    }
+
     // Use validation engine for comprehensive validation
     const validator = new ValidationEngine();
     const validationErrors = validator.validate(calculationType, tariffType, voltageLevel, params);
@@ -35,7 +48,8 @@ async function calculateElectricityBill(ctx, calculationType) {
       ctx.status = 400;
       ctx.body = {
         success: false,
-        error: `Invalid voltage level: ${voltageLevel}. Supported: <22kV, 22-33kV, >=69kV`,
+        error: 'Invalid voltage level',
+        message: `Invalid voltage level: ${voltageLevel}. Supported: <22kV, 22-33kV, >=69kV`,
         timestamp: new Date().toISOString()
       };
       return;
@@ -51,7 +65,8 @@ async function calculateElectricityBill(ctx, calculationType) {
         ctx.status = 400;
         ctx.body = {
           success: false,
-          error: `Type 2 only supports TOU tariff`,
+          error: 'Unsupported Tariff Type',
+          message: 'Normal tariff is not supported for Type 2',
           timestamp: new Date().toISOString()
         };
         return;
@@ -80,7 +95,8 @@ async function calculateElectricityBill(ctx, calculationType) {
         ctx.status = 400;
         ctx.body = {
           success: false,
-          error: `Type 5 only supports TOU tariff`,
+          error: 'Unsupported Tariff Type',
+          message: 'Type 5 only supports TOU tariff',
           timestamp: new Date().toISOString()
         };
         return;
@@ -91,7 +107,8 @@ async function calculateElectricityBill(ctx, calculationType) {
       ctx.status = 400;
       ctx.body = {
         success: false,
-        error: `Invalid combination: ${calculationType} with ${tariffType}`,
+        error: 'Strategy Selection Error',
+        message: `No suitable strategy found for ${calculationType} with ${tariffType}`,
         timestamp: new Date().toISOString()
       };
       return;
@@ -103,7 +120,8 @@ async function calculateElectricityBill(ctx, calculationType) {
       ctx.status = 400;
       ctx.body = {
         success: false,
-        error: `Strategy not found: ${strategyName}. Please check the strategy name and ensure the file exists.`,
+        error: 'Strategy Selection Error',
+        message: `Strategy not found: ${strategyName}. Please check the strategy name and ensure the file exists.`,
         timestamp: new Date().toISOString()
       };
       return;
@@ -128,12 +146,40 @@ async function calculateElectricityBill(ctx, calculationType) {
 
   } catch (error) {
     console.error('Error in PEA calculation:', error);
-    ctx.status = 500;
-    ctx.body = {
-      success: false,
-      error: 'Internal server error during calculation',
-      timestamp: new Date().toISOString()
-    };
+    
+    // Handle specific error types
+    if (error.message.includes('Strategy not found')) {
+      ctx.status = 400;
+      ctx.body = {
+        success: false,
+        error: 'Strategy Selection Error',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      };
+    } else if (error.message.includes('Invalid calculation parameters')) {
+      ctx.status = 400;
+      ctx.body = {
+        success: false,
+        error: 'Calculation Error',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      };
+    } else if (error.message.includes('Calculation result exceeds limits')) {
+      ctx.status = 400;
+      ctx.body = {
+        success: false,
+        error: 'Calculation Error',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      };
+    } else {
+      ctx.status = 500;
+      ctx.body = {
+        success: false,
+        error: 'Internal server error during calculation',
+        timestamp: new Date().toISOString()
+      };
+    }
   }
 }
 

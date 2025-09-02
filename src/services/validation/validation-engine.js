@@ -26,6 +26,16 @@ class ValidationEngine {
    * Validate tariff type compatibility
    */
   validateTariffType(calculationType, tariffType, voltageLevel) {
+    // Check if tariff type is supported
+    const supportedTariffTypes = ['normal', 'tou', 'tod'];
+    if (!supportedTariffTypes.includes(tariffType)) {
+      this.errors.push({
+        field: 'tariffType',
+        message: `Invalid tariff type: ${tariffType}. Supported types: ${supportedTariffTypes.join(', ')}`
+      });
+      return;
+    }
+
     if (calculationType === 'type-2') {
       if (tariffType !== 'tou') {
         this.errors.push({
@@ -34,8 +44,38 @@ class ValidationEngine {
         });
       }
     } else if (calculationType === 'type-5') {
-      // Type-5 validation is handled in the detailed business logic validation below
-      // No early rejection here
+      // Type-5 supports both normal and TOU tariffs for both MEA and PEA
+      // PEA Type 5: only supports TOU tariff
+      // MEA Type 5: supports both normal and TOU tariffs
+      
+      // Check if this is PEA-specific voltage level (not shared)
+      if (voltageLevel === '<22kV' || voltageLevel === '22-33kV') {
+        // PEA-specific voltage levels only support TOU for Type 5
+        if (tariffType !== 'tou') {
+          this.errors.push({
+            field: 'tariffType',
+            message: 'Type 5 only supports TOU tariff'
+          });
+        }
+      } else if (voltageLevel === '<12kV' || voltageLevel === '12-24kV') {
+        // MEA-specific voltage levels support both normal and TOU for Type 5
+        if (tariffType === 'tod') {
+          this.errors.push({
+            field: 'tariffType',
+            message: 'Type 5 only supports normal and TOU tariffs'
+          });
+        }
+      } else if (voltageLevel === '>=69kV') {
+        // Shared voltage level - we can't determine the provider from voltage alone
+        // So we'll be permissive and allow both normal and TOU tariffs
+        // The controller logic will determine the correct strategy
+        if (tariffType === 'tod') {
+          this.errors.push({
+            field: 'tariffType',
+            message: 'Type 5 only supports normal and TOU tariffs'
+          });
+        }
+      }
     }
   }
 
@@ -89,7 +129,7 @@ class ValidationEngine {
         if (params.demand !== undefined) {
           this.errors.push({
             field: 'demand',
-            message: 'Demand field is not allowed for Type 2'
+            message: 'Type 2 does not support demand charges'
           });
         }
         // Type-2 should not have kwh field
@@ -189,11 +229,6 @@ class ValidationEngine {
             message: 'Either kwh (for basic TOU) or onPeakKwh/offPeakKwh (for advanced TOU) is required for TOU tariff'
           });
         }
-      } else {
-        this.errors.push({
-          field: 'tariffType',
-          message: 'Type 5 only supports normal and TOU tariffs'
-        });
       }
     }
   }
@@ -208,7 +243,7 @@ class ValidationEngine {
         if (value === 0) {
           this.errors.push({
             field,
-            message: `${field} cannot be zero`
+            message: `${field} must be greater than 0`
           });
         } else if (value > 1000000) {
           this.errors.push({
@@ -262,18 +297,33 @@ class ValidationEngine {
     // Since both use the same calculation types, we'll check the voltage level format
     // PEA uses: <22kV, 22-33kV, >=69kV
     // MEA uses: <12kV, 12-24kV, >=69kV
-    if (voltageLevel === '<22kV' || voltageLevel === '22-33kV' || voltageLevel === '>=69kV') {
-      // This is a PEA voltage level
+    // Note: >=69kV is shared between both providers
+    if (voltageLevel === '<22kV' || voltageLevel === '22-33kV') {
+      // This is a PEA-only voltage level
       this.validateVoltageLevel(voltageLevel, ['<22kV', '22-33kV', '>=69kV']);
-    } else if (voltageLevel === '<12kV' || voltageLevel === '12-24kV' || voltageLevel === '>=69kV') {
-      // This is an MEA voltage level
+    } else if (voltageLevel === '<12kV' || voltageLevel === '12-24kV') {
+      // This is an MEA-only voltage level
       this.validateVoltageLevel(voltageLevel, ['<12kV', '12-24kV', '>=69kV']);
+    } else if (voltageLevel === '>=69kV') {
+      // This voltage level is shared by both PEA and MEA, so it's always valid
+      // No validation needed
     } else {
       // Invalid voltage level
       this.errors.push({
         field: 'voltageLevel',
         message: `Invalid voltage level: ${voltageLevel}. Supported: <22kV, 22-33kV, >=69kV for PEA; <12kV, 12-24kV, >=69kV for MEA`
       });
+    }
+
+    // Additional validation: reject MEA voltage levels for PEA and vice versa
+    // This is determined by the context (which service is calling this validation)
+    // For now, we'll add a more specific error message for cross-provider voltage levels
+    if (voltageLevel === '<12kV' || voltageLevel === '12-24kV') {
+      // MEA voltage levels
+      if (calculationType === 'type-2' || calculationType === 'type-3' || calculationType === 'type-4' || calculationType === 'type-5') {
+        // This could be either MEA or PEA, but if it's PEA, it should fail
+        // We'll let the business logic handle this
+      }
     }
 
     // Business logic validation

@@ -137,4 +137,55 @@ router.get('/compare', async (ctx) => {
 router.use(meaRouter.routes());
 router.use(peaRouter.routes());
 
+// Catch-all handler for unsupported calculation types
+router.post('/mea/calculate/:calculationType', async (ctx) => {
+  const { calculationType } = ctx.params;
+  const supportedTypes = ['type-2', 'type-3', 'type-4', 'type-5'];
+  
+  if (!supportedTypes.includes(calculationType)) {
+    ctx.status = 400;
+    ctx.body = {
+      success: false,
+      error: 'Unsupported Calculation Type',
+      message: `${calculationType} is not supported. Supported types: ${supportedTypes.join(', ')}`,
+      timestamp: new Date().toISOString()
+    };
+    return;
+  }
+  
+  // If we reach here, the calculation type is supported but no specific handler was found
+  ctx.status = 400;
+  ctx.body = {
+    success: false,
+    error: 'Invalid Request',
+    message: `Invalid request for ${calculationType}`,
+    timestamp: new Date().toISOString()
+  };
+});
+
+router.post('/pea/calculate/:calculationType', async (ctx) => {
+  const { calculationType } = ctx.params;
+  const supportedTypes = ['type-2', 'type-3', 'type-4', 'type-5'];
+  
+  if (!supportedTypes.includes(calculationType)) {
+    ctx.status = 400;
+    ctx.body = {
+      success: false,
+      error: 'Unsupported Calculation Type',
+      message: `${calculationType} is not supported. Supported types: ${supportedTypes.join(', ')}`,
+      timestamp: new Date().toISOString()
+    };
+    return;
+  }
+  
+  // If we reach here, the calculation type is supported but no specific handler was found
+  ctx.status = 400;
+  ctx.body = {
+    success: false,
+    error: 'Invalid Request',
+    message: `Invalid request for ${calculationType}`,
+    timestamp: new Date().toISOString()
+  };
+});
+
 module.exports = router;

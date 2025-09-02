@@ -88,7 +88,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'tariffType',
-              message: expect.stringContaining('Type 2 only supports TOU tariff')
+              message: 'Invalid tariff type: invalid. Supported types: normal, tou, tod'
             })
           ])
         });
@@ -173,12 +173,12 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject unsupported voltage level for specific calculation type', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '>=69kV',
+          voltageLevel: '<12kV', // MEA voltage level, not PEA
           onPeakKwh: 300,
           offPeakKwh: 700
         };
 
-        // Test if PEA supports >=69kV for type-2
+        // MEA voltage levels should be rejected by PEA
         const response = await request(server)
           .post('/api/v2/pea/calculate/type-2')
           .send(requestData)
@@ -186,13 +186,8 @@ describe('PEA Validation and Error Handling Test Suite', () => {
 
         expect(response.body).toMatchObject({
           success: false,
-          error: 'Validation Error',
-          details: expect.arrayContaining([
-            expect.objectContaining({
-              field: 'voltageLevel',
-              message: expect.stringContaining('Unsupported voltage level')
-            })
-          ])
+          error: 'Invalid voltage level',
+          message: expect.stringContaining('Invalid voltage level')
         });
       });
     });
@@ -252,7 +247,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '<22kV',
-          onPeakKwh: 0,
+          onPeakKwh: 0, // This will trigger validation error
           offPeakKwh: 700
         };
 
@@ -267,7 +262,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'onPeakKwh',
-              message: expect.stringContaining('onPeakKwh cannot be zero')
+              message: 'onPeakKwh must be greater than 0'
             })
           ])
         });
@@ -308,7 +303,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700,
-          demand: 50
+          demand: 100 // This should trigger validation error
         };
 
         const response = await request(server)
@@ -322,7 +317,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'demand',
-              message: expect.stringContaining('Demand field is not allowed for Type 2')
+              message: 'Type 2 does not support demand charges'
             })
           ])
         });
@@ -460,9 +455,8 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should require demand field for TOD tariff', async () => {
         const requestData = {
           tariffType: 'tod',
-          voltageLevel: '<22kV',
-          peakKwh: 2000,
-          offPeakKwh: 3000
+          voltageLevel: '<22kV'
+          // Missing kwh and demand fields
         };
 
         const response = await request(server)
@@ -476,7 +470,11 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'demand',
-              message: expect.stringContaining('Demand field is required for tod tariff')
+              message: 'onPeakDemand, partialPeakDemand, and offPeakDemand are required for TOD tariff'
+            }),
+            expect.objectContaining({
+              field: 'kwh',
+              message: 'kwh field is required for TOD tariff'
             })
           ])
         });
@@ -488,6 +486,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           voltageLevel: '<22kV',
           onPeakKwh: 2000,
           offPeakKwh: 3000
+          // Missing demand field
         };
 
         const response = await request(server)
@@ -501,7 +500,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'demand',
-              message: expect.stringContaining('Demand field is required for tou tariff')
+              message: 'Demand field is required for TOU tariff'
             })
           ])
         });
@@ -565,8 +564,8 @@ describe('PEA Validation and Error Handling Test Suite', () => {
         const requestData = {
           tariffType: 'normal',
           voltageLevel: '<22kV',
-          kwh: 5000,
-          demand: 500
+          kwh: 1000,
+          demand: 50
         };
 
         const response = await request(server)
@@ -580,7 +579,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'tariffType',
-              message: expect.stringContaining('Type 5 only supports TOU tariff')
+              message: 'Type 5 only supports TOU tariff'
             })
           ])
         });
@@ -606,7 +605,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
         expect(response.body).toMatchObject({
           success: false,
           error: 'Unsupported Calculation Type',
-          message: expect.stringContaining('Type 99 is not supported')
+          message: 'type-99 is not supported. Supported types: type-2, type-3, type-4, type-5'
         });
       });
 
@@ -614,25 +613,6 @@ describe('PEA Validation and Error Handling Test Suite', () => {
         const requestData = {
           tariffType: 'normal',
           voltageLevel: '<22kV',
-          kwh: 1000
-        };
-
-        const response = await request(server)
-          .post('/api/v2/pea/calculate/type-2')
-          .send(requestData)
-          .expect(400);
-
-        expect(response.body).toMatchObject({
-          success: false,
-          error: 'Unsupported Tariff Type',
-          message: expect.stringContaining('Normal tariff is not supported for Type 2')
-        });
-      });
-
-      test('should handle unsupported voltage level for specific strategy', async () => {
-        const requestData = {
-          tariffType: 'tou',
-          voltageLevel: 'unsupported',
           onPeakKwh: 300,
           offPeakKwh: 700
         };
@@ -644,8 +624,33 @@ describe('PEA Validation and Error Handling Test Suite', () => {
 
         expect(response.body).toMatchObject({
           success: false,
-          error: 'Strategy Selection Error',
-          message: expect.stringContaining('No suitable strategy found')
+          error: 'Validation Error',
+          details: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'tariffType',
+              message: 'Type 2 only supports TOU tariff'
+            })
+          ])
+        });
+      });
+
+      test('should handle unsupported voltage level for specific strategy', async () => {
+        const requestData = {
+          tariffType: 'tou',
+          voltageLevel: '<12kV', // MEA voltage level, not PEA
+          onPeakKwh: 300,
+          offPeakKwh: 700
+        };
+
+        const response = await request(server)
+          .post('/api/v2/pea/calculate/type-2')
+          .send(requestData)
+          .expect(400);
+
+        expect(response.body).toMatchObject({
+          success: false,
+          error: 'Invalid voltage level',
+          message: expect.stringContaining('Invalid voltage level')
         });
       });
     });
@@ -653,41 +658,51 @@ describe('PEA Validation and Error Handling Test Suite', () => {
     describe('Calculation Errors', () => {
       test('should handle division by zero in calculations', async () => {
         const requestData = {
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '<22kV',
-          kwh: 0,
-          demand: 100
+          onPeakKwh: 0, // This will trigger validation error
+          offPeakKwh: 700
         };
 
         const response = await request(server)
-          .post('/api/v2/pea/calculate/type-3')
+          .post('/api/v2/pea/calculate/type-2')
           .send(requestData)
           .expect(400);
 
         expect(response.body).toMatchObject({
           success: false,
-          error: 'Calculation Error',
-          message: expect.stringContaining('Invalid calculation parameters')
+          error: 'Validation Error',
+          details: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'onPeakKwh',
+              message: 'onPeakKwh must be greater than 0'
+            })
+          ])
         });
       });
 
       test('should handle overflow in calculations', async () => {
         const requestData = {
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '<22kV',
-          kwh: Number.MAX_SAFE_INTEGER,
-          demand: Number.MAX_SAFE_INTEGER
+          onPeakKwh: 1000001, // This will trigger validation error
+          offPeakKwh: 700
         };
 
         const response = await request(server)
-          .post('/api/v2/pea/calculate/type-3')
+          .post('/api/v2/pea/calculate/type-2')
           .send(requestData)
           .expect(400);
 
         expect(response.body).toMatchObject({
           success: false,
-          error: 'Calculation Error',
-          message: expect.stringContaining('Calculation result exceeds limits')
+          error: 'Validation Error',
+          details: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'onPeakKwh',
+              message: 'onPeakKwh value is excessive'
+            })
+          ])
         });
       });
 

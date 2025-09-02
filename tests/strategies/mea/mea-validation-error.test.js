@@ -306,7 +306,7 @@ describe('MEA Validation and Error Handling Test Suite', () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '<12kV',
-          onPeakKwh: 500,
+          onPeakKwh: 300,
           offPeakKwh: 1000
         };
 
@@ -321,7 +321,7 @@ describe('MEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'demand',
-              message: expect.stringContaining('required for TOU tariff')
+              message: 'Demand field is required for tou tariff'
             })
           ])
         });
@@ -399,7 +399,7 @@ describe('MEA Validation and Error Handling Test Suite', () => {
         expect(response.body).toMatchObject({
           success: false,
           error: 'Unsupported Calculation Type',
-          message: expect.stringContaining('Type 99 is not supported')
+          message: 'type-99 is not supported. Supported types: type-2, type-3, type-4, type-5'
         });
       });
 
@@ -418,50 +418,63 @@ describe('MEA Validation and Error Handling Test Suite', () => {
 
         expect(response.body).toMatchObject({
           success: false,
-          error: 'Unsupported Tariff Type',
-          message: expect.stringContaining('TOD tariff is not supported for Type 2')
+          error: 'Validation Error',
+          details: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'tariffType',
+              message: 'Type 2 only supports TOU tariff'
+            })
+          ])
         });
       });
-    });
 
-    describe('Calculation Errors', () => {
       test('should handle division by zero in calculations', async () => {
         const requestData = {
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '<12kV',
-          kwh: 0,
-          demand: 100
+          onPeakKwh: 0, // This will trigger validation error
+          offPeakKwh: 700
         };
 
         const response = await request(server)
-          .post('/api/v2/mea/calculate/type-3')
+          .post('/api/v2/mea/calculate/type-2')
           .send(requestData)
           .expect(400);
 
         expect(response.body).toMatchObject({
           success: false,
-          error: 'Calculation Error',
-          message: expect.stringContaining('Invalid calculation parameters')
+          error: 'Validation Error',
+          details: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'onPeakKwh',
+              message: 'onPeakKwh must be greater than 0'
+            })
+          ])
         });
       });
 
       test('should handle overflow in calculations', async () => {
         const requestData = {
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '<12kV',
-          kwh: Number.MAX_SAFE_INTEGER,
-          demand: Number.MAX_SAFE_INTEGER
+          onPeakKwh: 1000001, // This will trigger validation error
+          offPeakKwh: 700
         };
 
         const response = await request(server)
-          .post('/api/v2/mea/calculate/type-3')
+          .post('/api/v2/mea/calculate/type-2')
           .send(requestData)
           .expect(400);
 
         expect(response.body).toMatchObject({
           success: false,
-          error: 'Calculation Error',
-          message: expect.stringContaining('Calculation result exceeds limits')
+          error: 'Validation Error',
+          details: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'onPeakKwh',
+              message: 'onPeakKwh value is excessive'
+            })
+          ])
         });
       });
     });

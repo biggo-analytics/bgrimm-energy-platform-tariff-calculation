@@ -223,7 +223,7 @@ describe('MEA Strategy Pattern Calculations (API v2)', () => {
 
       expect(response.body).toMatchObject({
         success: false,
-        error: expect.stringContaining("Invalid combination")
+        error: 'Validation Error'
       });
     });
 
@@ -242,7 +242,7 @@ describe('MEA Strategy Pattern Calculations (API v2)', () => {
 
       expect(response.body).toMatchObject({
         success: false,
-        error: expect.stringContaining("Invalid combination")
+        error: 'Invalid combination'
       });
     });
 
@@ -259,7 +259,7 @@ describe('MEA Strategy Pattern Calculations (API v2)', () => {
 
       expect(response.body).toMatchObject({
         success: false,
-        error: expect.stringContaining("Missing required parameters")
+        error: 'Validation Error'
       });
     });
   });
