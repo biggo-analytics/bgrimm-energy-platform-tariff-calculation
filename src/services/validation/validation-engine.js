@@ -1,372 +1,315 @@
 /**
- * Validation Composition Engine
- * 
- * Implements Composite Pattern and Command Pattern to create reusable
- * validation components that can be combined and applied consistently.
- * 
- * Eliminates DRY violations in validation logic by providing composable
- * validation rules that can be mixed and matched.
+ * Simple Validation Engine for Electricity Bill Calculations
+ * Provides detailed validation with field-specific error messages
  */
 
-const { ValidationError } = require('../../utils/error-handler');
-
-/**
- * Base Validation Rule Interface
- * 
- * All validation rules implement this interface for consistent behavior.
- */
-class ValidationRule {
-  /**
-   * Validate input data
-   * 
-   * @param {*} value - Value to validate
-   * @param {string} fieldName - Name of the field being validated
-   * @param {Object} context - Additional validation context
-   * @returns {ValidationResult} - Validation result
-   */
-  validate(value, fieldName, context = {}) {
-    throw new Error('validate method must be implemented by subclass');
-  }
-}
-
-/**
- * Validation result container
- */
-class ValidationResult {
-  constructor(isValid, errors = []) {
-    this.isValid = isValid;
-    this.errors = Array.isArray(errors) ? errors : [errors];
-  }
-  
-  /**
-   * Combine multiple validation results
-   */
-  static combine(...results) {
-    const isValid = results.every(result => result.isValid);
-    const errors = results.flatMap(result => result.errors);
-    return new ValidationResult(isValid, errors);
-  }
-}
-
-// ============================================================================
-// CONCRETE VALIDATION RULES
-// ============================================================================
-
-/**
- * Required Field Validation
- */
-class RequiredFieldRule extends ValidationRule {
-  validate(value, fieldName, context = {}) {
-    const isEmpty = value === undefined || value === null || value === '';
-    
-    if (isEmpty) {
-      return new ValidationResult(false, 
-        `Missing required field: ${fieldName}. This field is mandatory for the calculation.`
-      );
-    }
-    
-    return new ValidationResult(true);
-  }
-}
-
-/**
- * Numeric Value Validation
- */
-class NumericValueRule extends ValidationRule {
-  constructor(options = {}) {
-    super();
-    this.min = options.min;
-    this.max = options.max;
-    this.allowZero = options.allowZero !== false; // Default to true
-  }
-  
-  validate(value, fieldName, context = {}) {
-    if (value === undefined || value === null) {
-      return new ValidationResult(true); // Let RequiredFieldRule handle this
-    }
-    
-    if (typeof value !== 'number' || isNaN(value)) {
-      return new ValidationResult(false, 
-        `${fieldName} must be a valid number, received: ${typeof value}`
-      );
-    }
-    
-    if (!this.allowZero && value === 0) {
-      return new ValidationResult(false, 
-        `${fieldName} cannot be zero`
-      );
-    }
-    
-    if (value < 0) {
-      return new ValidationResult(false, 
-        `${fieldName} cannot be negative, received: ${value}`
-      );
-    }
-    
-    if (this.min !== undefined && value < this.min) {
-      return new ValidationResult(false, 
-        `${fieldName} must be at least ${this.min}, received: ${value}`
-      );
-    }
-    
-    if (this.max !== undefined && value > this.max) {
-      return new ValidationResult(false, 
-        `${fieldName} cannot exceed ${this.max}, received: ${value}`
-      );
-    }
-    
-    return new ValidationResult(true);
-  }
-}
-
-/**
- * Enumeration Value Validation
- */
-class EnumValueRule extends ValidationRule {
-  constructor(allowedValues, options = {}) {
-    super();
-    this.allowedValues = Array.isArray(allowedValues) ? allowedValues : [allowedValues];
-    this.caseSensitive = options.caseSensitive !== false; // Default to true
-  }
-  
-  validate(value, fieldName, context = {}) {
-    if (value === undefined || value === null) {
-      return new ValidationResult(true); // Let RequiredFieldRule handle this
-    }
-    
-    const valueToCheck = this.caseSensitive ? value : String(value).toLowerCase();
-    const allowedToCheck = this.caseSensitive 
-      ? this.allowedValues 
-      : this.allowedValues.map(v => String(v).toLowerCase());
-    
-    if (!allowedToCheck.includes(valueToCheck)) {
-      return new ValidationResult(false, 
-        `${fieldName} must be one of: ${this.allowedValues.join(', ')}. Received: ${value}`
-      );
-    }
-    
-    return new ValidationResult(true);
-  }
-}
-
-/**
- * Object Structure Validation
- */
-class ObjectStructureRule extends ValidationRule {
-  constructor(requiredFields = [], optionalFields = []) {
-    super();
-    this.requiredFields = requiredFields;
-    this.optionalFields = optionalFields;
-    this.allowedFields = [...requiredFields, ...optionalFields];
-  }
-  
-  validate(value, fieldName, context = {}) {
-    if (value === undefined || value === null) {
-      return new ValidationResult(true); // Let RequiredFieldRule handle this
-    }
-    
-    if (typeof value !== 'object' || Array.isArray(value)) {
-      return new ValidationResult(false, 
-        `${fieldName} must be an object, received: ${typeof value}`
-      );
-    }
-    
-    const errors = [];
-    
-    // Check for missing required fields
-    for (const required of this.requiredFields) {
-      if (value[required] === undefined || value[required] === null) {
-        errors.push(`${fieldName}.${required} is required`);
-      }
-    }
-    
-    // Check for unexpected fields
-    const providedFields = Object.keys(value);
-    for (const provided of providedFields) {
-      if (!this.allowedFields.includes(provided)) {
-        errors.push(`${fieldName}.${provided} is not a valid field`);
-      }
-    }
-    
-    return new ValidationResult(errors.length === 0, errors);
-  }
-}
-
-/**
- * Conditional Validation Rule
- * 
- * Applies validation only when a condition is met
- */
-class ConditionalRule extends ValidationRule {
-  constructor(condition, rule) {
-    super();
-    this.condition = condition;
-    this.rule = rule;
-  }
-  
-  validate(value, fieldName, context = {}) {
-    if (!this.condition(value, fieldName, context)) {
-      return new ValidationResult(true); // Condition not met, skip validation
-    }
-    
-    return this.rule.validate(value, fieldName, context);
-  }
-}
-
-// ============================================================================
-// VALIDATION COMPOSER
-// ============================================================================
-
-/**
- * Validation Composer
- * 
- * Combines multiple validation rules for a field and provides
- * a fluent interface for building validation chains.
- */
-class ValidationComposer {
+class ValidationEngine {
   constructor() {
-    this.fieldValidators = new Map();
+    this.errors = [];
   }
-  
-  /**
-   * Add validation for a field
-   * 
-   * @param {string} fieldName - Name of the field
-   * @returns {FieldValidator} - Field validator for chaining
-   */
-  field(fieldName) {
-    if (!this.fieldValidators.has(fieldName)) {
-      this.fieldValidators.set(fieldName, new FieldValidator(fieldName));
-    }
-    return this.fieldValidators.get(fieldName);
-  }
-  
-  /**
-   * Validate all configured fields
-   * 
-   * @param {Object} data - Data to validate
-   * @param {Object} context - Validation context
-   * @returns {ValidationResult} - Combined validation result
-   */
-  validate(data, context = {}) {
-    const results = [];
-    
-    for (const [fieldName, fieldValidator] of this.fieldValidators) {
-      const fieldValue = this._getNestedValue(data, fieldName);
-      const result = fieldValidator.validate(fieldValue, context);
-      results.push(result);
-    }
-    
-    return ValidationResult.combine(...results);
-  }
-  
-  /**
-   * Get nested value from object using dot notation
-   * 
-   * @private
-   * @param {Object} obj - Object to search
-   * @param {string} path - Dot-separated path
-   * @returns {*} - Value at path
-   */
-  _getNestedValue(obj, path) {
-    return path.split('.').reduce((current, key) => {
-      return current && current[key] !== undefined ? current[key] : undefined;
-    }, obj);
-  }
-}
 
-/**
- * Field Validator
- * 
- * Manages validation rules for a specific field
- */
-class FieldValidator {
-  constructor(fieldName) {
-    this.fieldName = fieldName;
-    this.rules = [];
-  }
-  
   /**
-   * Add required validation
+   * Validate required fields
    */
-  required() {
-    this.rules.push(new RequiredFieldRule());
-    return this;
+  validateRequired(params, requiredFields) {
+    requiredFields.forEach(field => {
+      if (!params[field] && params[field] !== 0) {
+        this.errors.push({
+          field,
+          message: `${field} is required`
+        });
+      }
+    });
   }
-  
+
   /**
-   * Add numeric validation
+   * Validate tariff type compatibility
    */
-  numeric(options = {}) {
-    this.rules.push(new NumericValueRule(options));
-    return this;
+  validateTariffType(calculationType, tariffType, voltageLevel) {
+    if (calculationType === 'type-2') {
+      if (tariffType !== 'tou') {
+        this.errors.push({
+          field: 'tariffType',
+          message: 'Type 2 only supports TOU tariff'
+        });
+      }
+    } else if (calculationType === 'type-5') {
+      // Type-5 validation is handled in the detailed business logic validation below
+      // No early rejection here
+    }
   }
-  
+
   /**
-   * Add enumeration validation
+   * Validate voltage level
    */
-  oneOf(allowedValues, options = {}) {
-    this.rules.push(new EnumValueRule(allowedValues, options));
-    return this;
+  validateVoltageLevel(voltageLevel, supportedLevels) {
+    if (!supportedLevels.includes(voltageLevel)) {
+      this.errors.push({
+        field: 'voltageLevel',
+        message: `Invalid voltage level: ${voltageLevel}. Supported: ${supportedLevels.join(', ')}`
+      });
+    }
   }
-  
+
   /**
-   * Add object structure validation
+   * Validate numeric values
    */
-  object(requiredFields = [], optionalFields = []) {
-    this.rules.push(new ObjectStructureRule(requiredFields, optionalFields));
-    return this;
-  }
-  
-  /**
-   * Add conditional validation
-   */
-  when(condition, rule) {
-    this.rules.push(new ConditionalRule(condition, rule));
-    return this;
-  }
-  
-  /**
-   * Add custom validation rule
-   */
-  custom(validationFunction) {
-    this.rules.push({
-      validate: (value, fieldName, context) => {
-        try {
-          const result = validationFunction(value, fieldName, context);
-          return result instanceof ValidationResult ? result : new ValidationResult(!!result);
-        } catch (error) {
-          return new ValidationResult(false, error.message);
+  validateNumericValues(params, fields) {
+    fields.forEach(field => {
+      if (params[field] !== undefined) {
+        if (typeof params[field] !== 'number' && isNaN(Number(params[field]))) {
+          this.errors.push({
+            field,
+            message: `${field} must be a valid number`
+          });
+        } else if (Number(params[field]) < 0) {
+          this.errors.push({
+            field,
+            message: `${field} must be positive`
+          });
         }
       }
     });
-    return this;
   }
-  
+
   /**
-   * Validate field value
-   * 
-   * @param {*} value - Value to validate
-   * @param {Object} context - Validation context
-   * @returns {ValidationResult} - Validation result
+   * Validate business logic for specific calculation types
    */
-  validate(value, context = {}) {
-    const results = this.rules.map(rule => 
-      rule.validate(value, this.fieldName, context)
-    );
-    
-    return ValidationResult.combine(...results);
+  validateBusinessLogic(calculationType, tariffType, params) {
+    if (calculationType === 'type-2') {
+      // Type-2 requires both onPeakKwh and offPeakKwh for TOU
+      if (tariffType === 'tou') {
+        if (params.onPeakKwh === undefined || params.offPeakKwh === undefined) {
+          this.errors.push({
+            field: 'offPeakKwh',
+            message: 'Both onPeakKwh and offPeakKwh are required for TOU tariff'
+          });
+        }
+        // Type-2 should not have demand field
+        if (params.demand !== undefined) {
+          this.errors.push({
+            field: 'demand',
+            message: 'Demand field is not allowed for Type 2'
+          });
+        }
+        // Type-2 should not have kwh field
+        if (params.kwh !== undefined) {
+          this.errors.push({
+            field: 'kwh',
+            message: 'kwh field is not allowed for Type 2 TOU'
+          });
+        }
+      }
+    } else if (calculationType === 'type-3') {
+      // Type-3 requires demand field
+      if (params.demand === undefined) {
+        this.errors.push({
+          field: 'demand',
+          message: `Demand field is required for ${tariffType} tariff`
+        });
+      }
+      // Type-3 should not have peakKwh field (not TOD)
+      if (params.peakKwh !== undefined) {
+        this.errors.push({
+          field: 'peakKwh',
+          message: 'peakKwh field is not allowed for Type 3'
+        });
+      }
+    } else if (calculationType === 'type-4') {
+      // Type-4 requires different fields based on tariff type
+      if (tariffType === 'tod') {
+        // TOD tariff uses onPeakDemand, partialPeakDemand, offPeakDemand
+        if (params.onPeakDemand === undefined || params.partialPeakDemand === undefined || params.offPeakDemand === undefined) {
+          this.errors.push({
+            field: 'demand',
+            message: 'onPeakDemand, partialPeakDemand, and offPeakDemand are required for TOD tariff'
+          });
+        }
+        // TOD tariff also needs kwh for energy charges
+        if (params.kwh === undefined) {
+          this.errors.push({
+            field: 'kwh',
+            message: 'kwh field is required for TOD tariff'
+          });
+        }
+      } else if (tariffType === 'tou') {
+        // TOU tariff uses single demand field
+        if (params.demand === undefined) {
+          this.errors.push({
+            field: 'demand',
+            message: 'Demand field is required for TOU tariff'
+          });
+        }
+        // TOU tariff should not have kwh field
+        if (params.kwh !== undefined) {
+          this.errors.push({
+            field: 'kwh',
+            message: 'kwh field is not allowed for Type 4 TOU'
+          });
+        }
+      }
+    } else if (calculationType === 'type-5') {
+      // Type-5 supports both normal and TOU tariffs
+      if (tariffType === 'normal') {
+        // Normal tariff requires kwh and demand fields
+        if (params.kwh === undefined) {
+          this.errors.push({
+            field: 'kwh',
+            message: 'kwh field is required for normal tariff'
+          });
+        }
+        if (params.demand === undefined) {
+          this.errors.push({
+            field: 'demand',
+            message: 'demand field is required for normal tariff'
+          });
+        }
+      } else if (tariffType === 'tou') {
+        // TOU tariff can use either basic (kwh + demand) or advanced (onPeakKwh + offPeakKwh + demand) format
+        if (params.onPeakKwh !== undefined && params.offPeakKwh !== undefined) {
+          // Advanced TOU format: onPeakKwh, offPeakKwh, and demand
+          if (params.demand === undefined) {
+            this.errors.push({
+              field: 'demand',
+              message: 'demand field is required for TOU tariff'
+            });
+          }
+        } else if (params.kwh !== undefined) {
+          // Basic TOU format: kwh and demand
+          if (params.demand === undefined) {
+            this.errors.push({
+              field: 'demand',
+              message: 'demand field is required for TOU tariff'
+            });
+          }
+        } else {
+          // Neither format provided
+          this.errors.push({
+            field: 'kwh',
+            message: 'Either kwh (for basic TOU) or onPeakKwh/offPeakKwh (for advanced TOU) is required for TOU tariff'
+          });
+        }
+      } else {
+        this.errors.push({
+          field: 'tariffType',
+          message: 'Type 5 only supports normal and TOU tariffs'
+        });
+      }
+    }
+  }
+
+  /**
+   * Validate extreme values
+   */
+  validateExtremeValues(params, fields) {
+    fields.forEach(field => {
+      if (params[field] !== undefined) {
+        const value = Number(params[field]);
+        if (value === 0) {
+          this.errors.push({
+            field,
+            message: `${field} cannot be zero`
+          });
+        } else if (value > 1000000) {
+          this.errors.push({
+            field,
+            message: `${field} value is excessive`
+          });
+        }
+      }
+    });
+  }
+
+  /**
+   * Validate data types
+   */
+  validateDataTypes(params, fields) {
+    fields.forEach(field => {
+      if (params[field] !== undefined) {
+        if (typeof params[field] === 'string') {
+          const numValue = Number(params[field]);
+          if (isNaN(numValue)) {
+            this.errors.push({
+              field,
+              message: `${field} must be a valid number`
+            });
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Main validation method
+   */
+  validate(calculationType, tariffType, voltageLevel, params) {
+    this.errors = [];
+
+    // Create a combined params object for validation
+    const allParams = {
+      tariffType,
+      voltageLevel,
+      ...params
+    };
+
+    // Required fields validation
+    this.validateRequired(allParams, ['tariffType', 'voltageLevel']);
+
+    // Tariff type validation
+    this.validateTariffType(calculationType, tariffType, voltageLevel);
+
+    // Voltage level validation - we need to determine if this is PEA or MEA
+    // Since both use the same calculation types, we'll check the voltage level format
+    // PEA uses: <22kV, 22-33kV, >=69kV
+    // MEA uses: <12kV, 12-24kV, >=69kV
+    if (voltageLevel === '<22kV' || voltageLevel === '22-33kV' || voltageLevel === '>=69kV') {
+      // This is a PEA voltage level
+      this.validateVoltageLevel(voltageLevel, ['<22kV', '22-33kV', '>=69kV']);
+    } else if (voltageLevel === '<12kV' || voltageLevel === '12-24kV' || voltageLevel === '>=69kV') {
+      // This is an MEA voltage level
+      this.validateVoltageLevel(voltageLevel, ['<12kV', '12-24kV', '>=69kV']);
+    } else {
+      // Invalid voltage level
+      this.errors.push({
+        field: 'voltageLevel',
+        message: `Invalid voltage level: ${voltageLevel}. Supported: <22kV, 22-33kV, >=69kV for PEA; <12kV, 12-24kV, >=69kV for MEA`
+      });
+    }
+
+    // Business logic validation
+    this.validateBusinessLogic(calculationType, tariffType, allParams);
+
+    // Numeric validation for relevant fields
+    const numericFields = ['kwh', 'onPeakKwh', 'offPeakKwh', 'demand', 'onPeakDemand', 'partialPeakDemand', 'offPeakDemand'];
+    this.validateNumericValues(allParams, numericFields);
+
+    // Extreme values validation
+    this.validateExtremeValues(allParams, numericFields);
+
+    // Data type validation
+    this.validateDataTypes(allParams, numericFields);
+
+    return this.errors;
+  }
+
+  /**
+   * Check if validation passed
+   */
+  isValid() {
+    return this.errors.length === 0;
+  }
+
+  /**
+   * Get formatted error response
+   */
+  getErrorResponse() {
+    return {
+      success: false,
+      error: 'Validation Error',
+      details: this.errors,
+      timestamp: new Date().toISOString()
+    };
   }
 }
 
-module.exports = {
-  ValidationRule,
-  ValidationResult,
-  RequiredFieldRule,
-  NumericValueRule,
-  EnumValueRule,
-  ObjectStructureRule,
-  ConditionalRule,
-  ValidationComposer,
-  FieldValidator
-};
+module.exports = ValidationEngine;

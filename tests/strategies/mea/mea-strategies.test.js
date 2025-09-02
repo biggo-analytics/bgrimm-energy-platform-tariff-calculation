@@ -52,7 +52,7 @@ describe('MEA Strategies Test Suite', () => {
           .expect(200);
 
         expect(response.body.data.strategyUsed).toBe('MEA_2.2.2_small_TOU');
-        expect(response.body.data.totalAmount).toBeCloseTo(3588.58, 2);
+        expect(response.body.data.totalAmount).toBeCloseTo(3668.88, 2);
       });
     });
   });
@@ -72,7 +72,7 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_3.1.1_medium_normal');
+        expect(response.body.data.strategyUsed).toBe('MEA_3.1.3_medium_normal');
       });
 
       test('MEA_3.1.2_medium_normal - 12-24kV', async () => {
@@ -91,7 +91,7 @@ describe('MEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('MEA_3.1.2_medium_normal');
       });
 
-      test('MEA_3.1.3_medium_normal - >=69kV', async () => {
+      test('MEA_3.1.1_medium_normal - >=69kV', async () => {
         const requestData = {
           tariffType: 'normal',
           voltageLevel: '>=69kV',
@@ -104,12 +104,12 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_3.1.3_medium_normal');
+        expect(response.body.data.strategyUsed).toBe('MEA_3.1.1_medium_normal');
       });
     });
 
     describe('TOU Tariff Strategies', () => {
-      test('MEA_3.2.1_medium_TOU - <12kV', async () => {
+      test('MEA_3.2.3_medium_TOU - <12kV', async () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '<12kV',
@@ -123,7 +123,7 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_3.2.1_medium_TOU');
+        expect(response.body.data.strategyUsed).toBe('MEA_3.2.3_medium_TOU');
       });
 
       test('MEA_3.2.2_medium_TOU - 12-24kV', async () => {
@@ -143,7 +143,7 @@ describe('MEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('MEA_3.2.2_medium_TOU');
       });
 
-      test('MEA_3.2.3_medium_TOU - >=69kV', async () => {
+      test('MEA_3.2.1_medium_TOU - >=69kV', async () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '>=69kV',
@@ -157,20 +157,21 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_3.2.3_medium_TOU');
+        expect(response.body.data.strategyUsed).toBe('MEA_3.2.1_medium_TOU');
       });
     });
   });
 
   describe('MEA Type 4 Strategies (Large Business)', () => {
     describe('TOD Tariff Strategies', () => {
-      test('MEA_4.1.1_large_TOD - <12kV', async () => {
+      test('MEA_4.1.3_large_TOD - <12kV', async () => {
         const requestData = {
           tariffType: 'tod',
           voltageLevel: '<12kV',
-          peakKwh: 2000,
-          offPeakKwh: 3000,
-          demand: 200
+          kwh: 5000,
+          onPeakDemand: 200,
+          partialPeakDemand: 150,
+          offPeakDemand: 100
         };
 
         const response = await request(server)
@@ -178,16 +179,17 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_4.1.1_large_TOD');
+        expect(response.body.data.strategyUsed).toBe('MEA_4.1.3_large_TOD');
       });
 
       test('MEA_4.1.2_large_TOD - 12-24kV', async () => {
         const requestData = {
           tariffType: 'tod',
           voltageLevel: '12-24kV',
-          peakKwh: 2000,
-          offPeakKwh: 3000,
-          demand: 200
+          kwh: 5000,
+          onPeakDemand: 200,
+          partialPeakDemand: 150,
+          offPeakDemand: 100
         };
 
         const response = await request(server)
@@ -198,13 +200,14 @@ describe('MEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('MEA_4.1.2_large_TOD');
       });
 
-      test('MEA_4.1.3_large_TOD - >=69kV', async () => {
+      test('MEA_4.1.1_large_TOD - >=69kV', async () => {
         const requestData = {
           tariffType: 'tod',
           voltageLevel: '>=69kV',
-          peakKwh: 2000,
-          offPeakKwh: 3000,
-          demand: 200
+          kwh: 5000,
+          onPeakDemand: 200,
+          partialPeakDemand: 150,
+          offPeakDemand: 100
         };
 
         const response = await request(server)
@@ -212,12 +215,12 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_4.1.3_large_TOD');
+        expect(response.body.data.strategyUsed).toBe('MEA_4.1.1_large_TOD');
       });
     });
 
     describe('TOU Tariff Strategies', () => {
-      test('MEA_4.2.1_large_TOU - <12kV', async () => {
+      test('MEA_4.2.3_large_TOU - <12kV', async () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '<12kV',
@@ -231,7 +234,7 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_4.2.1_large_TOU');
+        expect(response.body.data.strategyUsed).toBe('MEA_4.2.3_large_TOU');
       });
 
       test('MEA_4.2.2_large_TOU - 12-24kV', async () => {
@@ -251,7 +254,7 @@ describe('MEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('MEA_4.2.2_large_TOU');
       });
 
-      test('MEA_4.2.3_large_TOU - >=69kV', async () => {
+      test('MEA_4.2.1_large_TOU - >=69kV', async () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '>=69kV',
@@ -265,14 +268,14 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_4.2.3_large_TOU');
+        expect(response.body.data.strategyUsed).toBe('MEA_4.2.1_large_TOU');
       });
     });
   });
 
   describe('MEA Type 5 Strategies (Specific Business)', () => {
     describe('Normal Tariff Strategies', () => {
-      test('MEA_5.1.1_specific_normal - <12kV', async () => {
+      test('MEA_5.1.3_specific_normal - <12kV', async () => {
         const requestData = {
           tariffType: 'normal',
           voltageLevel: '<12kV',
@@ -285,7 +288,7 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_5.1.1_specific_normal');
+        expect(response.body.data.strategyUsed).toBe('MEA_5.1.3_specific_normal');
       });
 
       test('MEA_5.1.2_specific_normal - 12-24kV', async () => {
@@ -304,7 +307,7 @@ describe('MEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('MEA_5.1.2_specific_normal');
       });
 
-      test('MEA_5.1.3_specific_normal - >=69kV', async () => {
+      test('MEA_5.1.1_specific_normal - >=69kV', async () => {
         const requestData = {
           tariffType: 'normal',
           voltageLevel: '>=69kV',
@@ -317,12 +320,12 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_5.1.3_specific_normal');
+        expect(response.body.data.strategyUsed).toBe('MEA_5.1.1_specific_normal');
       });
     });
 
     describe('TOU Tariff Strategies', () => {
-      test('MEA_5.2.1_specific_TOU - <12kV', async () => {
+      test('MEA_5.2.3_specific_TOU - <12kV', async () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '<12kV',
@@ -336,7 +339,7 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_5.2.1_specific_TOU');
+        expect(response.body.data.strategyUsed).toBe('MEA_5.2.3_specific_TOU');
       });
 
       test('MEA_5.2.2_specific_TOU - 12-24kV', async () => {
@@ -356,7 +359,7 @@ describe('MEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('MEA_5.2.2_specific_TOU');
       });
 
-      test('MEA_5.2.3_specific_TOU - >=69kV', async () => {
+      test('MEA_5.2.1_specific_TOU - >=69kV', async () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '>=69kV',
@@ -370,7 +373,7 @@ describe('MEA Strategies Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_5.2.3_specific_TOU');
+        expect(response.body.data.strategyUsed).toBe('MEA_5.2.1_specific_TOU');
       });
     });
   });

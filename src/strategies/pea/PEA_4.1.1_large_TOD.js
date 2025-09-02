@@ -7,7 +7,7 @@ const strategy = {
   /**
    * Calculates the bill for PEA Large TOD (>=69kV).
    * @param {object} params - Must contain `kwh`, `onPeakDemand`, `partialPeakDemand`, and `offPeakDemand`.
-   * @returns {number} The total bill amount.
+   * @returns {object} The bill breakdown with energyCharge, onPeakDemandCharge, partialPeakDemandCharge, offPeakDemandCharge, serviceCharge, and totalAmount.
    */
   calculate({ kwh, onPeakDemand, partialPeakDemand, offPeakDemand }) {
     if (typeof kwh !== 'number' || typeof onPeakDemand !== 'number' || 
@@ -20,9 +20,25 @@ const strategy = {
     const partialPeakDemandCharge = config.demandPartial * partialPeakDemand;
     const offPeakDemandCharge = config.demandOff * offPeakDemand;
     const energyCharge = config.energy * kwh;
-    const total = config.serviceCharge + onPeakDemandCharge + partialPeakDemandCharge + offPeakDemandCharge + energyCharge;
+    const serviceCharge = config.serviceCharge;
+    const totalAmount = serviceCharge + energyCharge + onPeakDemandCharge + partialPeakDemandCharge + offPeakDemandCharge;
     
-    return parseFloat(total.toFixed(2));
+    return {
+      energyCharge: parseFloat(energyCharge.toFixed(2)),
+      onPeakDemandCharge: parseFloat(onPeakDemandCharge.toFixed(2)),
+      partialPeakDemandCharge: parseFloat(partialPeakDemandCharge.toFixed(2)),
+      offPeakDemandCharge: parseFloat(offPeakDemandCharge.toFixed(2)),
+      serviceCharge: parseFloat(serviceCharge.toFixed(2)),
+      totalAmount: parseFloat(totalAmount.toFixed(2)),
+      breakdown: {
+        energyCharge: parseFloat(energyCharge.toFixed(2)),
+        onPeakDemandCharge: parseFloat(onPeakDemandCharge.toFixed(2)),
+        partialPeakDemandCharge: parseFloat(partialPeakDemandCharge.toFixed(2)),
+        offPeakDemandCharge: parseFloat(offPeakDemandCharge.toFixed(2)),
+        serviceCharge: parseFloat(serviceCharge.toFixed(2)),
+        totalAmount: parseFloat(totalAmount.toFixed(2))
+      }
+    };
   }
 };
 

@@ -7,7 +7,7 @@ const strategy = {
   /**
    * Calculates the bill for MEA Medium Normal (<12kV).
    * @param {object} params - Must contain `kwh` and `demand`.
-   * @returns {number} The total bill amount.
+   * @returns {object} The bill breakdown with energyCharge, serviceCharge, and totalAmount.
    */
   calculate({ kwh, demand }) {
     if (typeof kwh !== 'number' || typeof demand !== 'number' || kwh < 0 || demand < 0) {
@@ -16,9 +16,20 @@ const strategy = {
 
     const demandCharge = config.demand * demand;
     const energyCharge = config.energy * kwh;
-    const total = config.serviceCharge + demandCharge + energyCharge;
+    const serviceCharge = config.serviceCharge;
+    const totalAmount = serviceCharge + demandCharge + energyCharge;
     
-    return parseFloat(total.toFixed(2));
+    return {
+      energyCharge: parseFloat(energyCharge.toFixed(2)),
+      serviceCharge: parseFloat(serviceCharge.toFixed(2)),
+      totalAmount: parseFloat(totalAmount.toFixed(2)),
+      breakdown: {
+        demandCharge: parseFloat(demandCharge.toFixed(2)),
+        energyCharge: parseFloat(energyCharge.toFixed(2)),
+        serviceCharge: parseFloat(serviceCharge.toFixed(2)),
+        totalAmount: parseFloat(totalAmount.toFixed(2))
+      }
+    };
   }
 };
 

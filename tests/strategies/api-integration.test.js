@@ -226,7 +226,7 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
           .send(requestData)
           .expect(200);
 
-        expect(response.body.data.strategyUsed).toBe('MEA_3.1.1_medium_normal');
+        expect(response.body.data.strategyUsed).toBe('MEA_3.1.3_medium_normal');
         expect(response.body.data.calculationType).toBe('type-3');
         expect(response.body.data.tariffType).toBe('normal');
         expect(response.body.data.voltageLevel).toBe('<12kV');
@@ -236,9 +236,10 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
         const requestData = {
           tariffType: 'tod',
           voltageLevel: '<12kV',
-          peakKwh: 2000,
-          offPeakKwh: 3000,
-          demand: 200
+          kwh: 5000,
+          onPeakDemand: 200,
+          partialPeakDemand: 150,
+          offPeakDemand: 100
         };
 
         const response = await request(server)
@@ -296,9 +297,10 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
         const requestData = {
           tariffType: 'tod',
           voltageLevel: '<22kV',
-          peakKwh: 2000,
-          offPeakKwh: 3000,
-          demand: 200
+          kwh: 5000,
+          onPeakDemand: 200,
+          partialPeakDemand: 150,
+          offPeakDemand: 100
         };
 
         const response = await request(server)

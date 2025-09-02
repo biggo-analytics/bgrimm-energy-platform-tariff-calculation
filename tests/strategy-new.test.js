@@ -49,7 +49,7 @@ describe('Strategy Pattern Tests (API v2)', () => {
       const result = strategy.calculate({ onPeakKwh: 300, offPeakKwh: 700 });
       
       // Expected: 33.29 + (300 * 5.7982) + (700 * 2.6369) = 33.29 + 1739.46 + 1845.83 = 3618.58
-      expect(result).toBeCloseTo(3618.58, 2);
+      expect(result.totalAmount).toBeCloseTo(3618.58, 2);
     });
 
     test('MEA Type 3 Normal (<12kV) calculation', () => {
@@ -57,7 +57,7 @@ describe('Strategy Pattern Tests (API v2)', () => {
       const result = strategy.calculate({ kwh: 1500, demand: 75 });
       
       // Expected: 312.24 + (75 * 221.50) + (1500 * 3.1751) = 312.24 + 16612.5 + 4762.65 = 21687.39
-      expect(result).toBeCloseTo(21687.39, 2);
+      expect(result.totalAmount).toBeCloseTo(21687.39, 2);
     });
 
     test('MEA Type 3 TOU (>=69kV) calculation', () => {
@@ -65,7 +65,7 @@ describe('Strategy Pattern Tests (API v2)', () => {
       const result = strategy.calculate({ onPeakKwh: 800, offPeakKwh: 1200, demand: 100 });
       
       // Expected: 312.24 + (100 * 74.14) + (800 * 4.1025) + (1200 * 2.5849) = 312.24 + 7414 + 3282 + 3101.88 = 14110.12
-      expect(result).toBeCloseTo(14110.12, 2);
+      expect(result.totalAmount).toBeCloseTo(14110.12, 2);
     });
 
     test('MEA Type 4 TOD (<12kV) calculation', () => {
@@ -79,7 +79,7 @@ describe('Strategy Pattern Tests (API v2)', () => {
       
       // Expected: 312.24 + (120 * 352.71) + (80 * 210.80) + (40 * 0) + (2000 * 3.1751)
       // = 312.24 + 42325.2 + 16864 + 0 + 6350.2 = 65851.64
-      expect(result).toBeCloseTo(65851.64, 2);
+      expect(result.totalAmount).toBeCloseTo(65851.64, 2);
     });
 
     test('MEA Type 5 Normal (12-24kV) calculation', () => {
@@ -87,7 +87,7 @@ describe('Strategy Pattern Tests (API v2)', () => {
       const result = strategy.calculate({ kwh: 1000, demand: 50 });
       
       // Expected: 312.24 + (50 * 256.07) + (1000 * 3.1271) = 312.24 + 12803.5 + 3127.1 = 16242.84
-      expect(result).toBeCloseTo(16242.84, 2);
+      expect(result.totalAmount).toBeCloseTo(16242.84, 2);
     });
   });
 
@@ -97,7 +97,7 @@ describe('Strategy Pattern Tests (API v2)', () => {
       const result = strategy.calculate({ onPeakKwh: 300, offPeakKwh: 700 });
       
       // Expected: 33.29 + (300 * 5.7982) + (700 * 2.6369) = 33.29 + 1739.46 + 1845.83 = 3618.58
-      expect(result).toBeCloseTo(3618.58, 2);
+      expect(result.totalAmount).toBeCloseTo(3618.58, 2);
     });
 
     test('PEA Type 3 Normal (>=69kV) calculation', () => {
@@ -105,7 +105,7 @@ describe('Strategy Pattern Tests (API v2)', () => {
       const result = strategy.calculate({ kwh: 1500, demand: 75 });
       
       // Expected: 312.24 + (75 * 175.70) + (1500 * 3.1097) = 312.24 + 13177.5 + 4664.55 = 18154.29
-      expect(result).toBeCloseTo(18154.29, 2);
+      expect(result.totalAmount).toBeCloseTo(18154.29, 2);
     });
 
     test('PEA Type 4 TOD (22-33kV) calculation', () => {
@@ -119,7 +119,7 @@ describe('Strategy Pattern Tests (API v2)', () => {
       
       // Expected: 312.24 + (120 * 285.05) + (80 * 58.88) + (40 * 0) + (2000 * 3.1471)
       // = 312.24 + 34206 + 4710.4 + 0 + 6294.2 = 45522.84
-      expect(result).toBeCloseTo(45522.84, 2);
+      expect(result.totalAmount).toBeCloseTo(45522.84, 2);
     });
   });
 });

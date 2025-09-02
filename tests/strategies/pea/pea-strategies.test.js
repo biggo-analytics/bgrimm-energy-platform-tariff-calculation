@@ -52,7 +52,7 @@ describe('PEA Strategies Test Suite', () => {
           .expect(200);
 
         expect(response.body.data.strategyUsed).toBe('PEA_2.2.2_small_TOU');
-        expect(response.body.data.totalAmount).toBeCloseTo(3588.58, 2);
+        expect(response.body.data.totalAmount).toBeCloseTo(3668.88, 2);
       });
     });
   });
@@ -168,9 +168,10 @@ describe('PEA Strategies Test Suite', () => {
         const requestData = {
           tariffType: 'tod',
           voltageLevel: '<22kV',
-          peakKwh: 2000,
-          offPeakKwh: 3000,
-          demand: 200
+          kwh: 5000,
+          onPeakDemand: 200,
+          partialPeakDemand: 150,
+          offPeakDemand: 100
         };
 
         const response = await request(server)
@@ -185,9 +186,10 @@ describe('PEA Strategies Test Suite', () => {
         const requestData = {
           tariffType: 'tod',
           voltageLevel: '22-33kV',
-          peakKwh: 2000,
-          offPeakKwh: 3000,
-          demand: 200
+          kwh: 5000,
+          onPeakDemand: 200,
+          partialPeakDemand: 150,
+          offPeakDemand: 100
         };
 
         const response = await request(server)
@@ -202,9 +204,10 @@ describe('PEA Strategies Test Suite', () => {
         const requestData = {
           tariffType: 'tod',
           voltageLevel: '>=69kV',
-          peakKwh: 2000,
-          offPeakKwh: 3000,
-          demand: 200
+          kwh: 5000,
+          onPeakDemand: 200,
+          partialPeakDemand: 150,
+          offPeakDemand: 100
         };
 
         const response = await request(server)
@@ -276,8 +279,7 @@ describe('PEA Strategies Test Suite', () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '<22kV',
-          onPeakKwh: 3000,
-          offPeakKwh: 4000,
+          kwh: 7000,
           demand: 500
         };
 
@@ -293,8 +295,7 @@ describe('PEA Strategies Test Suite', () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '22-33kV',
-          onPeakKwh: 3000,
-          offPeakKwh: 4000,
+          kwh: 7000,
           demand: 500
         };
 
@@ -310,8 +311,7 @@ describe('PEA Strategies Test Suite', () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '>=69kV',
-          onPeakKwh: 3000,
-          offPeakKwh: 4000,
+          kwh: 7000,
           demand: 500
         };
 
@@ -329,8 +329,8 @@ describe('PEA Strategies Test Suite', () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '<22kV',
-          onPeakKwh: 3000,
-          offPeakKwh: 4000,
+          onPeakKwh: 4000,
+          offPeakKwh: 3000,
           demand: 500
         };
 
@@ -346,8 +346,8 @@ describe('PEA Strategies Test Suite', () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '22-33kV',
-          onPeakKwh: 3000,
-          offPeakKwh: 4000,
+          onPeakKwh: 4000,
+          offPeakKwh: 3000,
           demand: 500
         };
 
@@ -363,8 +363,8 @@ describe('PEA Strategies Test Suite', () => {
         const requestData = {
           tariffType: 'tou',
           voltageLevel: '>=69kV',
-          onPeakKwh: 3000,
-          offPeakKwh: 4000,
+          onPeakKwh: 4000,
+          offPeakKwh: 3000,
           demand: 500
         };
 

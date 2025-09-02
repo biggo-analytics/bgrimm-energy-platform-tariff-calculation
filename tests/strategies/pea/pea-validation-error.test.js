@@ -88,7 +88,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'tariffType',
-              message: expect.stringContaining('Invalid tariff type')
+              message: expect.stringContaining('Type 2 only supports TOU tariff')
             })
           ])
         });
@@ -267,7 +267,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'onPeakKwh',
-              message: expect.stringContaining('must be greater than 0')
+              message: expect.stringContaining('onPeakKwh cannot be zero')
             })
           ])
         });
@@ -292,7 +292,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'onPeakKwh',
-              message: expect.stringContaining('exceeds maximum allowed value')
+              message: expect.stringContaining('onPeakKwh value is excessive')
             })
           ])
         });
@@ -322,7 +322,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'demand',
-              message: expect.stringContaining('Type 2 does not support demand charges')
+              message: expect.stringContaining('Demand field is not allowed for Type 2')
             })
           ])
         });
@@ -372,7 +372,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'kwh',
-              message: expect.stringContaining('not allowed for TOU tariff')
+              message: expect.stringContaining('kwh field is not allowed for Type 2 TOU')
             })
           ])
         });
@@ -423,7 +423,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'demand',
-              message: expect.stringContaining('required for TOU tariff')
+              message: expect.stringContaining('Demand field is required for tou tariff')
             })
           ])
         });
@@ -449,7 +449,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'peakKwh',
-              message: expect.stringContaining('not allowed for normal tariff')
+              message: expect.stringContaining('peakKwh field is not allowed for Type 3')
             })
           ])
         });
@@ -476,7 +476,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'demand',
-              message: expect.stringContaining('required for TOD tariff')
+              message: expect.stringContaining('Demand field is required for tod tariff')
             })
           ])
         });
@@ -501,7 +501,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'demand',
-              message: expect.stringContaining('required for TOU tariff')
+              message: expect.stringContaining('Demand field is required for tou tariff')
             })
           ])
         });
@@ -528,7 +528,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: 'kwh',
-              message: expect.stringContaining('not allowed for TOU tariff')
+              message: expect.stringContaining('kwh field is not allowed for Type 4')
             })
           ])
         });

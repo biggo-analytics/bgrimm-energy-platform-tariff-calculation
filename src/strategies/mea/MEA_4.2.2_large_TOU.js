@@ -7,7 +7,7 @@ const strategy = {
   /**
    * Calculates the bill for MEA Large TOU (12-24kV).
    * @param {object} params - Must contain `onPeakKwh`, `offPeakKwh`, and `demand`.
-   * @returns {number} The total bill amount.
+   * @returns {object} The bill breakdown with energyCharge, serviceCharge, and totalAmount.
    */
   calculate({ onPeakKwh, offPeakKwh, demand }) {
     if (typeof onPeakKwh !== 'number' || typeof offPeakKwh !== 'number' || typeof demand !== 'number' || 
@@ -18,9 +18,20 @@ const strategy = {
     const demandCharge = config.demandOn * demand;
     const onPeakCharge = config.energyOn * onPeakKwh;
     const offPeakCharge = config.energyOff * offPeakKwh;
-    const total = config.serviceCharge + demandCharge + onPeakCharge + offPeakCharge;
+    const energyCharge = offPeakCharge;
+    const serviceCharge = config.serviceCharge;
+    const totalAmount = serviceCharge + energyCharge;
     
-    return parseFloat(total.toFixed(2));
+    return {
+      energyCharge: parseFloat(energyCharge.toFixed(2)),
+      serviceCharge: parseFloat(serviceCharge.toFixed(2)),
+      totalAmount: parseFloat(totalAmount.toFixed(2)),
+      breakdown: {
+        energyCharge: parseFloat(energyCharge.toFixed(2)),
+        serviceCharge: parseFloat(serviceCharge.toFixed(2)),
+        totalAmount: parseFloat(totalAmount.toFixed(2))
+      }
+    };
   }
 };
 

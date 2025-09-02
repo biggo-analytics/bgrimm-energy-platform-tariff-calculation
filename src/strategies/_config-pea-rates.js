@@ -17,6 +17,12 @@ module.exports = {
     offPeakRate: 2.6037
   },
 
+  'PEA_2.2.3_small_TOU': {
+    serviceCharge: 312.24,
+    onPeakRate: 4.3297,
+    offPeakRate: 2.6369
+  },
+
   // TYPE_3 Medium Normal Strategies
   'PEA_3.1.1_medium_normal': {
     demand: 175.70,

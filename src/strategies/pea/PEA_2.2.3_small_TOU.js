@@ -1,11 +1,11 @@
-// Corresponds to PEA, TYPE_2, tou, 22-33kV
+// Corresponds to PEA, TYPE_2, tou, >=69kV
 
 const allPeaConfigs = require('../_config-pea-rates.js');
-const config = allPeaConfigs['PEA_2.2.2_small_TOU'];
+const config = allPeaConfigs['PEA_2.2.3_small_TOU'];
 
 const strategy = {
   /**
-   * Calculates the bill for PEA Small TOU (22-33kV).
+   * Calculates the bill for PEA Small TOU (>=69kV).
    * @param {object} params - Must contain `onPeakKwh` and `offPeakKwh`.
    * @returns {object} The bill breakdown with energyCharge, serviceCharge, and totalAmount.
    */

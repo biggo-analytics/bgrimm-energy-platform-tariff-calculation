@@ -4,6 +4,7 @@
  */
 
 const { getStrategy, getAvailableStrategies } = require('../strategy-selector');
+const ValidationEngine = require('../services/validation/validation-engine');
 
 /**
  * Calculate electricity bill for different types using strategy pattern
@@ -12,14 +13,13 @@ async function calculateElectricityBill(ctx, calculationType) {
   try {
     const { tariffType, voltageLevel, ...params } = ctx.request.body;
 
-    // Validate required parameters
-    if (!tariffType || !voltageLevel) {
+    // Use validation engine for comprehensive validation
+    const validator = new ValidationEngine();
+    const validationErrors = validator.validate(calculationType, tariffType, voltageLevel, params);
+
+    if (validationErrors.length > 0) {
       ctx.status = 400;
-      ctx.body = {
-        success: false,
-        error: 'Missing required parameters: tariffType, voltageLevel',
-        timestamp: new Date().toISOString()
-      };
+      ctx.body = validator.getErrorResponse();
       return;
     }
 
@@ -70,7 +70,12 @@ async function calculateElectricityBill(ctx, calculationType) {
       }
     } else if (calculationType === 'type-5') {
       if (tariffType === 'tou') {
-        strategyName = `PEA_5.1.${voltageCode}_specific_TOU`;
+        // Check if this is advanced TOU (has onPeakKwh and offPeakKwh) or basic TOU (has kwh)
+        if (params.onPeakKwh !== undefined && params.offPeakKwh !== undefined) {
+          strategyName = `PEA_5.2.${voltageCode}_specific_TOU`;
+        } else {
+          strategyName = `PEA_5.1.${voltageCode}_specific_TOU`;
+        }
       } else {
         ctx.status = 400;
         ctx.body = {
@@ -94,26 +99,39 @@ async function calculateElectricityBill(ctx, calculationType) {
 
     // Get and execute strategy
     const strategy = getStrategy(strategyName);
-    const result = strategy.calculate(params);
+    if (!strategy) {
+      ctx.status = 400;
+      ctx.body = {
+        success: false,
+        error: `Strategy not found: ${strategyName}. Please check the strategy name and ensure the file exists.`,
+        timestamp: new Date().toISOString()
+      };
+      return;
+    }
 
-    ctx.status = 200;
+    // Execute strategy calculation
+    const result = await strategy.calculate(params);
+
+    // Add metadata to response
     ctx.body = {
       success: true,
       data: {
-        calculationType,
-        tariffType,
-        voltageLevel,
-        totalAmount: result,
-        strategyUsed: strategyName
+        ...result,
+        strategyUsed: strategyName,
+        calculationType: calculationType,
+        tariffType: tariffType,
+        voltageLevel: voltageLevel,
+        provider: 'PEA'
       },
       timestamp: new Date().toISOString()
     };
 
   } catch (error) {
-    ctx.status = 400;
+    console.error('Error in PEA calculation:', error);
+    ctx.status = 500;
     ctx.body = {
       success: false,
-      error: error.message,
+      error: 'Internal server error during calculation',
       timestamp: new Date().toISOString()
     };
   }
