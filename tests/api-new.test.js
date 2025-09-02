@@ -32,9 +32,9 @@ describe('New Strategy Pattern API Tests', () => {
 
   describe('API v1 with Strategy Pattern', () => {
     describe('MEA Calculations', () => {
-      test('POST /api/mea/calculate/type-2 should calculate TOU bill', async () => {
+      test('POST /api/v2/mea/calculate/type-2 should calculate TOU bill', async () => {
         const response = await request(server)
-          .post('/api/mea/calculate/type-2')
+          .post('/api/v2/mea/calculate/type-2')
           .send({
             tariffType: 'tou',
             voltageLevel: '<12kV',
@@ -58,9 +58,9 @@ describe('New Strategy Pattern API Tests', () => {
         expect(response.body.data.totalAmount).toBeCloseTo(3618.58, 2);
       });
 
-      test('POST /api/mea/calculate/type-3 should calculate normal bill', async () => {
+      test('POST /api/v2/mea/calculate/type-3 should calculate normal bill', async () => {
         const response = await request(server)
-          .post('/api/mea/calculate/type-3')
+          .post('/api/v2/mea/calculate/type-3')
           .send({
             tariffType: 'normal',
             voltageLevel: '<12kV',
@@ -83,9 +83,9 @@ describe('New Strategy Pattern API Tests', () => {
         expect(response.body.data.totalAmount).toBeCloseTo(21687.39, 2);
       });
 
-      test('POST /api/mea/calculate/type-4 should calculate TOD bill', async () => {
+      test('POST /api/v2/mea/calculate/type-4 should calculate TOD bill', async () => {
         const response = await request(server)
-          .post('/api/mea/calculate/type-4')
+          .post('/api/v2/mea/calculate/type-4')
           .send({
             tariffType: 'tod',
             voltageLevel: '<12kV',
@@ -112,7 +112,7 @@ describe('New Strategy Pattern API Tests', () => {
 
       test('should return error for missing parameters', async () => {
         const response = await request(server)
-          .post('/api/mea/calculate/type-3')
+          .post('/api/v2/mea/calculate/type-3')
           .send({
             tariffType: 'normal'
             // Missing voltageLevel
@@ -128,7 +128,7 @@ describe('New Strategy Pattern API Tests', () => {
 
       test('should return error for invalid voltage level', async () => {
         const response = await request(server)
-          .post('/api/mea/calculate/type-3')
+          .post('/api/v2/mea/calculate/type-3')
           .send({
             tariffType: 'normal',
             voltageLevel: 'invalid',
@@ -145,9 +145,9 @@ describe('New Strategy Pattern API Tests', () => {
     });
 
     describe('PEA Calculations', () => {
-      test('POST /api/pea/calculate/type-2 should calculate TOU bill', async () => {
+      test('POST /api/v2/pea/calculate/type-2 should calculate TOU bill', async () => {
         const response = await request(server)
-          .post('/api/pea/calculate/type-2')
+          .post('/api/v2/pea/calculate/type-2')
           .send({
             tariffType: 'tou',
             voltageLevel: '<22kV',
@@ -170,9 +170,9 @@ describe('New Strategy Pattern API Tests', () => {
         expect(response.body.data.totalAmount).toBeCloseTo(3618.58, 2);
       });
 
-      test('POST /api/pea/calculate/type-3 should calculate normal bill', async () => {
+      test('POST /api/v2/pea/calculate/type-3 should calculate normal bill', async () => {
         const response = await request(server)
-          .post('/api/pea/calculate/type-3')
+          .post('/api/v2/pea/calculate/type-3')
           .send({
             tariffType: 'normal',
             voltageLevel: '>=69kV',
@@ -195,9 +195,9 @@ describe('New Strategy Pattern API Tests', () => {
         expect(response.body.data.totalAmount).toBeCloseTo(18154.29, 2);
       });
 
-      test('POST /api/pea/calculate/type-4 should calculate TOD bill', async () => {
+      test('POST /api/v2/pea/calculate/type-4 should calculate TOD bill', async () => {
         const response = await request(server)
-          .post('/api/pea/calculate/type-4')
+          .post('/api/v2/pea/calculate/type-4')
           .send({
             tariffType: 'tod',
             voltageLevel: '22-33kV',
@@ -224,7 +224,7 @@ describe('New Strategy Pattern API Tests', () => {
 
       test('should return error for invalid voltage level (PEA)', async () => {
         const response = await request(server)
-          .post('/api/pea/calculate/type-3')
+          .post('/api/v2/pea/calculate/type-3')
           .send({
             tariffType: 'normal',
             voltageLevel: '<12kV', // Invalid for PEA
@@ -457,7 +457,7 @@ describe('New Strategy Pattern API Tests', () => {
       };
 
       const v1Response = await request(server)
-        .post('/api/mea/calculate/type-3')
+        .post('/api/v2/mea/calculate/type-3')
         .send(testData)
         .expect(200);
 

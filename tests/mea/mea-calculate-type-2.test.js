@@ -17,7 +17,7 @@ describe('MEA Type 2 - Small General Service API', () => {
     server.close(done);
   });
 
-  const baseUrl = '/api/mea/calculate/type-2';
+  const baseUrl = '/api/v2/mea/calculate/type-2';
 
   describe('Normal Tariff Tests', () => {
     describe('Valid Input Tests', () => {

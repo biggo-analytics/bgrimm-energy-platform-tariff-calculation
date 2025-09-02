@@ -13,7 +13,7 @@ describe('MEA Electricity Bill Calculation API', () => {
   });
 
   describe('Type 2 - Small General Service', () => {
-    const baseUrl = '/api/mea/calculate/type-2';
+    const baseUrl = '/api/v2/mea/calculate/type-2';
 
     describe('Normal Tariff', () => {
       test('should calculate bill for <12kV with 500 kWh', async () => {
@@ -196,7 +196,7 @@ describe('MEA Electricity Bill Calculation API', () => {
   });
 
   describe('Type 3 - Medium General Service', () => {
-    const baseUrl = '/api/mea/calculate/type-3';
+    const baseUrl = '/api/v2/mea/calculate/type-3';
 
     describe('Normal Tariff', () => {
       test('should calculate bill for >=69kV', async () => {
@@ -365,7 +365,7 @@ describe('MEA Electricity Bill Calculation API', () => {
   });
 
   describe('Type 4 - Large General Service', () => {
-    const baseUrl = '/api/mea/calculate/type-4';
+    const baseUrl = '/api/v2/mea/calculate/type-4';
 
     describe('TOD Tariff', () => {
       test('should calculate bill for >=69kV TOD', async () => {
@@ -517,7 +517,7 @@ describe('MEA Electricity Bill Calculation API', () => {
   });
 
   describe('Type 5 - Specific Business', () => {
-    const baseUrl = '/api/mea/calculate/type-5';
+    const baseUrl = '/api/v2/mea/calculate/type-5';
 
     describe('Normal Tariff', () => {
       test('should calculate bill for >=69kV', async () => {
@@ -662,7 +662,7 @@ describe('MEA Electricity Bill Calculation API', () => {
   describe('Power Factor Calculations', () => {
     test('should calculate power factor penalty correctly', async () => {
       const response = await request(server)
-        .post('/api/mea/calculate/type-3')
+        .post('/api/v2/mea/calculate/type-3')
         .send({
           tariffType: 'normal',
           voltageLevel: '>=69kV',
@@ -682,7 +682,7 @@ describe('MEA Electricity Bill Calculation API', () => {
 
     test('should have zero power factor penalty when within limits', async () => {
       const response = await request(server)
-        .post('/api/mea/calculate/type-3')
+        .post('/api/v2/mea/calculate/type-3')
         .send({
           tariffType: 'normal',
           voltageLevel: '>=69kV',
@@ -704,7 +704,7 @@ describe('MEA Electricity Bill Calculation API', () => {
   describe('Edge Cases', () => {
     test('should handle zero usage gracefully', async () => {
       const response = await request(server)
-        .post('/api/mea/calculate/type-2')
+        .post('/api/v2/mea/calculate/type-2')
         .send({
           tariffType: 'normal',
           voltageLevel: '<12kV',
@@ -722,7 +722,7 @@ describe('MEA Electricity Bill Calculation API', () => {
 
     test('should handle very high usage values', async () => {
       const response = await request(server)
-        .post('/api/mea/calculate/type-2')
+        .post('/api/v2/mea/calculate/type-2')
         .send({
           tariffType: 'normal',
           voltageLevel: '<12kV',
@@ -751,7 +751,7 @@ describe('PEA Electricity Bill Calculation API', () => {
   });
 
   describe('Type 2 - Small Business Service', () => {
-    const baseUrl = '/api/pea/calculate/type-2';
+    const baseUrl = '/api/v2/pea/calculate/type-2';
 
     describe('Normal Tariff', () => {
       test('should calculate bill for <22kV with 500 kWh', async () => {
@@ -1178,7 +1178,7 @@ describe('PEA Electricity Bill Calculation API', () => {
   });
 
   describe('Type 3 - Medium Business Service', () => {
-    const baseUrl = '/api/pea/calculate/type-3';
+    const baseUrl = '/api/v2/pea/calculate/type-3';
 
     describe('Normal Tariff', () => {
       test('should calculate bill for >=69kV', async () => {
@@ -1497,7 +1497,7 @@ describe('PEA Electricity Bill Calculation API', () => {
   });
 
   describe('Type 4 - Large Business Service', () => {
-    const baseUrl = '/api/pea/calculate/type-4';
+    const baseUrl = '/api/v2/pea/calculate/type-4';
 
     describe('TOD Tariff', () => {
       test('should calculate bill for >=69kV TOD', async () => {

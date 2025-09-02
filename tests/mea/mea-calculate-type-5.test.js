@@ -17,7 +17,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
     server.close(done);
   });
 
-  const baseUrl = '/api/mea/calculate/type-5';
+  const baseUrl = '/api/v2/mea/calculate/type-5';
 
   describe('Normal Tariff Tests', () => {
     describe('Valid Input Tests', () => {

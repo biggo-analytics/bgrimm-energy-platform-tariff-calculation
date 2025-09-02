@@ -4,6 +4,7 @@
  */
 
 const { getStrategy } = require('../strategy-selector');
+const meaLegacyService = require('../services/mea-electricity-legacy.service');
 
 /**
  * Calculate electricity bill for different types using strategy pattern
@@ -97,7 +98,20 @@ async function calculateElectricityBill(ctx, calculationType) {
 }
 
 module.exports = {
-  calculateType2: (ctx) => calculateElectricityBill(ctx, 'type-2'),
+  calculateType2: async (ctx) => {
+    try {
+      const result = meaLegacyService.calculateType2(ctx.request.body);
+      ctx.status = 200;
+      ctx.body = result;
+    } catch (error) {
+      ctx.status = 400;
+      ctx.body = {
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+    }
+  },
   calculateType3: (ctx) => calculateElectricityBill(ctx, 'type-3'),
   calculateType4: (ctx) => calculateElectricityBill(ctx, 'type-4'),
   calculateType5: (ctx) => calculateElectricityBill(ctx, 'type-5')

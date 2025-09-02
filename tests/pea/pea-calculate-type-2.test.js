@@ -17,7 +17,7 @@ describe('PEA Type 2 - Small Business Service API', () => {
     server.close(done);
   });
 
-  const baseUrl = '/api/pea/calculate/type-2';
+  const baseUrl = '/api/v2/pea/calculate/type-2';
 
   describe('Normal Tariff Tests', () => {
     describe('Valid Input Tests', () => {

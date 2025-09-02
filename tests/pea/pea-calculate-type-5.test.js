@@ -17,7 +17,7 @@ describe('PEA Type 5 - Specific Business Service API', () => {
     server.close(done);
   });
 
-  const baseUrl = '/api/pea/calculate/type-5';
+  const baseUrl = '/api/v2/pea/calculate/type-5';
 
   describe('Normal Tariff Tests', () => {
     describe('Valid Input Tests', () => {

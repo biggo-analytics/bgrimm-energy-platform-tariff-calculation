@@ -17,7 +17,7 @@ describe('PEA Type 3 - Medium Business Service API', () => {
     server.close(done);
   });
 
-  const baseUrl = '/api/pea/calculate/type-3';
+  const baseUrl = '/api/v2/pea/calculate/type-3';
 
   describe('Normal Tariff Tests', () => {
     describe('Valid Input Tests', () => {
