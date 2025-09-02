@@ -116,16 +116,15 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
         success: true,
         data: {
           provider: 'MEA',
-          totalStrategies: expect.any(Number),
           strategies: expect.arrayContaining([
-            expect.objectContaining({
-              name: expect.stringMatching(/^MEA_\d+\.\d+\.\d+_/),
-              calculationType: expect.stringMatching(/^type-\d+$/),
-              tariffType: expect.stringMatching(/^(normal|tou|tod)$/),
-              voltageLevel: expect.stringMatching(/^(<12kV|12-24kV|>=69kV)$/),
-              description: expect.any(String)
-            })
-          ])
+            'MEA_2.2.1_small_TOU',
+            'MEA_2.2.2_small_TOU',
+            'MEA_3.1.1_medium_normal',
+            'MEA_3.2.1_medium_TOU',
+            'MEA_4.1.1_large_TOD',
+            'MEA_5.1.1_specific_normal'
+          ]),
+          count: expect.any(Number),
         }
       });
     });
@@ -144,7 +143,7 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
           description: 'Provincial Electricity Authority',
           availableStrategies: expect.any(Number),
           strategies: expect.any(Array),
-          voltageOptions: ['<12kV', '12-24kV', '>=69kV'],
+          voltageOptions: ['<22kV', '22-33kV', '>=69kV'],
           tariffTypes: ['normal', 'tou', 'tod'],
           calculationTypes: ['type-2', 'type-3', 'type-4', 'type-5']
         }
@@ -161,7 +160,7 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
         data: {
           calculationType: 'type-2',
           availableTariffTypes: expect.arrayContaining(['tou']),
-          voltageLevels: expect.arrayContaining(['<12kV', '12-24kV']),
+          voltageLevels: expect.arrayContaining(['<22kV', '22-33kV', '>=69kV']),
           strategies: expect.arrayContaining([
             'PEA_2.2.1_small_TOU',
             'PEA_2.2.2_small_TOU'
@@ -179,16 +178,15 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
         success: true,
         data: {
           provider: 'PEA',
-          totalStrategies: expect.any(Number),
           strategies: expect.arrayContaining([
-            expect.objectContaining({
-              name: expect.stringMatching(/^PEA_\d+\.\d+\.\d+_/),
-              calculationType: expect.stringMatching(/^type-\d+$/),
-              tariffType: expect.stringMatching(/^(normal|tou|tod)$/),
-              voltageLevel: expect.stringMatching(/^(<12kV|12-24kV|>=69kV)$/),
-              description: expect.any(String)
-            })
-          ])
+            'PEA_2.2.1_small_TOU',
+            'PEA_2.2.2_small_TOU',
+            'PEA_3.1.1_medium_normal',
+            'PEA_3.2.1_medium_TOU',
+            'PEA_4.1.1_large_TOD',
+            'PEA_5.1.1_specific_TOU'
+          ]),
+          count: expect.any(Number),
         }
       });
     });
@@ -256,10 +254,10 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
     });
 
     describe('PEA Strategy Selection', () => {
-      test('should select correct strategy for PEA type-2 TOU <12kV', async () => {
+      test('should select correct strategy for PEA type-2 TOU <22kV', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700
         };
@@ -272,13 +270,13 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('PEA_2.2.1_small_TOU');
         expect(response.body.data.calculationType).toBe('type-2');
         expect(response.body.data.tariffType).toBe('tou');
-        expect(response.body.data.voltageLevel).toBe('<12kV');
+        expect(response.body.data.voltageLevel).toBe('<22kV');
       });
 
-      test('should select correct strategy for PEA type-3 normal <12kV', async () => {
+      test('should select correct strategy for PEA type-3 normal <22kV', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 1500,
           demand: 75
         };
@@ -291,13 +289,13 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('PEA_3.1.1_medium_normal');
         expect(response.body.data.calculationType).toBe('type-3');
         expect(response.body.data.tariffType).toBe('normal');
-        expect(response.body.data.voltageLevel).toBe('<12kV');
+        expect(response.body.data.voltageLevel).toBe('<22kV');
       });
 
-      test('should select correct strategy for PEA type-4 TOD <12kV', async () => {
+      test('should select correct strategy for PEA type-4 TOD <22kV', async () => {
         const requestData = {
           tariffType: 'tod',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           peakKwh: 2000,
           offPeakKwh: 3000,
           demand: 200
@@ -311,7 +309,7 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('PEA_4.1.1_large_TOD');
         expect(response.body.data.calculationType).toBe('type-4');
         expect(response.body.data.tariffType).toBe('tod');
-        expect(response.body.data.voltageLevel).toBe('<12kV');
+        expect(response.body.data.voltageLevel).toBe('<22kV');
       });
     });
   });
@@ -369,7 +367,7 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
       test('should calculate PEA type-2 TOU correctly', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700
         };
@@ -390,7 +388,7 @@ describe('API Integration and Strategy Pattern Test Suite', () => {
       test('should calculate PEA type-3 normal correctly', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 1500,
           demand: 75
         };

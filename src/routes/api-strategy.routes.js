@@ -26,6 +26,7 @@ meaRouter.post('/calculate/type-5', meaStrategyController.calculateType5);
 meaRouter.get('/info', meaStrategyController.getServiceInfo);
 meaRouter.get('/rates', meaStrategyController.getRateInfo);
 meaRouter.get('/tariff-types/:calculationType', meaStrategyController.getAvailableTariffTypes);
+meaRouter.get('/strategies', meaStrategyController.getAllStrategies);
 
 // PEA Strategy-based Routes
 const peaRouter = new Router({
@@ -42,6 +43,7 @@ peaRouter.post('/calculate/type-5', peaStrategyController.calculateType5);
 peaRouter.get('/info', peaStrategyController.getServiceInfo);
 peaRouter.get('/rates', peaStrategyController.getRateInfo);
 peaRouter.get('/tariff-types/:calculationType', peaStrategyController.getAvailableTariffTypes);
+peaRouter.get('/strategies', peaStrategyController.getAllStrategies);
 
 // API Health Check and Information
 router.get('/health', async (ctx) => {

@@ -48,7 +48,13 @@ async function calculateElectricityBill(ctx, calculationType) {
       if (tariffType === 'tou') {
         strategyName = `PEA_2.2.${voltageCode}_small_TOU`;
       } else {
-        strategyName = `PEA_2.1.${voltageCode}_small_normal`;
+        ctx.status = 400;
+        ctx.body = {
+          success: false,
+          error: `Type 2 only supports TOU tariff`,
+          timestamp: new Date().toISOString()
+        };
+        return;
       }
     } else if (calculationType === 'type-3') {
       if (tariffType === 'normal') {
@@ -65,6 +71,14 @@ async function calculateElectricityBill(ctx, calculationType) {
     } else if (calculationType === 'type-5') {
       if (tariffType === 'tou') {
         strategyName = `PEA_5.1.${voltageCode}_specific_TOU`;
+      } else {
+        ctx.status = 400;
+        ctx.body = {
+          success: false,
+          error: `Type 5 only supports TOU tariff`,
+          timestamp: new Date().toISOString()
+        };
+        return;
       }
     }
 
@@ -187,6 +201,20 @@ async function getAvailableTariffTypes(ctx) {
       'type-5': ['normal', 'tou']
     };
 
+    const strategiesByType = {
+      'type-2': ['PEA_2.2.1_small_TOU', 'PEA_2.2.2_small_TOU', 'PEA_2.2.3_small_TOU'],
+      'type-3': ['PEA_3.1.1_medium_normal', 'PEA_3.1.2_medium_normal', 'PEA_3.1.3_medium_normal', 'PEA_3.2.1_medium_TOU', 'PEA_3.2.2_medium_TOU', 'PEA_3.2.3_medium_TOU'],
+      'type-4': ['PEA_4.1.1_large_TOD', 'PEA_4.1.2_large_TOD', 'PEA_4.1.3_large_TOD', 'PEA_4.2.1_large_TOU', 'PEA_4.2.2_large_TOU', 'PEA_4.2.3_large_TOU'],
+      'type-5': ['PEA_5.1.1_specific_TOU', 'PEA_5.1.2_specific_TOU', 'PEA_5.1.3_specific_TOU', 'PEA_5.2.1_specific_TOU', 'PEA_5.2.2_specific_TOU', 'PEA_5.2.3_specific_TOU']
+    };
+
+    const voltageLevelsByType = {
+      'type-2': ['<22kV', '22-33kV', '>=69kV'],
+      'type-3': ['<22kV', '22-33kV', '>=69kV'],
+      'type-4': ['<22kV', '22-33kV', '>=69kV'],
+      'type-5': ['<22kV', '22-33kV', '>=69kV']
+    };
+
     const availableTypes = tariffTypesByType[calculationType];
     if (!availableTypes) {
       ctx.status = 400;
@@ -203,7 +231,9 @@ async function getAvailableTariffTypes(ctx) {
       success: true,
       data: {
         calculationType,
-        availableTariffTypes: availableTypes
+        availableTariffTypes: availableTypes,
+        strategies: strategiesByType[calculationType] || [],
+        voltageLevels: voltageLevelsByType[calculationType] || []
       },
       timestamp: new Date().toISOString()
     };
@@ -217,6 +247,65 @@ async function getAvailableTariffTypes(ctx) {
   }
 }
 
+/**
+ * Get all available PEA strategies
+ */
+async function getAllStrategies(ctx) {
+  try {
+    const strategies = [
+      // Type 2 - Small Business (only TOU supported)
+      'PEA_2.2.1_small_TOU', // <22kV
+      'PEA_2.2.2_small_TOU', // 22-33kV
+      'PEA_2.2.3_small_TOU', // >=69kV
+      
+      // Type 3 - Medium Business
+      'PEA_3.1.1_medium_normal', // <22kV
+      'PEA_3.1.2_medium_normal', // 22-33kV
+      'PEA_3.1.3_medium_normal', // >=69kV
+      'PEA_3.2.1_medium_TOU',   // <22kV
+      'PEA_3.2.2_medium_TOU',   // 22-33kV
+      'PEA_3.2.3_medium_TOU',   // >=69kV
+      
+      // Type 4 - Large Business
+      'PEA_4.1.1_large_TOD',    // <22kV
+      'PEA_4.1.2_large_TOD',    // 22-33kV
+      'PEA_4.1.3_large_TOD',    // >=69kV
+      'PEA_4.2.1_large_TOU',    // <22kV
+      'PEA_4.2.2_large_TOU',    // 22-33kV
+      'PEA_4.2.3_large_TOU',    // >=69kV
+      
+      // Type 5 - Specific Business (only TOU supported)
+      'PEA_5.1.1_specific_TOU', // <22kV
+      'PEA_5.1.2_specific_TOU', // 22-33kV
+      'PEA_5.1.3_specific_TOU', // >=69kV
+      'PEA_5.2.1_specific_TOU', // <22kV
+      'PEA_5.2.2_specific_TOU', // 22-33kV
+      'PEA_5.2.3_specific_TOU'  // >=69kV
+    ];
+    
+    ctx.status = 200;
+    ctx.body = {
+      success: true,
+      data: {
+        provider: 'PEA',
+        strategies: strategies,
+        count: strategies.length,
+        calculationTypes: ['type-2', 'type-3', 'type-4', 'type-5'],
+        tariffTypes: ['normal', 'tou', 'tod'],
+        voltageLevels: ['<22kV', '22-33kV', '>=69kV']
+      },
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {
+      success: false,
+      error: 'Failed to retrieve strategies',
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+
 module.exports = {
   calculateType2: (ctx) => calculateElectricityBill(ctx, 'type-2'),
   calculateType3: (ctx) => calculateElectricityBill(ctx, 'type-3'),
@@ -224,5 +313,6 @@ module.exports = {
   calculateType5: (ctx) => calculateElectricityBill(ctx, 'type-5'),
   getServiceInfo,
   getRateInfo,
-  getAvailableTariffTypes
+  getAvailableTariffTypes,
+  getAllStrategies
 };
