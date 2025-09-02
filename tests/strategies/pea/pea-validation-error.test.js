@@ -21,7 +21,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
     describe('Required Field Validation', () => {
       test('should reject request without tariffType', async () => {
         const requestData = {
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700
         };
@@ -72,7 +72,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject invalid tariffType for type-2', async () => {
         const requestData = {
           tariffType: 'invalid',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700
         };
@@ -97,7 +97,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject normal tariff for type-2 (only TOU allowed)', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 1000
         };
 
@@ -121,7 +121,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject TOD tariff for type-2 (only TOU allowed)', async () => {
         const requestData = {
           tariffType: 'tod',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           peakKwh: 300,
           offPeakKwh: 700
         };
@@ -201,7 +201,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject negative kWh values', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: -100,
           offPeakKwh: 700
         };
@@ -226,7 +226,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject negative demand values', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 1000,
           demand: -50
         };
@@ -251,7 +251,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject zero kWh values', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 0,
           offPeakKwh: 700
         };
@@ -276,7 +276,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject excessive kWh values', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 999999999,
           offPeakKwh: 999999999
         };
@@ -305,7 +305,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject demand field for type-2', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700,
           demand: 50
@@ -331,7 +331,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should require both onPeakKwh and offPeakKwh for TOU', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300
         };
 
@@ -355,7 +355,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject kwh field for type-2 TOU', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 1000,
           onPeakKwh: 300,
           offPeakKwh: 700
@@ -383,7 +383,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should require demand field for normal tariff', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 1000
         };
 
@@ -407,7 +407,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should require demand field for TOU tariff', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 500,
           offPeakKwh: 1000
         };
@@ -432,7 +432,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject peakKwh field for type-3 (not TOD)', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 1000,
           demand: 75,
           peakKwh: 500
@@ -460,7 +460,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should require demand field for TOD tariff', async () => {
         const requestData = {
           tariffType: 'tod',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           peakKwh: 2000,
           offPeakKwh: 3000
         };
@@ -485,7 +485,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should require demand field for TOU tariff', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 2000,
           offPeakKwh: 3000
         };
@@ -510,7 +510,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject kwh field for type-4 (not normal tariff)', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 5000,
           onPeakKwh: 2000,
           offPeakKwh: 3000,
@@ -539,7 +539,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should require demand field for TOU tariff', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 3000,
           offPeakKwh: 4000
         };
@@ -564,7 +564,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject normal tariff for type-5 (only TOU allowed)', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 5000,
           demand: 500
         };
@@ -593,7 +593,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should handle unsupported calculation type', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700
         };
@@ -613,7 +613,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should handle unsupported tariff type for calculation type', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 1000
         };
 
@@ -654,7 +654,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should handle division by zero in calculations', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 0,
           demand: 100
         };
@@ -674,7 +674,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should handle overflow in calculations', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: Number.MAX_SAFE_INTEGER,
           demand: Number.MAX_SAFE_INTEGER
         };
@@ -696,7 +696,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
         // For now, we'll test with valid data to ensure the system works
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700
         };
@@ -721,7 +721,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
         // For now, we'll test the error response structure
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700
         };
@@ -748,7 +748,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should handle minimum valid kWh values', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 0.01,
           offPeakKwh: 0.01
         };
@@ -764,7 +764,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should handle maximum reasonable kWh values', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 1000000,
           demand: 10000
         };
@@ -781,7 +781,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should handle decimal precision in calculations', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 100.123,
           offPeakKwh: 200.456
         };
@@ -801,7 +801,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should handle string numbers correctly', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: '300',
           offPeakKwh: '700'
         };
@@ -817,7 +817,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should reject non-numeric strings', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 'abc',
           offPeakKwh: '700'
         };
@@ -842,7 +842,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should handle mixed data types gracefully', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: '700'
         };
@@ -860,7 +860,7 @@ describe('PEA Validation and Error Handling Test Suite', () => {
       test('should handle multiple simultaneous requests', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700
         };

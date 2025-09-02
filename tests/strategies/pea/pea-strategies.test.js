@@ -18,11 +18,11 @@ describe('PEA Strategies Test Suite', () => {
   });
 
   describe('PEA Type 2 Strategies (Small Business)', () => {
-    describe('PEA_2.2.1_small_TOU - <12kV', () => {
-      test('should calculate TOU tariff for <12kV correctly', async () => {
+    describe('PEA_2.2.1_small_TOU - <22kV', () => {
+      test('should calculate TOU tariff for <22kV correctly', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 300,
           offPeakKwh: 700
         };
@@ -37,11 +37,11 @@ describe('PEA Strategies Test Suite', () => {
       });
     });
 
-    describe('PEA_2.2.2_small_TOU - 12-24kV', () => {
-      test('should calculate TOU tariff for 12-24kV correctly', async () => {
+    describe('PEA_2.2.2_small_TOU - 22-33kV', () => {
+      test('should calculate TOU tariff for 22-33kV correctly', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '12-24kV',
+          voltageLevel: '22-33kV',
           onPeakKwh: 300,
           offPeakKwh: 700
         };
@@ -59,10 +59,10 @@ describe('PEA Strategies Test Suite', () => {
 
   describe('PEA Type 3 Strategies (Medium Business)', () => {
     describe('Normal Tariff Strategies', () => {
-      test('PEA_3.1.1_medium_normal - <12kV', async () => {
+      test('PEA_3.1.1_medium_normal - <22kV', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           kwh: 1500,
           demand: 75
         };
@@ -75,10 +75,10 @@ describe('PEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('PEA_3.1.1_medium_normal');
       });
 
-      test('PEA_3.1.2_medium_normal - 12-24kV', async () => {
+      test('PEA_3.1.2_medium_normal - 22-33kV', async () => {
         const requestData = {
           tariffType: 'normal',
-          voltageLevel: '12-24kV',
+          voltageLevel: '22-33kV',
           kwh: 1500,
           demand: 75
         };
@@ -109,10 +109,10 @@ describe('PEA Strategies Test Suite', () => {
     });
 
     describe('TOU Tariff Strategies', () => {
-      test('PEA_3.2.1_medium_TOU - <12kV', async () => {
+      test('PEA_3.2.1_medium_TOU - <22kV', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 500,
           offPeakKwh: 1000,
           demand: 100
@@ -126,10 +126,10 @@ describe('PEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('PEA_3.2.1_medium_TOU');
       });
 
-      test('PEA_3.2.2_medium_TOU - 12-24kV', async () => {
+      test('PEA_3.2.2_medium_TOU - 22-33kV', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '12-24kV',
+          voltageLevel: '22-33kV',
           onPeakKwh: 500,
           offPeakKwh: 1000,
           demand: 100
@@ -164,10 +164,10 @@ describe('PEA Strategies Test Suite', () => {
 
   describe('PEA Type 4 Strategies (Large Business)', () => {
     describe('TOD Tariff Strategies', () => {
-      test('PEA_4.1.1_large_TOD - <12kV', async () => {
+      test('PEA_4.1.1_large_TOD - <22kV', async () => {
         const requestData = {
           tariffType: 'tod',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           peakKwh: 2000,
           offPeakKwh: 3000,
           demand: 200
@@ -181,10 +181,10 @@ describe('PEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('PEA_4.1.1_large_TOD');
       });
 
-      test('PEA_4.1.2_large_TOD - 12-24kV', async () => {
+      test('PEA_4.1.2_large_TOD - 22-33kV', async () => {
         const requestData = {
           tariffType: 'tod',
-          voltageLevel: '12-24kV',
+          voltageLevel: '22-33kV',
           peakKwh: 2000,
           offPeakKwh: 3000,
           demand: 200
@@ -217,10 +217,10 @@ describe('PEA Strategies Test Suite', () => {
     });
 
     describe('TOU Tariff Strategies', () => {
-      test('PEA_4.2.1_large_TOU - <12kV', async () => {
+      test('PEA_4.2.1_large_TOU - <22kV', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 2000,
           offPeakKwh: 3000,
           demand: 200
@@ -234,10 +234,10 @@ describe('PEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('PEA_4.2.1_large_TOU');
       });
 
-      test('PEA_4.2.2_large_TOU - 12-24kV', async () => {
+      test('PEA_4.2.2_large_TOU - 22-33kV', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '12-24kV',
+          voltageLevel: '22-33kV',
           onPeakKwh: 2000,
           offPeakKwh: 3000,
           demand: 200
@@ -272,10 +272,10 @@ describe('PEA Strategies Test Suite', () => {
 
   describe('PEA Type 5 Strategies (Specific Business)', () => {
     describe('TOU Tariff Strategies', () => {
-      test('PEA_5.1.1_specific_TOU - <12kV', async () => {
+      test('PEA_5.1.1_specific_TOU - <22kV', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 3000,
           offPeakKwh: 4000,
           demand: 500
@@ -289,10 +289,10 @@ describe('PEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('PEA_5.1.1_specific_TOU');
       });
 
-      test('PEA_5.1.2_specific_TOU - 12-24kV', async () => {
+      test('PEA_5.1.2_specific_TOU - 22-33kV', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '12-24kV',
+          voltageLevel: '22-33kV',
           onPeakKwh: 3000,
           offPeakKwh: 4000,
           demand: 500
@@ -325,10 +325,10 @@ describe('PEA Strategies Test Suite', () => {
     });
 
     describe('TOU Tariff Strategies (Advanced)', () => {
-      test('PEA_5.2.1_specific_TOU - <12kV', async () => {
+      test('PEA_5.2.1_specific_TOU - <22kV', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '<12kV',
+          voltageLevel: '<22kV',
           onPeakKwh: 3000,
           offPeakKwh: 4000,
           demand: 500
@@ -342,10 +342,10 @@ describe('PEA Strategies Test Suite', () => {
         expect(response.body.data.strategyUsed).toBe('PEA_5.2.1_specific_TOU');
       });
 
-      test('PEA_5.2.2_specific_TOU - 12-24kV', async () => {
+      test('PEA_5.2.2_specific_TOU - 22-33kV', async () => {
         const requestData = {
           tariffType: 'tou',
-          voltageLevel: '12-24kV',
+          voltageLevel: '22-33kV',
           onPeakKwh: 3000,
           offPeakKwh: 4000,
           demand: 500
