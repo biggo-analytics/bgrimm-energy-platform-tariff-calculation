@@ -23,11 +23,11 @@ async function calculateElectricityBill(ctx, calculationType) {
       return;
     }
 
-    // Map voltage levels to strategy naming convention (PEA uses different voltage levels)
+    // Map voltage levels to strategy naming convention
     const voltageMap = {
-      '<22kV': '3',
+      '<22kV': '1',
       '22-33kV': '2', 
-      '>=69kV': '1'
+      '>=69kV': '3'
     };
 
     const voltageCode = voltageMap[voltageLevel];
@@ -41,33 +41,42 @@ async function calculateElectricityBill(ctx, calculationType) {
       return;
     }
 
-    // Build strategy name
-    const tariffTypeMap = {
-      'normal': 'normal',
-      'tou': 'TOU',
-      'tod': 'TOD'
-    };
+    // Build strategy name based on actual strategy files
+    let strategyName;
+    
+    if (calculationType === 'type-2') {
+      if (tariffType === 'tou') {
+        strategyName = `PEA_2.2.${voltageCode}_small_TOU`;
+      } else {
+        strategyName = `PEA_2.1.${voltageCode}_small_normal`;
+      }
+    } else if (calculationType === 'type-3') {
+      if (tariffType === 'normal') {
+        strategyName = `PEA_3.1.${voltageCode}_medium_normal`;
+      } else if (tariffType === 'tou') {
+        strategyName = `PEA_3.2.${voltageCode}_medium_TOU`;
+      }
+    } else if (calculationType === 'type-4') {
+      if (tariffType === 'tod') {
+        strategyName = `PEA_4.1.${voltageCode}_large_TOD`;
+      } else if (tariffType === 'tou') {
+        strategyName = `PEA_4.2.${voltageCode}_large_TOU`;
+      }
+    } else if (calculationType === 'type-5') {
+      if (tariffType === 'tou') {
+        strategyName = `PEA_5.1.${voltageCode}_specific_TOU`;
+      }
+    }
 
-    const strategyTariff = tariffTypeMap[tariffType];
-    if (!strategyTariff) {
+    if (!strategyName) {
       ctx.status = 400;
       ctx.body = {
         success: false,
-        error: `Invalid tariff type: ${tariffType}. Supported: normal, tou, tod`,
+        error: `Invalid combination: ${calculationType} with ${tariffType}`,
         timestamp: new Date().toISOString()
       };
       return;
     }
-
-    const typeMap = {
-      'type-2': '2.2',
-      'type-3': calculationType === 'type-3' && tariffType === 'normal' ? '3.1' : '3.2',
-      'type-4': calculationType === 'type-4' && tariffType === 'tod' ? '4.1' : '4.2',
-      'type-5': calculationType === 'type-5' && tariffType === 'normal' ? '5.1' : '5.2'
-    };
-
-    const typeCode = typeMap[calculationType];
-    const strategyName = `PEA_${typeCode}.${voltageCode}_${calculationType.replace('type-', '')}${strategyTariff === 'normal' ? '_normal' : `_${strategyTariff}`}`;
 
     // Get and execute strategy
     const strategy = getStrategy(strategyName);

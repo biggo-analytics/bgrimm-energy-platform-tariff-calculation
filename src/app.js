@@ -35,7 +35,8 @@ if (require.main === module) {
   app.listen(PORT, () => {
     logger.info(`🚀 Server running on http://localhost:${PORT}`);
     logger.info(`📊 Health check available at http://localhost:${PORT}/health`);
-    logger.info(`📋 API info available at http://localhost:${PORT}/api/info`);
+    logger.info(`📋 API v2 info available at http://localhost:${PORT}/api/v2/info`);
+    logger.info(`🔧 Using Strategy Pattern Architecture`);
   });
 }
 

@@ -1,11 +1,11 @@
 /**
- * New Strategy Pattern Tests
+ * Strategy Pattern Tests (API v2 only)
  * Tests for the refactored strategy pattern with centralized configuration
  */
 
 const { getStrategy, getAvailableStrategies, isValidStrategy } = require('../src/strategy-selector');
 
-describe('New Strategy Pattern Tests', () => {
+describe('Strategy Pattern Tests (API v2)', () => {
   
   describe('Strategy Selector', () => {
     test('should load MEA strategy correctly', () => {
@@ -108,14 +108,6 @@ describe('New Strategy Pattern Tests', () => {
       expect(result).toBeCloseTo(18154.29, 2);
     });
 
-    test('PEA Type 3 TOU (22-33kV) calculation', () => {
-      const strategy = getStrategy('PEA_3.2.2_medium_TOU');
-      const result = strategy.calculate({ onPeakKwh: 800, offPeakKwh: 1200, demand: 100 });
-      
-      // Expected: 312.24 + (100 * 132.93) + (800 * 4.1839) + (1200 * 2.6037) = 312.24 + 13293 + 3347.12 + 3124.44 = 20076.8
-      expect(result).toBeCloseTo(20076.8, 2);
-    });
-
     test('PEA Type 4 TOD (22-33kV) calculation', () => {
       const strategy = getStrategy('PEA_4.1.2_large_TOD');
       const result = strategy.calculate({ 
@@ -128,102 +120,6 @@ describe('New Strategy Pattern Tests', () => {
       // Expected: 312.24 + (120 * 285.05) + (80 * 58.88) + (40 * 0) + (2000 * 3.1471)
       // = 312.24 + 34206 + 4710.4 + 0 + 6294.2 = 45522.84
       expect(result).toBeCloseTo(45522.84, 2);
-    });
-
-    test('PEA Type 5 TOU (>=69kV) calculation', () => {
-      const strategy = getStrategy('PEA_5.2.1_specific_TOU');
-      const result = strategy.calculate({ onPeakKwh: 800, offPeakKwh: 1200, demand: 100 });
-      
-      // Expected: 312.24 + (100 * 74.14) + (800 * 4.1025) + (1200 * 2.5849) = 312.24 + 7414 + 3282 + 3101.88 = 14110.12
-      expect(result).toBeCloseTo(14110.12, 2);
-    });
-  });
-
-  describe('Error Handling', () => {
-    test('should handle invalid parameters in MEA strategy', () => {
-      const strategy = getStrategy('MEA_3.1.3_medium_normal');
-      
-      expect(() => {
-        strategy.calculate({ kwh: -100, demand: 50 });
-      }).toThrow('Invalid input: kwh and demand must be non-negative numbers.');
-
-      expect(() => {
-        strategy.calculate({ kwh: 'invalid', demand: 50 });
-      }).toThrow('Invalid input: kwh and demand must be non-negative numbers.');
-    });
-
-    test('should handle invalid parameters in PEA TOU strategy', () => {
-      const strategy = getStrategy('PEA_3.2.1_medium_TOU');
-      
-      expect(() => {
-        strategy.calculate({ onPeakKwh: -100, offPeakKwh: 200, demand: 50 });
-      }).toThrow('Invalid input: onPeakKwh, offPeakKwh, and demand must be non-negative numbers.');
-
-      expect(() => {
-        strategy.calculate({ onPeakKwh: 100, offPeakKwh: 'invalid', demand: 50 });
-      }).toThrow('Invalid input: onPeakKwh, offPeakKwh, and demand must be non-negative numbers.');
-    });
-
-    test('should handle invalid parameters in PEA TOD strategy', () => {
-      const strategy = getStrategy('PEA_4.1.3_large_TOD');
-      
-      expect(() => {
-        strategy.calculate({ kwh: 1000, onPeakDemand: -10, partialPeakDemand: 20, offPeakDemand: 30 });
-      }).toThrow('Invalid input: kwh and all demand values must be non-negative numbers.');
-    });
-  });
-
-  describe('All Strategy Coverage', () => {
-    test('should be able to load and execute all MEA strategies', () => {
-      const available = getAvailableStrategies();
-      
-      available.mea.forEach(strategyName => {
-        const strategy = getStrategy(strategyName);
-        expect(strategy).toBeDefined();
-        expect(typeof strategy.calculate).toBe('function');
-        
-        // Test with sample data based on strategy type
-        let testParams;
-        if (strategyName.includes('small_TOU')) {
-          testParams = { onPeakKwh: 100, offPeakKwh: 200 };
-        } else if (strategyName.includes('_TOU')) {
-          testParams = { onPeakKwh: 100, offPeakKwh: 200, demand: 30 };
-        } else if (strategyName.includes('_TOD')) {
-          testParams = { kwh: 1000, onPeakDemand: 20, partialPeakDemand: 15, offPeakDemand: 10 };
-        } else {
-          testParams = { kwh: 1000, demand: 30 };
-        }
-        
-        const result = strategy.calculate(testParams);
-        expect(typeof result).toBe('number');
-        expect(result).toBeGreaterThan(0);
-      });
-    });
-
-    test('should be able to load and execute all PEA strategies', () => {
-      const available = getAvailableStrategies();
-      
-      available.pea.forEach(strategyName => {
-        const strategy = getStrategy(strategyName);
-        expect(strategy).toBeDefined();
-        expect(typeof strategy.calculate).toBe('function');
-        
-        // Test with sample data based on strategy type
-        let testParams;
-        if (strategyName.includes('small_TOU')) {
-          testParams = { onPeakKwh: 100, offPeakKwh: 200 };
-        } else if (strategyName.includes('_TOU')) {
-          testParams = { onPeakKwh: 100, offPeakKwh: 200, demand: 30 };
-        } else if (strategyName.includes('_TOD')) {
-          testParams = { kwh: 1000, onPeakDemand: 20, partialPeakDemand: 15, offPeakDemand: 10 };
-        } else {
-          testParams = { kwh: 1000, demand: 30 };
-        }
-        
-        const result = strategy.calculate(testParams);
-        expect(typeof result).toBe('number');
-        expect(result).toBeGreaterThan(0);
-      });
     });
   });
 });

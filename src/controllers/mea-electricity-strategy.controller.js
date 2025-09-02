@@ -23,51 +23,82 @@ async function calculateElectricityBill(ctx, calculationType) {
       return;
     }
 
-    // Map voltage levels to strategy naming convention
-    const voltageMap = {
-      '<12kV': '3',
-      '12-24kV': '2', 
-      '>=69kV': '1'
-    };
+    // Build strategy name based on actual strategy files
+    let strategyName;
+    
+    if (calculationType === 'type-2') {
+      if (tariffType === 'tou') {
+        if (voltageLevel === '<12kV') {
+          strategyName = 'MEA_2.2.1_small_TOU';
+        } else if (voltageLevel === '12-24kV') {
+          strategyName = 'MEA_2.2.2_small_TOU';
+        }
+      }
+    } else if (calculationType === 'type-3') {
+      if (tariffType === 'normal') {
+        if (voltageLevel === '>=69kV') {
+          strategyName = 'MEA_3.1.1_medium_normal';
+        } else if (voltageLevel === '12-24kV') {
+          strategyName = 'MEA_3.1.2_medium_normal';
+        } else if (voltageLevel === '<12kV') {
+          strategyName = 'MEA_3.1.3_medium_normal';
+        }
+      } else if (tariffType === 'tou') {
+        if (voltageLevel === '>=69kV') {
+          strategyName = 'MEA_3.2.1_medium_TOU';
+        } else if (voltageLevel === '12-24kV') {
+          strategyName = 'MEA_3.2.2_medium_TOU';
+        } else if (voltageLevel === '<12kV') {
+          strategyName = 'MEA_3.2.3_medium_TOU';
+        }
+      }
+    } else if (calculationType === 'type-4') {
+      if (tariffType === 'tod') {
+        if (voltageLevel === '>=69kV') {
+          strategyName = 'MEA_4.1.1_large_TOD';
+        } else if (voltageLevel === '12-24kV') {
+          strategyName = 'MEA_4.1.2_large_TOD';
+        } else if (voltageLevel === '<12kV') {
+          strategyName = 'MEA_4.1.3_large_TOD';
+        }
+      } else if (tariffType === 'tou') {
+        if (voltageLevel === '>=69kV') {
+          strategyName = 'MEA_4.2.1_large_TOU';
+        } else if (voltageLevel === '12-24kV') {
+          strategyName = 'MEA_4.2.2_large_TOU';
+        } else if (voltageLevel === '<12kV') {
+          strategyName = 'MEA_4.2.3_large_TOU';
+        }
+      }
+    } else if (calculationType === 'type-5') {
+      if (tariffType === 'normal') {
+        if (voltageLevel === '>=69kV') {
+          strategyName = 'MEA_5.1.1_specific_normal';
+        } else if (voltageLevel === '12-24kV') {
+          strategyName = 'MEA_5.1.2_specific_normal';
+        } else if (voltageLevel === '<12kV') {
+          strategyName = 'MEA_5.1.3_specific_normal';
+        }
+      } else if (tariffType === 'tou') {
+        if (voltageLevel === '>=69kV') {
+          strategyName = 'MEA_5.2.1_specific_TOU';
+        } else if (voltageLevel === '12-24kV') {
+          strategyName = 'MEA_5.2.2_specific_TOU';
+        } else if (voltageLevel === '<12kV') {
+          strategyName = 'MEA_5.2.3_specific_TOU';
+        }
+      }
+    }
 
-    const voltageCode = voltageMap[voltageLevel];
-    if (!voltageCode) {
+    if (!strategyName) {
       ctx.status = 400;
       ctx.body = {
         success: false,
-        error: `Invalid voltage level: ${voltageLevel}. Supported: <12kV, 12-24kV, >=69kV`,
+        error: `Invalid combination: ${calculationType} with ${tariffType} for ${voltageLevel}`,
         timestamp: new Date().toISOString()
       };
       return;
     }
-
-    // Build strategy name
-    const tariffTypeMap = {
-      'normal': 'normal',
-      'tou': 'TOU',
-      'tod': 'TOD'
-    };
-
-    const strategyTariff = tariffTypeMap[tariffType];
-    if (!strategyTariff) {
-      ctx.status = 400;
-      ctx.body = {
-        success: false,
-        error: `Invalid tariff type: ${tariffType}. Supported: normal, tou, tod`,
-        timestamp: new Date().toISOString()
-      };
-      return;
-    }
-
-    const typeMap = {
-      'type-2': '2.2',
-      'type-3': calculationType === 'type-3' && tariffType === 'normal' ? '3.1' : '3.2',
-      'type-4': calculationType === 'type-4' && tariffType === 'tod' ? '4.1' : '4.2',
-      'type-5': calculationType === 'type-5' && tariffType === 'normal' ? '5.1' : '5.2'
-    };
-
-    const typeCode = typeMap[calculationType];
-    const strategyName = `MEA_${typeCode}.${voltageCode}_${calculationType.replace('type-', '')}${strategyTariff === 'normal' ? '_normal' : `_${strategyTariff}`}`;
 
     // Get and execute strategy
     const strategy = getStrategy(strategyName);
