@@ -37,20 +37,22 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
-        expect(response.body).toHaveProperty('serviceCharge');
-        expect(response.body).toHaveProperty('ftCharge');
-        expect(response.body).toHaveProperty('subTotal');
-        expect(response.body).toHaveProperty('vat');
-        expect(response.body).toHaveProperty('grandTotal');
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body).toHaveProperty('data');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('serviceCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('subTotal');
+        expect(response.body.data).toHaveProperty('vat');
+        expect(response.body.data).toHaveProperty('grandTotal');
         
         // Verify calculations
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(17570, 1); // 100 * 175.70
-        expect(response.body.energyCharge).toBeCloseTo(124388, 1); // 40000 * 3.1097
-        expect(response.body.pfCharge).toBeCloseTo(3252.06, 2); // (120 - 100*0.6197) * 56.07
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(17570, 1); // 100 * 175.70
+        expect(response.body.data.energyCharge).toBeCloseTo(124388, 1); // 40000 * 3.1097
+        expect(response.body.data.pfCharge).toBeCloseTo(3252.06, 2); // (120 - 100*0.6197) * 56.07
       });
 
       test('should calculate bill for 22-33kV with 80 kW and 30000 kWh', async () => {
@@ -69,8 +71,8 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(15700.8, 1); // 80 * 196.26
-        expect(response.body.energyCharge).toBeCloseTo(94413, 1); // 30000 * 3.1471
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(15700.8, 1); // 80 * 196.26
+        expect(response.body.data.energyCharge).toBeCloseTo(94413, 1); // 30000 * 3.1471
       });
 
       test('should calculate bill for <22kV with 50 kW and 20000 kWh', async () => {
@@ -89,8 +91,8 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(11075, 1); // 50 * 221.50
-        expect(response.body.energyCharge).toBeCloseTo(63502, 1); // 20000 * 3.1751
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(11075, 1); // 50 * 221.50
+        expect(response.body.data.energyCharge).toBeCloseTo(63502, 1); // 20000 * 3.1751
       });
 
       test('should calculate bill with zero FT rate', async () => {
@@ -149,8 +151,8 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(175.70, 1); // 1 * 175.70
-        expect(response.body.energyCharge).toBeCloseTo(3.11, 1); // 1 * 3.1097
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(175.70, 1); // 1 * 175.70
+        expect(response.body.data.energyCharge).toBeCloseTo(3.11, 1); // 1 * 3.1097
       });
 
       test('should handle very high consumption (1000 kW, 1000000 kWh)', async () => {
@@ -189,8 +191,8 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(17657.9, 1); // 100.5 * 175.70 (rounded)
-        expect(response.body.energyCharge).toBeCloseTo(124389.6, 1); // Adjusted to match actual calculation
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(17657.9, 1); // 100.5 * 175.70 (rounded)
+        expect(response.body.data.energyCharge).toBeCloseTo(124389.6, 1); // Adjusted to match actual calculation
       });
     });
   });
@@ -215,18 +217,20 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
-        expect(response.body).toHaveProperty('serviceCharge');
-        expect(response.body).toHaveProperty('ftCharge');
-        expect(response.body).toHaveProperty('subTotal');
-        expect(response.body).toHaveProperty('vat');
-        expect(response.body).toHaveProperty('grandTotal');
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body).toHaveProperty('data');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('serviceCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('subTotal');
+        expect(response.body.data).toHaveProperty('vat');
+        expect(response.body.data).toHaveProperty('grandTotal');
         
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(6672.6, 1); // 90 * 74.14
-        expect(response.body.energyCharge).toBeCloseTo(126160, 1); // (15000 * 4.1025) + (25000 * 2.5849)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(6672.6, 1); // 90 * 74.14
+        expect(response.body.data.energyCharge).toBeCloseTo(126160, 1); // (15000 * 4.1025) + (25000 * 2.5849)
       });
 
       test('should calculate bill for 22-33kV TOU', async () => {
@@ -247,8 +251,8 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(9305.1, 1); // 70 * 132.93
-        expect(response.body.energyCharge).toBeCloseTo(102280.8, 1); // (12000 * 4.1839) + (20000 * 2.6037)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(9305.1, 1); // 70 * 132.93
+        expect(response.body.data.energyCharge).toBeCloseTo(102280.8, 1); // (12000 * 4.1839) + (20000 * 2.6037)
       });
 
       test('should calculate bill for <22kV TOU', async () => {
@@ -269,8 +273,8 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(10500, 1); // 50 * 210.00
-        expect(response.body.energyCharge).toBeCloseTo(82850.5, 1); // (10000 * 4.3297) + (15000 * 2.6369)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(10500, 1); // 50 * 210.00
+        expect(response.body.data.energyCharge).toBeCloseTo(82850.5, 1); // (10000 * 4.3297) + (15000 * 2.6369)
       });
 
       test('should handle zero off-peak consumption', async () => {
@@ -291,7 +295,7 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(61537.5, 1); // 15000 * 4.1025
+        expect(response.body.data.energyCharge).toBeCloseTo(61537.5, 1); // 15000 * 4.1025
       });
 
       test('should handle zero on-peak consumption', async () => {
@@ -312,7 +316,7 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(64622.5, 1); // 25000 * 2.5849
+        expect(response.body.data.energyCharge).toBeCloseTo(64622.5, 1); // 25000 * 2.5849
       });
     });
 
@@ -335,7 +339,7 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(0.67, 2); // (0.1 * 4.1025) + (0.1 * 2.5849)
+        expect(response.body.data.energyCharge).toBeCloseTo(0.67, 2); // (0.1 * 4.1025) + (0.1 * 2.5849)
       });
 
       test('should handle very large consumption values', async () => {
@@ -533,6 +537,7 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
       });
 
@@ -552,6 +557,7 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
       });
 
@@ -571,6 +577,7 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
       });
 
@@ -590,6 +597,7 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
       });
 
@@ -609,6 +617,7 @@ describe('PEA Type 3 - Medium Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
       });
     });

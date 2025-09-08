@@ -37,18 +37,20 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
-        expect(response.body).toHaveProperty('ftCharge');
-        expect(response.body).toHaveProperty('subTotal');
-        expect(response.body).toHaveProperty('vat');
-        expect(response.body).toHaveProperty('grandTotal');
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body).toHaveProperty('data');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('subTotal');
+        expect(response.body.data).toHaveProperty('vat');
+        expect(response.body.data).toHaveProperty('grandTotal');
         
         // Verify calculations
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(28646.8, 1); // 130 * 220.36
-        expect(response.body.energyCharge).toBeCloseTo(155485, 1); // 50000 * 3.1097
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(28646.8, 1); // 130 * 220.36
+        expect(response.body.data.energyCharge).toBeCloseTo(155485, 1); // 50000 * 3.1097
       });
 
       test('should calculate bill for 12-24kV with 110 kW and 45000 kWh', async () => {
@@ -67,8 +69,8 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(28167.7, 1); // 110 * 256.07
-        expect(response.body.energyCharge).toBeCloseTo(140719.5, 1); // 45000 * 3.1271
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(28167.7, 1); // 110 * 256.07
+        expect(response.body.data.energyCharge).toBeCloseTo(140719.5, 1); // 45000 * 3.1271
       });
 
       test('should calculate bill for <12kV with 110 kW and 45000 kWh', async () => {
@@ -87,8 +89,8 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(30430.4, 1); // 110 * 276.64
-        expect(response.body.energyCharge).toBeCloseTo(142879.5, 1); // 45000 * 3.1751
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(30430.4, 1); // 110 * 276.64
+        expect(response.body.data.energyCharge).toBeCloseTo(142879.5, 1); // 45000 * 3.1751
       });
 
       test('should calculate bill with zero FT rate', async () => {
@@ -147,8 +149,8 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(220.36, 1); // 1 * 220.36
-        expect(response.body.energyCharge).toBeCloseTo(3.11, 1); // 1 * 3.1097
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(220.36, 1); // 1 * 220.36
+        expect(response.body.data.energyCharge).toBeCloseTo(3.11, 1); // 1 * 3.1097
       });
 
       test('should handle very high consumption (1000 kW, 1000000 kWh)', async () => {
@@ -187,8 +189,8 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(28756.98, 1); // 130.5 * 220.36
-        expect(response.body.energyCharge).toBeCloseTo(155486.6, 1); // Adjusted to match actual calculation
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(28756.98, 1); // 130.5 * 220.36
+        expect(response.body.data.energyCharge).toBeCloseTo(155486.6, 1); // Adjusted to match actual calculation
       });
     });
   });
@@ -213,17 +215,19 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
-        expect(response.body).toHaveProperty('ftCharge');
-        expect(response.body).toHaveProperty('subTotal');
-        expect(response.body).toHaveProperty('vat');
-        expect(response.body).toHaveProperty('grandTotal');
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body).toHaveProperty('data');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('subTotal');
+        expect(response.body.data).toHaveProperty('vat');
+        expect(response.body.data).toHaveProperty('grandTotal');
         
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(8896.8, 1); // 120 * 74.14
-        expect(response.body.energyCharge).toBeCloseTo(172521.5, 1); // (20000 * 4.1025) + (35000 * 2.5849)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(8896.8, 1); // 120 * 74.14
+        expect(response.body.data.energyCharge).toBeCloseTo(172521.5, 1); // (20000 * 4.1025) + (35000 * 2.5849)
       });
 
       test('should calculate bill for 12-24kV TOU', async () => {
@@ -244,8 +248,8 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(14622.3, 1); // 110 * 132.93
-        expect(response.body.energyCharge).toBeCloseTo(153421.2, 1); // (18000 * 4.1839) + (30000 * 2.6037)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(14622.3, 1); // 110 * 132.93
+        expect(response.body.data.energyCharge).toBeCloseTo(153421.2, 1); // (18000 * 4.1839) + (30000 * 2.6037)
       });
 
       test('should calculate bill for <12kV TOU', async () => {
@@ -266,8 +270,8 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(21080, 1); // 100 * 210.80
-        expect(response.body.energyCharge).toBeCloseTo(133868, 1); // (15000 * 4.3297) + (25000 * 2.6369)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(21080, 1); // 100 * 210.80
+        expect(response.body.data.energyCharge).toBeCloseTo(133868, 1); // (15000 * 4.3297) + (25000 * 2.6369)
       });
 
       test('should handle zero off-peak consumption', async () => {
@@ -288,7 +292,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(82050, 1); // 20000 * 4.1025
+        expect(response.body.data.energyCharge).toBeCloseTo(82050, 1); // 20000 * 4.1025
       });
 
       test('should handle zero on-peak consumption', async () => {
@@ -309,7 +313,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(90471.5, 1); // 35000 * 2.5849
+        expect(response.body.data.energyCharge).toBeCloseTo(90471.5, 1); // 35000 * 2.5849
       });
     });
 
@@ -332,7 +336,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(0.67, 2); // (0.1 * 4.1025) + (0.1 * 2.5849)
+        expect(response.body.data.energyCharge).toBeCloseTo(0.67, 2); // (0.1 * 4.1025) + (0.1 * 2.5849)
       });
 
       test('should handle very large consumption values', async () => {
@@ -530,6 +534,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
       });
 
@@ -549,6 +554,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
       });
 
@@ -568,6 +574,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
       });
 
@@ -587,6 +594,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
       });
 
@@ -606,6 +614,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
       });
     });

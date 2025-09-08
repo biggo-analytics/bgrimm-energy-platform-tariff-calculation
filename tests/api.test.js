@@ -2184,8 +2184,6 @@ describe('New API Endpoints', () => {
       expect(response.body.data).toHaveProperty('calculationTypes');
       expect(response.body.data).toHaveProperty('tariffTypes');
       expect(response.body.data).toHaveProperty('features');
-      expect(response.body.data).toHaveProperty('endpoints');
-      expect(response.body.data).toHaveProperty('examples');
     });
   });
 

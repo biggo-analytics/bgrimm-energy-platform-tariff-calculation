@@ -133,9 +133,9 @@ function createStrategy(provider, calculationType, tariffType, voltageLevel) {
 
     // Map voltage level to strategy identifier components
     const voltageMapping = {
-      '<12kV': '1',
+      '<12kV': '3',
       '12-24kV': '2',
-      '<22kV': '1',
+      '<22kV': '3',
       '22-33kV': '2',
       '>=69kV': '1'
     };
@@ -171,7 +171,9 @@ function createStrategy(provider, calculationType, tariffType, voltageLevel) {
       strategyId = `${normalizedProvider}_2.2.${type2VoltageSuffix}_small_${tariffSuffix}`;
     } else {
       // Type 3, 4, 5 use the base type with voltage suffix
-      strategyId = `${normalizedProvider}_${typeInfo.baseType}.${voltageSuffix}_${typeInfo.size}_${tariffSuffix}`;
+      // For TOU, use .2. prefix; for TOD and normal, use .1. prefix
+      const tariffPrefix = (tariffSuffix === 'TOU') ? '2' : '1';
+      strategyId = `${normalizedProvider}_${typeInfo.baseType}.${tariffPrefix}.${voltageSuffix}_${typeInfo.size}_${tariffSuffix}`;
     }
 
     // Get strategy class from registry
