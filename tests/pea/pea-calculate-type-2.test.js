@@ -166,13 +166,13 @@ describe('PEA Type 2 - Small Business Service API', () => {
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              on_peak_kwh: 500,
+              on_peak_kwh: 5000,
               off_peak_kwh: 5000
             }
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeGreaterThan(40000); // Should be significant
+        expect(response.body.data.energyCharge).toBeGreaterThan(40000); // Should be significant
       });
 
       test('should handle decimal kWh values', async () => {
@@ -699,7 +699,7 @@ describe('PEA Type 2 - Small Business Service API', () => {
       // Next 250 kWh (151-400): 250 * 4.2218 = 1055.45
       // Remaining 200 kWh (401-600): 200 * 4.4217 = 884.34
       // Total: 487.26 + 1055.45 + 884.34 = 2427.05
-      expect(response.body.energyCharge).toBeCloseTo(2427.05, 2);
+      expect(response.body.data.energyCharge).toBeCloseTo(2427.05, 2);
     });
 
     test('should calculate correct TOU rates for <22kV', async () => {
