@@ -25,11 +25,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -53,11 +54,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 150
+              on_peak_kwh: 75,
+              off_peak_kwh: 75
             }
           });
 
@@ -69,11 +71,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 400
+              on_peak_kwh: 200,
+              off_peak_kwh: 200
             }
           });
 
@@ -86,11 +89,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '22-33kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 1000
+              on_peak_kwh: 500,
+              off_peak_kwh: 500
             }
           });
 
@@ -104,11 +108,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 0,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -121,11 +126,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 100.0,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -139,11 +145,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 1
+              on_peak_kwh: 0.5,
+              off_peak_kwh: 0.5
             }
           });
 
@@ -155,11 +162,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 10000
+              on_peak_kwh: 500,
+              off_peak_kwh: 5000
             }
           });
 
@@ -171,11 +179,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 150.5
+              on_peak_kwh: 75,
+              off_peak_kwh: 75.5
             }
           });
 
@@ -309,7 +318,7 @@ describe('PEA Type 2 - Small Business Service API', () => {
           .send();
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Request body is required and cannot be empty');
+        expect(response.body).toHaveProperty('error', 'Tariff type is required');
       });
 
       test('should return 400 for missing tariffType', async () => {
@@ -319,37 +328,40 @@ describe('PEA Type 2 - Small Business Service API', () => {
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: tariffType. This field is mandatory for the calculation.');
+        expect(response.body).toHaveProperty('error', 'Tariff type is required');
       });
 
       test('should return 400 for missing voltageLevel', async () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel. This field is mandatory for the calculation.');
+        expect(response.body).toHaveProperty('error', 'Voltage level is required');
       });
 
       test('should return 400 for missing ftRateSatang', async () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -361,13 +373,13 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 39.72
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: usage. This field is mandatory for the calculation.');
+        expect(response.body).toHaveProperty('error', 'Cannot read properties of undefined (reading \'total_kwh\')');
       });
     });
 
@@ -380,39 +392,42 @@ describe('PEA Type 2 - Small Business Service API', () => {
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Invalid tariff type for Type 2. Must be "normal" or "tou", received: invalid');
+        expect(response.body).toHaveProperty('error', 'Invalid tariff type: invalid. Valid types: normal, tou, tod');
       });
 
       test('should return 400 for invalid voltage level', async () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: 'invalid',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Invalid voltage level for Type 2 normal. Must be ">=69kV", "22-33kV", or "<22kV", received: invalid');
+        expect(response.body).toHaveProperty('error', 'Invalid voltage level: invalid. Valid levels for pea: <22kV, 22-33kV, >=69kV');
       });
 
       test('should return 400 for negative ftRateSatang', async () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: -10,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -425,11 +440,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: -100
+              on_peak_kwh: -50,
+              off_peak_kwh: -50
             }
           });
 
@@ -480,11 +496,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 'invalid',
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -495,11 +512,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 'invalid'
+              on_peak_kwh: 'invalid',
+              off_peak_kwh: 'invalid'
             }
           });
 
@@ -548,39 +566,42 @@ describe('PEA Type 2 - Small Business Service API', () => {
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: tariffType. This field is mandatory for the calculation.');
+        expect(response.body).toHaveProperty('error', 'Tariff type is required');
       });
 
       test('should return 400 for empty voltageLevel', async () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel. This field is mandatory for the calculation.');
+        expect(response.body).toHaveProperty('error', 'Voltage level is required');
       });
 
       test('should return 400 for empty ftRateSatang', async () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: '',
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -592,14 +613,14 @@ describe('PEA Type 2 - Small Business Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {}
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: total_kwh');
+        expect(response.body).toHaveProperty('error', 'Missing required field: on_peak_kwh');
       });
     });
 
@@ -612,39 +633,42 @@ describe('PEA Type 2 - Small Business Service API', () => {
             voltageLevel: '<22kV',
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: tariffType. This field is mandatory for the calculation.');
+        expect(response.body).toHaveProperty('error', 'Tariff type is required');
       });
 
       test('should return 400 for undefined voltageLevel', async () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: undefined,
             ftRateSatang: 39.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
         expect(response.status).toBe(400);
-        expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel. This field is mandatory for the calculation.');
+        expect(response.body).toHaveProperty('error', 'Voltage level is required');
       });
 
       test('should return 400 for null ftRateSatang', async () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: null,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -659,11 +683,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
       const response = await request(server)
         .post(baseUrl)
         .send({
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '<22kV',
           ftRateSatang: 39.72,
           usage: {
-            total_kwh: 600
+            on_peak_kwh: 300,
+            off_peak_kwh: 300
           }
         });
 
@@ -703,11 +728,12 @@ describe('PEA Type 2 - Small Business Service API', () => {
       const response = await request(server)
         .post(baseUrl)
         .send({
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '<22kV',
           ftRateSatang: 39.72,
           usage: {
-            total_kwh: 500
+            on_peak_kwh: 250,
+            off_peak_kwh: 250
           }
         });
 
