@@ -1,7 +1,7 @@
 /**
- * PEA Electricity Rates Configuration
- * Contains all PEA electricity tariff rates
- */
+* PEA Electricity Rates Configuration
+* Contains all PEA electricity tariff rates
+*/
 
 const PEA_RATES = {
   TYPE_2: {

@@ -1,7 +1,7 @@
 /**
- * MEA Electricity Rates Configuration
- * Contains all MEA electricity tariff rates
- */
+* MEA Electricity Rates Configuration
+* Contains all MEA electricity tariff rates
+*/
 
 const MEA_RATES = {
   TYPE_2: {
