@@ -190,8 +190,8 @@ describe('PEA Type 4 - Large Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeGreaterThan(250000); // Should be significant
-        expect(response.body.energyCharge).toBeGreaterThan(3000000); // Should be significant
+        expect(response.body.data.calculatedDemandCharge).toBeGreaterThan(250000); // Should be significant
+        expect(response.body.data.energyCharge).toBeGreaterThan(3000000); // Should be significant
       });
 
       test('should handle decimal values', async () => {
@@ -977,10 +977,10 @@ describe('PEA Type 4 - Large Business Service API', () => {
       
       // Manual calculation verification:
       // Demand charge = (250 * 224.30) + (200 * 29.91) + (100 * 0) = 56075 + 5982 = 62057
-      expect(response.body.calculatedDemandCharge).toBeCloseTo(62057, 1);
+      expect(response.body.data.calculatedDemandCharge).toBeCloseTo(62057, 1);
       
       // Energy charge = 100000 * 3.1097 = 310970
-      expect(response.body.energyCharge).toBeCloseTo(310970, 1);
+      expect(response.body.data.energyCharge).toBeCloseTo(310970, 1);
     });
 
     test('should calculate correct TOU rates for >=69kV', async () => {
@@ -1004,10 +1004,10 @@ describe('PEA Type 4 - Large Business Service API', () => {
       
       // Manual calculation verification:
       // Demand charge = 200 * 74.14 = 14828
-      expect(response.body.calculatedDemandCharge).toBeCloseTo(14828, 1);
+      expect(response.body.data.calculatedDemandCharge).toBeCloseTo(14828, 1);
       
       // Energy charge = (15000 * 4.1025) + (25000 * 2.5849) = 61537.5 + 64622.5 = 126160
-      expect(response.body.energyCharge).toBeCloseTo(126160, 1);
+      expect(response.body.data.energyCharge).toBeCloseTo(126160, 1);
     });
 
     test('should calculate correct VAT', async () => {
@@ -1032,8 +1032,8 @@ describe('PEA Type 4 - Large Business Service API', () => {
       // Manual VAT calculation verification:
       // Subtotal = calculatedDemandCharge + energyCharge + pfCharge + ftCharge
       // VAT = subtotal * 0.07
-      expect(response.body.vat).toBeGreaterThan(0);
-      expect(response.body.grandTotal).toBeGreaterThan(response.body.subTotal);
+      expect(response.body.data.vat).toBeGreaterThan(0);
+      expect(response.body.data.grandTotal).toBeGreaterThan(response.body.data.subTotal);
     });
   });
 });

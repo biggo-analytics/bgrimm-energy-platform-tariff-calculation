@@ -20,11 +20,12 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -46,11 +47,12 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 150
+              on_peak_kwh: 75,
+              off_peak_kwh: 75
             }
           });
 
@@ -62,11 +64,12 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 400
+              on_peak_kwh: 200,
+              off_peak_kwh: 200
             }
           });
 
@@ -79,11 +82,12 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '12-24kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 1000
+              on_peak_kwh: 500,
+              off_peak_kwh: 500
             }
           });
 
@@ -144,7 +148,8 @@ describe('MEA Electricity Bill Calculation API', () => {
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -157,10 +162,11 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -173,10 +179,11 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -189,7 +196,7 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72
           });
@@ -209,7 +216,7 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '>=69kV',
             ftRateSatang: 19.72,
             peakKvar: 120,
@@ -240,7 +247,7 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '12-24kV',
             ftRateSatang: 19.72,
             peakKvar: 80,
@@ -260,7 +267,7 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             peakKvar: 60,
@@ -350,7 +357,7 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '>=69kV',
             ftRateSatang: 19.72,
             peakKvar: 50,
@@ -530,7 +537,7 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '>=69kV',
             ftRateSatang: 19.72,
             peakKvar: 120,
@@ -559,7 +566,7 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '12-24kV',
             ftRateSatang: 19.72,
             peakKvar: 100,
@@ -579,7 +586,7 @@ describe('MEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             peakKvar: 100,
@@ -670,7 +677,7 @@ describe('MEA Electricity Bill Calculation API', () => {
       const response = await request(server)
         .post('/api/MEA/calculate/type-3')
         .send({
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '>=69kV',
           ftRateSatang: 19.72,
           peakKvar: 120, // High reactive power
@@ -690,7 +697,7 @@ describe('MEA Electricity Bill Calculation API', () => {
       const response = await request(server)
         .post('/api/MEA/calculate/type-3')
         .send({
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '>=69kV',
           ftRateSatang: 19.72,
           peakKvar: 50, // Low reactive power
@@ -712,7 +719,7 @@ describe('MEA Electricity Bill Calculation API', () => {
       const response = await request(server)
         .post('/api/MEA/calculate/type-2')
         .send({
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '<12kV',
           ftRateSatang: 19.72,
           usage: {
@@ -730,7 +737,7 @@ describe('MEA Electricity Bill Calculation API', () => {
       const response = await request(server)
         .post('/api/MEA/calculate/type-2')
         .send({
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '<12kV',
           ftRateSatang: 19.72,
           usage: {
@@ -764,19 +771,20 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
         expect(response.body).toHaveProperty('serviceCharge');
-        expect(response.body).toHaveProperty('baseTariff');
-        expect(response.body).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('baseTariff');
+        expect(response.body.data).toHaveProperty('ftCharge');
         expect(response.body).toHaveProperty('vat');
         expect(response.body).toHaveProperty('totalBill');
         
@@ -790,11 +798,12 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 150
+              on_peak_kwh: 75,
+              off_peak_kwh: 75
             }
           });
 
@@ -807,11 +816,12 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 400
+              on_peak_kwh: 200,
+              off_peak_kwh: 200
             }
           });
 
@@ -824,11 +834,12 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '22-33kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 1000
+              on_peak_kwh: 500,
+              off_peak_kwh: 500
             }
           });
 
@@ -841,11 +852,12 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '22-33kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -871,10 +883,10 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
         expect(response.body).toHaveProperty('serviceCharge');
-        expect(response.body).toHaveProperty('baseTariff');
-        expect(response.body).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('baseTariff');
+        expect(response.body.data).toHaveProperty('ftCharge');
         expect(response.body).toHaveProperty('vat');
         expect(response.body).toHaveProperty('totalBill');
         
@@ -932,7 +944,8 @@ describe('PEA Electricity Bill Calculation API', () => {
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -945,10 +958,11 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -961,10 +975,11 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -977,7 +992,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 19.72
           });
@@ -995,7 +1010,8 @@ describe('PEA Electricity Bill Calculation API', () => {
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -1021,7 +1037,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             usage: {
@@ -1040,7 +1056,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             usage: {
@@ -1060,7 +1076,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '22-33kV',
             ftRateSatang: 19.72,
             usage: {
@@ -1077,11 +1093,12 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 0,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -1132,7 +1149,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 20.00,
             usage: {
@@ -1197,7 +1214,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '>=69kV',
             ftRateSatang: 19.72,
             peakKvar: 120,
@@ -1209,12 +1226,12 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
         expect(response.body).toHaveProperty('serviceCharge');
-        expect(response.body).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
         expect(response.body).toHaveProperty('subTotal');
         expect(response.body).toHaveProperty('vat');
         expect(response.body).toHaveProperty('grandTotal');
@@ -1229,7 +1246,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '22-33kV',
             ftRateSatang: 19.72,
             peakKvar: 80,
@@ -1249,7 +1266,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             peakKvar: 60,
@@ -1339,7 +1356,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '>=69kV',
             ftRateSatang: 19.72,
             peakKvar: 50,
@@ -1382,7 +1399,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             ftRateSatang: 19.72,
             peakKvar: 120,
             highestDemandChargeLast12m: 20000.00,
@@ -1401,7 +1418,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             peakKvar: 120,
             highestDemandChargeLast12m: 20000.00,
@@ -1420,7 +1437,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             highestDemandChargeLast12m: 20000.00,
@@ -1439,7 +1456,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             peakKvar: 120,
@@ -1458,7 +1475,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<22kV',
             ftRateSatang: 19.72,
             peakKvar: 120,
@@ -1476,7 +1493,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '>=69kV',
             ftRateSatang: 19.72,
             peakKvar: 120, // High reactive power
@@ -1496,7 +1513,7 @@ describe('PEA Electricity Bill Calculation API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '>=69kV',
             ftRateSatang: 19.72,
             peakKvar: 50, // Low reactive power
@@ -1536,12 +1553,12 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
         expect(response.body).toHaveProperty('serviceCharge');
-        expect(response.body).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
         expect(response.body).toHaveProperty('subTotal');
         expect(response.body).toHaveProperty('vat');
         expect(response.body).toHaveProperty('grandTotal');
@@ -2056,12 +2073,12 @@ describe('PEA Electricity Bill Calculation API', () => {
         expect(response.status).toBe(200);
         
         // Verify all components are present and calculated correctly
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
         expect(response.body).toHaveProperty('serviceCharge');
-        expect(response.body).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
         expect(response.body).toHaveProperty('subTotal');
         expect(response.body).toHaveProperty('vat');
         expect(response.body).toHaveProperty('grandTotal');
@@ -2109,12 +2126,12 @@ describe('PEA Electricity Bill Calculation API', () => {
         expect(response.status).toBe(200);
         
         // Verify all components are present and calculated correctly
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
         expect(response.body).toHaveProperty('serviceCharge');
-        expect(response.body).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
         expect(response.body).toHaveProperty('subTotal');
         expect(response.body).toHaveProperty('vat');
         expect(response.body).toHaveProperty('grandTotal');
