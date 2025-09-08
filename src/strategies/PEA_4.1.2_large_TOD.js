@@ -38,7 +38,7 @@ class PEA_4_1_2_large_TOD extends ICalculationStrategy {
       this.rates.demand_partial,
       this.rates.demand_off
     );
-    const energyCharge = calculateBasicEnergyCharge(usage.total_kwh, this.rates.energy);
+    const energyCharge = calculateBasicEnergyCharge(normalizedUsage.totalKwh, this.rates.energy);
     const serviceCharge = calculateServiceCharge(312.24);
     
     return calculateCompleteBill({

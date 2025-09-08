@@ -80,7 +80,7 @@ class ICalculationStrategy {
       throw new Error('Input data is required');
     }
 
-    const { tariffType, voltageLevel } = data;
+    const { tariffType, voltageLevel, usage } = data;
 
     if (!tariffType) {
       throw new Error('Tariff type is required');
@@ -98,7 +98,193 @@ class ICalculationStrategy {
       throw new Error(`Voltage level mismatch. Expected ${this.getVoltageLevel()}, got ${voltageLevel}`);
     }
 
+    // Validate usage field exists
+    if (!usage) {
+      throw new Error('Missing required field: usage. This field is mandatory for the calculation.');
+    }
+
+    // Validate other required fields
+    this.validateOtherFields(data);
+
+    // Validate usage fields based on calculation type and tariff type
+    this.validateUsageFields(data);
+
     return true;
+  }
+
+  /**
+   * Validate other required fields common to all strategies
+   * Can be overridden by specific strategies if needed
+   * @param {Object} data - Input data for validation
+   * @throws {Error} - If validation fails
+   */
+  validateOtherFields(data) {
+    const { ftRateSatang } = data;
+    const calculationType = this.getCalculationType();
+
+    // Get the base calculation type (e.g., "2" from "2.2.1")
+    const baseType = calculationType.split('.')[0];
+
+    // ftRateSatang is required for all calculation types
+    if (ftRateSatang === undefined || ftRateSatang === null) {
+      throw new Error('Missing required field: ftRateSatang. This field is mandatory for the calculation.');
+    }
+
+    // Validate ftRateSatang is a number and non-negative
+    if (typeof ftRateSatang !== 'number' || ftRateSatang < 0) {
+      throw new Error('ftRateSatang must be a non-negative number');
+    }
+
+    // Additional fields for types 3, 4, 5
+    if (baseType === '3' || baseType === '4' || baseType === '5') {
+      const { peakKvar, highestDemandChargeLast12m } = data;
+
+      if (peakKvar === undefined || peakKvar === null) {
+        throw new Error('Missing required field: peakKvar. This field is mandatory for calculation types 3, 4, and 5.');
+      }
+
+      if (typeof peakKvar !== 'number' || peakKvar < 0) {
+        throw new Error('peakKvar must be a non-negative number');
+      }
+
+      if (highestDemandChargeLast12m === undefined || highestDemandChargeLast12m === null) {
+        throw new Error('Missing required field: highestDemandChargeLast12m. This field is mandatory for calculation types 3, 4, and 5.');
+      }
+
+      if (typeof highestDemandChargeLast12m !== 'number' || highestDemandChargeLast12m < 0) {
+        throw new Error('highestDemandChargeLast12m must be a non-negative number');
+      }
+    }
+  }
+
+  /**
+   * Validate usage fields based on calculation type and tariff type
+   * Can be overridden by specific strategies if needed
+   * @param {Object} data - Input data for validation
+   * @throws {Error} - If validation fails
+   */
+  validateUsageFields(data) {
+    const { usage, tariffType } = data;
+    const calculationType = this.getCalculationType();
+
+    // Get the base calculation type (e.g., "2" from "2.2.1")
+    const baseType = calculationType.split('.')[0];
+
+    if (baseType === '2') {
+      if (tariffType === 'normal') {
+        if (usage.total_kwh === undefined || usage.total_kwh === null) {
+          throw new Error('Missing required field: total_kwh');
+        }
+        if (typeof usage.total_kwh !== 'number' || usage.total_kwh < 0) {
+          throw new Error('total_kwh must be a non-negative number');
+        }
+      } else if (tariffType === 'tou') {
+        if (usage.on_peak_kwh === undefined || usage.on_peak_kwh === null) {
+          throw new Error('Missing required field: on_peak_kwh');
+        }
+        if (typeof usage.on_peak_kwh !== 'number' || usage.on_peak_kwh < 0) {
+          throw new Error('on_peak_kwh must be a non-negative number');
+        }
+        if (usage.off_peak_kwh === undefined || usage.off_peak_kwh === null) {
+          throw new Error('Missing required field: off_peak_kwh');
+        }
+        if (typeof usage.off_peak_kwh !== 'number' || usage.off_peak_kwh < 0) {
+          throw new Error('off_peak_kwh must be a non-negative number');
+        }
+      }
+    } else if (baseType === '3' || baseType === '5') {
+      if (tariffType === 'normal') {
+        if (usage.peak_kw === undefined || usage.peak_kw === null) {
+          throw new Error('Missing required field: peak_kw');
+        }
+        if (typeof usage.peak_kw !== 'number' || usage.peak_kw < 0) {
+          throw new Error('peak_kw must be a non-negative number');
+        }
+        if (usage.total_kwh === undefined || usage.total_kwh === null) {
+          throw new Error('Missing required field: total_kwh');
+        }
+        if (typeof usage.total_kwh !== 'number' || usage.total_kwh < 0) {
+          throw new Error('total_kwh must be a non-negative number');
+        }
+      } else if (tariffType === 'tou') {
+        if (usage.on_peak_kw === undefined || usage.on_peak_kw === null) {
+          throw new Error('Missing required field: on_peak_kw');
+        }
+        if (typeof usage.on_peak_kw !== 'number' || usage.on_peak_kw < 0) {
+          throw new Error('on_peak_kw must be a non-negative number');
+        }
+        if (usage.on_peak_kwh === undefined || usage.on_peak_kwh === null) {
+          throw new Error('Missing required field: on_peak_kwh');
+        }
+        if (typeof usage.on_peak_kwh !== 'number' || usage.on_peak_kwh < 0) {
+          throw new Error('on_peak_kwh must be a non-negative number');
+        }
+        if (usage.off_peak_kw === undefined || usage.off_peak_kw === null) {
+          throw new Error('Missing required field: off_peak_kw');
+        }
+        if (typeof usage.off_peak_kw !== 'number' || usage.off_peak_kw < 0) {
+          throw new Error('off_peak_kw must be a non-negative number');
+        }
+        if (usage.off_peak_kwh === undefined || usage.off_peak_kwh === null) {
+          throw new Error('Missing required field: off_peak_kwh');
+        }
+        if (typeof usage.off_peak_kwh !== 'number' || usage.off_peak_kwh < 0) {
+          throw new Error('off_peak_kwh must be a non-negative number');
+        }
+      }
+    } else if (baseType === '4') {
+      if (tariffType === 'tod') {
+        if (usage.on_peak_kw === undefined || usage.on_peak_kw === null) {
+          throw new Error('Missing required field: on_peak_kw');
+        }
+        if (typeof usage.on_peak_kw !== 'number' || usage.on_peak_kw < 0) {
+          throw new Error('on_peak_kw must be a non-negative number');
+        }
+        if (usage.partial_peak_kw === undefined || usage.partial_peak_kw === null) {
+          throw new Error('Missing required field: partial_peak_kw');
+        }
+        if (typeof usage.partial_peak_kw !== 'number' || usage.partial_peak_kw < 0) {
+          throw new Error('partial_peak_kw must be a non-negative number');
+        }
+        if (usage.off_peak_kw === undefined || usage.off_peak_kw === null) {
+          throw new Error('Missing required field: off_peak_kw');
+        }
+        if (typeof usage.off_peak_kw !== 'number' || usage.off_peak_kw < 0) {
+          throw new Error('off_peak_kw must be a non-negative number');
+        }
+        if (usage.total_kwh === undefined || usage.total_kwh === null) {
+          throw new Error('Missing required field: total_kwh');
+        }
+        if (typeof usage.total_kwh !== 'number' || usage.total_kwh < 0) {
+          throw new Error('total_kwh must be a non-negative number');
+        }
+      } else if (tariffType === 'tou') {
+        if (usage.on_peak_kw === undefined || usage.on_peak_kw === null) {
+          throw new Error('Missing required field: on_peak_kw');
+        }
+        if (typeof usage.on_peak_kw !== 'number' || usage.on_peak_kw < 0) {
+          throw new Error('on_peak_kw must be a non-negative number');
+        }
+        if (usage.on_peak_kwh === undefined || usage.on_peak_kwh === null) {
+          throw new Error('Missing required field: on_peak_kwh');
+        }
+        if (typeof usage.on_peak_kwh !== 'number' || usage.on_peak_kwh < 0) {
+          throw new Error('on_peak_kwh must be a non-negative number');
+        }
+        if (usage.off_peak_kw === undefined || usage.off_peak_kw === null) {
+          throw new Error('Missing required field: off_peak_kw');
+        }
+        if (typeof usage.off_peak_kw !== 'number' || usage.off_peak_kw < 0) {
+          throw new Error('off_peak_kw must be a non-negative number');
+        }
+        if (usage.off_peak_kwh === undefined || usage.off_peak_kwh === null) {
+          throw new Error('Missing required field: off_peak_kwh');
+        }
+        if (typeof usage.off_peak_kwh !== 'number' || usage.off_peak_kwh < 0) {
+          throw new Error('off_peak_kwh must be a non-negative number');
+        }
+      }
+    }
   }
 
   /**
