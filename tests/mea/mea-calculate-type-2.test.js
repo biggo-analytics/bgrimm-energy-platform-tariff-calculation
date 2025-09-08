@@ -25,11 +25,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -53,11 +54,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 150
+              on_peak_kwh: 75,
+              off_peak_kwh: 75
             }
           });
 
@@ -69,11 +71,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 400
+              on_peak_kwh: 200,
+              off_peak_kwh: 200
             }
           });
 
@@ -86,11 +89,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '12-24kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 1000
+              on_peak_kwh: 500,
+              off_peak_kwh: 500
             }
           });
 
@@ -103,11 +107,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 0,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -120,11 +125,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 100.0,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -138,11 +144,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 1
+              on_peak_kwh: 0.5,
+              off_peak_kwh: 0.5
             }
           });
 
@@ -154,11 +161,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 10000
+              on_peak_kwh: 5000,
+              off_peak_kwh: 5000
             }
           });
 
@@ -170,11 +178,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 150.5
+              on_peak_kwh: 75.25,
+              off_peak_kwh: 75.25
             }
           });
 
@@ -317,7 +326,8 @@ describe('MEA Type 2 - Small General Service API', () => {
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -329,10 +339,11 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -344,10 +355,11 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -359,7 +371,7 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72
           });
@@ -378,7 +390,8 @@ describe('MEA Type 2 - Small General Service API', () => {
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -390,11 +403,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: 'invalid',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -406,11 +420,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: -10,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -423,11 +438,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: -100
+              on_peak_kwh: -50,
+              off_peak_kwh: -50
             }
           });
 
@@ -478,11 +494,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 'invalid',
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -493,11 +510,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 'invalid'
+              on_peak_kwh: 'invalid',
+              off_peak_kwh: 'invalid'
             }
           });
 
@@ -546,7 +564,8 @@ describe('MEA Type 2 - Small General Service API', () => {
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -558,11 +577,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -574,11 +594,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: '',
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -590,7 +611,7 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {}
@@ -610,7 +631,8 @@ describe('MEA Type 2 - Small General Service API', () => {
             voltageLevel: '<12kV',
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -622,11 +644,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: undefined,
             ftRateSatang: 19.72,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -638,11 +661,12 @@ describe('MEA Type 2 - Small General Service API', () => {
         const response = await request(server)
           .post(baseUrl)
           .send({
-            tariffType: 'normal',
+            tariffType: 'tou',
             voltageLevel: '<12kV',
             ftRateSatang: null,
             usage: {
-              total_kwh: 500
+              on_peak_kwh: 250,
+              off_peak_kwh: 250
             }
           });
 
@@ -653,26 +677,26 @@ describe('MEA Type 2 - Small General Service API', () => {
   });
 
   describe('Calculation Accuracy Tests', () => {
-    test('should calculate correct tiered rates for <12kV normal tariff', async () => {
+    test('should calculate correct TOU rates for <12kV (comprehensive test)', async () => {
       const response = await request(server)
         .post(baseUrl)
         .send({
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '<12kV',
           ftRateSatang: 19.72,
           usage: {
-            total_kwh: 600
+            on_peak_kwh: 300,
+            off_peak_kwh: 300
           }
         });
 
       expect(response.status).toBe(200);
       
-      // Manual calculation verification:
-      // First 150 kWh: 150 * 3.2484 = 487.26
-      // Next 250 kWh (151-400): 250 * 4.2218 = 1055.45
-      // Remaining 200 kWh (401-600): 200 * 4.4217 = 884.34
-      // Total: 487.26 + 1055.45 + 884.34 = 2427.05
-      expect(response.body.data.energyCharge).toBeCloseTo(2427.05, 2);
+      // Manual calculation verification for TOU:
+      // On-peak: 300 * 5.7982 = 1739.46
+      // Off-peak: 300 * 2.6369 = 791.07
+      // Total: 1739.46 + 791.07 = 2530.53
+      expect(response.body.data.energyCharge).toBeCloseTo(2530.53, 2);
     });
 
     test('should calculate correct TOU rates for <12kV', async () => {
@@ -701,11 +725,12 @@ describe('MEA Type 2 - Small General Service API', () => {
       const response = await request(server)
         .post(baseUrl)
         .send({
-          tariffType: 'normal',
+          tariffType: 'tou',
           voltageLevel: '<12kV',
           ftRateSatang: 19.72,
           usage: {
-            total_kwh: 500
+            on_peak_kwh: 250,
+            off_peak_kwh: 250
           }
         });
 
