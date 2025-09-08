@@ -110,7 +110,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.ftCharge).toBeCloseTo(0, 2);
+        expect(response.body.data.ftCharge).toBeCloseTo(0, 2);
       });
 
       test('should calculate bill with very high FT rate', async () => {
@@ -129,7 +129,7 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.ftCharge).toBeCloseTo(40000.0, 2); // 40000 * 100 / 100
+        expect(response.body.data.ftCharge).toBeCloseTo(40000.0, 2); // 40000 * 100 / 100
       });
     });
 
@@ -170,8 +170,8 @@ describe('MEA Type 3 - Medium General Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeGreaterThan(100000); // Should be significant
-        expect(response.body.energyCharge).toBeGreaterThan(3000000); // Should be significant
+        expect(response.body.data.calculatedDemandCharge).toBeGreaterThan(100000); // Should be significant
+        expect(response.body.data.energyCharge).toBeGreaterThan(3000000); // Should be significant
       });
 
       test('should handle decimal values', async () => {
@@ -905,13 +905,13 @@ describe('MEA Type 3 - Medium General Service API', () => {
       
       // Manual calculation verification:
       // Demand charge = 100 * 175.70 = 17570
-      expect(response.body.calculatedDemandCharge).toBeCloseTo(17570, 1);
+      expect(response.body.data.calculatedDemandCharge).toBeCloseTo(17570, 1);
       
       // Energy charge = 40000 * 3.1097 = 124388
-      expect(response.body.energyCharge).toBeCloseTo(124388, 1);
+      expect(response.body.data.energyCharge).toBeCloseTo(124388, 1);
       
       // Power factor charge = (120 - 100*0.6197) * 56.07 = (120 - 61.97) * 56.07 = 58.03 * 56.07 = 3252.06
-      expect(response.body.pfCharge).toBeCloseTo(3252.06, 2);
+      expect(response.body.data.pfCharge).toBeCloseTo(3252.06, 2);
     });
 
     test('should calculate correct TOU rates for >=69kV', async () => {
@@ -935,10 +935,10 @@ describe('MEA Type 3 - Medium General Service API', () => {
       
       // Manual calculation verification:
       // Demand charge = 90 * 74.14 = 6672.6
-      expect(response.body.calculatedDemandCharge).toBeCloseTo(6672.6, 1);
+      expect(response.body.data.calculatedDemandCharge).toBeCloseTo(6672.6, 1);
       
       // Energy charge = (15000 * 4.1025) + (25000 * 2.5849) = 61537.5 + 64622.5 = 126160
-      expect(response.body.energyCharge).toBeCloseTo(126160, 1);
+      expect(response.body.data.energyCharge).toBeCloseTo(126160, 1);
     });
 
     test('should calculate correct VAT', async () => {
@@ -961,8 +961,8 @@ describe('MEA Type 3 - Medium General Service API', () => {
       // Manual VAT calculation verification:
       // Subtotal = calculatedDemandCharge + energyCharge + pfCharge + ftCharge
       // VAT = subtotal * 0.07
-      expect(response.body.vat).toBeGreaterThan(0);
-      expect(response.body.grandTotal).toBeGreaterThan(response.body.subTotal);
+      expect(response.body.data.vat).toBeGreaterThan(0);
+      expect(response.body.data.grandTotal).toBeGreaterThan(response.body.data.subTotal);
     });
   });
 });

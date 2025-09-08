@@ -305,7 +305,7 @@ describe('PEA Type 2 - Small Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeGreaterThan(40000);
+        expect(response.body.data.energyCharge).toBeGreaterThan(40000);
       });
     });
   });

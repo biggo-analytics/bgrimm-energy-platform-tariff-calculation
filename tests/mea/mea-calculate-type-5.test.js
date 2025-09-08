@@ -109,7 +109,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.ftCharge).toBeCloseTo(0, 2);
+        expect(response.body.data.ftCharge).toBeCloseTo(0, 2);
       });
 
       test('should calculate bill with very high FT rate', async () => {
@@ -128,7 +128,7 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.ftCharge).toBeCloseTo(50000.0, 2); // 50000 * 100 / 100
+        expect(response.body.data.ftCharge).toBeCloseTo(50000.0, 2); // 50000 * 100 / 100
       });
     });
 
@@ -169,8 +169,8 @@ describe('MEA Type 5 - Specific Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeGreaterThan(200000); // Should be significant
-        expect(response.body.energyCharge).toBeGreaterThan(3000000); // Should be significant
+        expect(response.body.data.calculatedDemandCharge).toBeGreaterThan(200000); // Should be significant
+        expect(response.body.data.energyCharge).toBeGreaterThan(3000000); // Should be significant
       });
 
       test('should handle decimal values', async () => {
@@ -904,10 +904,10 @@ describe('MEA Type 5 - Specific Business Service API', () => {
       
       // Manual calculation verification:
       // Demand charge = 130 * 220.36 = 28646.8
-      expect(response.body.calculatedDemandCharge).toBeCloseTo(28646.8, 1);
+      expect(response.body.data.calculatedDemandCharge).toBeCloseTo(28646.8, 1);
       
       // Energy charge = 50000 * 3.1097 = 155485
-      expect(response.body.energyCharge).toBeCloseTo(155485, 1);
+      expect(response.body.data.energyCharge).toBeCloseTo(155485, 1);
     });
 
     test('should calculate correct TOU rates for >=69kV', async () => {
@@ -931,10 +931,10 @@ describe('MEA Type 5 - Specific Business Service API', () => {
       
       // Manual calculation verification:
       // Demand charge = 120 * 74.14 = 8896.8
-      expect(response.body.calculatedDemandCharge).toBeCloseTo(8896.8, 1);
+      expect(response.body.data.calculatedDemandCharge).toBeCloseTo(8896.8, 1);
       
       // Energy charge = (20000 * 4.1025) + (35000 * 2.5849) = 82050 + 90471.5 = 172521.5
-      expect(response.body.energyCharge).toBeCloseTo(172521.5, 1);
+      expect(response.body.data.energyCharge).toBeCloseTo(172521.5, 1);
     });
 
     test('should calculate correct VAT', async () => {
@@ -957,8 +957,8 @@ describe('MEA Type 5 - Specific Business Service API', () => {
       // Manual VAT calculation verification:
       // Subtotal = calculatedDemandCharge + energyCharge + pfCharge + ftCharge
       // VAT = subtotal * 0.07
-      expect(response.body.vat).toBeGreaterThan(0);
-      expect(response.body.grandTotal).toBeGreaterThan(response.body.subTotal);
+      expect(response.body.data.vat).toBeGreaterThan(0);
+      expect(response.body.data.grandTotal).toBeGreaterThan(response.body.data.subTotal);
     });
   });
 });
