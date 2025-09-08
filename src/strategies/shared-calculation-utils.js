@@ -304,6 +304,11 @@ const calculateSimpleBill = (params) => {
 const normalizeUsageData = (usage, calculationType) => {
   const normalized = {};
   
+  // Check if usage exists
+  if (!usage) {
+    return normalized;
+  }
+  
   // Calculate total energy consumption
   if (usage.total_kwh !== undefined) {
     normalized.totalKwh = usage.total_kwh;

@@ -27,6 +27,17 @@ class ElectricityController {
         return;
       }
 
+      // Validate request body exists
+      if (!data || Object.keys(data).length === 0) {
+        ctx.status = 400;
+        ctx.body = {
+          success: false,
+          error: 'Request body is required and cannot be empty',
+          timestamp: new Date().toISOString()
+        };
+        return;
+      }
+
       // Perform calculation using strategy
       const result = electricityService.calculateBill(provider, calculationType, data);
 

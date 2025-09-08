@@ -27,8 +27,8 @@ class MEA_5_1_2_specific_normal extends ICalculationStrategy {
     const { ftRateSatang, peakKvar, highestDemandChargeLast12m, usage } = data;
     const normalizedUsage = normalizeUsageData(usage, 'type-3');
     
-    const demandCharge = calculateBasicDemandCharge(usage.peak_kw, this.rates.demand);
-    const energyCharge = calculateBasicEnergyCharge(usage.total_kwh, this.rates.energy);
+    const demandCharge = calculateBasicDemandCharge(normalizedUsage.overallPeakKw, this.rates.demand);
+    const energyCharge = calculateBasicEnergyCharge(normalizedUsage.totalKwh, this.rates.energy);
     const serviceCharge = calculateServiceCharge(312.24);
     
     return calculateCompleteBill({
