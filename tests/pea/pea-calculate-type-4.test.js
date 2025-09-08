@@ -378,7 +378,7 @@ describe('PEA Type 4 - Large Business Service API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeGreaterThan(3000000);
+        expect(response.body.data.energyCharge).toBeGreaterThan(3000000);
       });
     });
   });
