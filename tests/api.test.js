@@ -13,7 +13,7 @@ describe('MEA Electricity Bill Calculation API', () => {
   });
 
   describe('Type 2 - Small General Service', () => {
-    const baseUrl = '/api/mea/calculate/type-2';
+    const baseUrl = '/api/MEA/calculate/type-2';
 
     describe('Normal Tariff', () => {
       test('should calculate bill for <12kV with 500 kWh', async () => {
@@ -29,15 +29,17 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('baseTariff');
-        expect(response.body).toHaveProperty('ftCharge');
-        expect(response.body).toHaveProperty('vat');
-        expect(response.body).toHaveProperty('totalBill');
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body).toHaveProperty('data');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('baseTariff');
+        expect(response.body.data).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('vat');
+        expect(response.body.data).toHaveProperty('totalBill');
         
         // Verify calculations
-        expect(response.body.energyCharge).toBeCloseTo(1984.88, 2);
-        expect(response.body.ftCharge).toBeCloseTo(98.60, 2);
+        expect(response.body.data.energyCharge).toBeCloseTo(1984.88, 2);
+        expect(response.body.data.ftCharge).toBeCloseTo(98.60, 2);
       });
 
       test('should calculate bill for <12kV with 150 kWh (first tier only)', async () => {
@@ -53,7 +55,7 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(487.26, 2); // 150 * 3.2484
+        expect(response.body.data.energyCharge).toBeCloseTo(487.26, 2); // 150 * 3.2484
       });
 
       test('should calculate bill for <12kV with 400 kWh (two tiers)', async () => {
@@ -70,7 +72,7 @@ describe('MEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // 150 * 3.2484 + 250 * 4.2218 = 487.26 + 1055.45 = 1542.71
-        expect(response.body.energyCharge).toBeCloseTo(1542.71, 2);
+        expect(response.body.data.energyCharge).toBeCloseTo(1542.71, 2);
       });
 
       test('should calculate bill for 12-24kV with 1000 kWh', async () => {
@@ -86,7 +88,7 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(3908.6, 2); // 1000 * 3.9086
+        expect(response.body.data.energyCharge).toBeCloseTo(3908.6, 2); // 1000 * 3.9086
       });
     });
 
@@ -105,14 +107,14 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('baseTariff');
-        expect(response.body).toHaveProperty('ftCharge');
-        expect(response.body).toHaveProperty('vat');
-        expect(response.body).toHaveProperty('totalBill');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('baseTariff');
+        expect(response.body.data).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('vat');
+        expect(response.body.data).toHaveProperty('totalBill');
         
         // Verify calculations: (200 * 5.7982) + (300 * 2.6369) = 1159.64 + 791.07 = 1950.71
-        expect(response.body.energyCharge).toBeCloseTo(1950.71, 2);
+        expect(response.body.data.energyCharge).toBeCloseTo(1950.71, 2);
       });
 
       test('should calculate bill for 12-24kV TOU', async () => {
@@ -130,7 +132,7 @@ describe('MEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // (150 * 5.1135) + (250 * 2.6037) = 767.025 + 650.925 = 1417.95
-        expect(response.body.energyCharge).toBeCloseTo(1417.95, 2);
+        expect(response.body.data.energyCharge).toBeCloseTo(1417.95, 2);
       });
     });
 
@@ -147,6 +149,7 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: tariffType. This field is mandatory for the calculation.');
       });
 
@@ -162,6 +165,7 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel. This field is mandatory for the calculation.');
       });
 
@@ -177,6 +181,7 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang. This field is mandatory for the calculation.');
       });
 
@@ -190,13 +195,14 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: usage. This field is mandatory for the calculation.');
       });
     });
   });
 
   describe('Type 3 - Medium General Service', () => {
-    const baseUrl = '/api/mea/calculate/type-3';
+    const baseUrl = '/api/MEA/calculate/type-3';
 
     describe('Normal Tariff', () => {
       test('should calculate bill for >=69kV', async () => {
@@ -215,19 +221,19 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
-        expect(response.body).toHaveProperty('ftCharge');
-        expect(response.body).toHaveProperty('subTotal');
-        expect(response.body).toHaveProperty('vat');
-        expect(response.body).toHaveProperty('grandTotal');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('subTotal');
+        expect(response.body.data).toHaveProperty('vat');
+        expect(response.body.data).toHaveProperty('grandTotal');
 
         // Verify calculations
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(17570, 1); // 100 * 175.70
-        expect(response.body.energyCharge).toBeCloseTo(124388, 1); // 40000 * 3.1097
-        expect(response.body.pfCharge).toBeCloseTo(3252.06, 2); // (120 - 100*0.6197) * 56.07
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(17570, 1); // 100 * 175.70
+        expect(response.body.data.energyCharge).toBeCloseTo(124388, 1); // 40000 * 3.1097
+        expect(response.body.data.pfCharge).toBeCloseTo(3252.06, 2); // (120 - 100*0.6197) * 56.07
       });
 
       test('should calculate bill for 12-24kV', async () => {
@@ -246,8 +252,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(15700.8, 1); // 80 * 196.26
-        expect(response.body.energyCharge).toBeCloseTo(93813, 1); // 30000 * 3.1271
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(15700.8, 1); // 80 * 196.26
+        expect(response.body.data.energyCharge).toBeCloseTo(93813, 1); // 30000 * 3.1271
       });
 
       test('should calculate bill for <12kV', async () => {
@@ -266,8 +272,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(11075, 1); // 50 * 221.50
-        expect(response.body.energyCharge).toBeCloseTo(63502, 1); // 20000 * 3.1751
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(11075, 1); // 50 * 221.50
+        expect(response.body.data.energyCharge).toBeCloseTo(63502, 1); // 20000 * 3.1751
       });
     });
 
@@ -290,8 +296,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(6672.6, 1); // 90 * 74.14
-        expect(response.body.energyCharge).toBeCloseTo(126160, 1); // (15000 * 4.1025) + (25000 * 2.5849)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(6672.6, 1); // 90 * 74.14
+        expect(response.body.data.energyCharge).toBeCloseTo(126160, 1); // (15000 * 4.1025) + (25000 * 2.5849)
       });
 
       test('should calculate bill for 12-24kV TOU', async () => {
@@ -312,8 +318,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(9969.75, 1); // 75 * 132.93
-        expect(response.body.energyCharge).toBeCloseTo(97073.4, 1); // (12000 * 4.1839) + (18000 * 2.6037)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(9969.75, 1); // 75 * 132.93
+        expect(response.body.data.energyCharge).toBeCloseTo(97073.4, 1); // (12000 * 4.1839) + (18000 * 2.6037)
       });
 
       test('should calculate bill for <12kV TOU', async () => {
@@ -334,8 +340,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(13702, 1); // 65 * 210.80
-        expect(response.body.energyCharge).toBeCloseTo(84850.5, 1); // (10000 * 4.5297) + (15000 * 2.6369)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(13702, 1); // 65 * 210.80
+        expect(response.body.data.energyCharge).toBeCloseTo(84850.5, 1); // (10000 * 4.5297) + (15000 * 2.6369)
       });
     });
 
@@ -358,14 +364,14 @@ describe('MEA Electricity Bill Calculation API', () => {
         expect(response.status).toBe(200);
         const calculatedDemand = 50 * 175.70; // 8785
         const minimumDemand = 20000 * 0.70; // 14000
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(calculatedDemand, 1);
-        expect(response.body.effectiveDemandCharge).toBeCloseTo(minimumDemand, 1);
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(calculatedDemand, 1);
+        expect(response.body.data.effectiveDemandCharge).toBeCloseTo(minimumDemand, 1);
       });
     });
   });
 
   describe('Type 4 - Large General Service', () => {
-    const baseUrl = '/api/mea/calculate/type-4';
+    const baseUrl = '/api/MEA/calculate/type-4';
 
     describe('TOD Tariff', () => {
       test('should calculate bill for >=69kV TOD', async () => {
@@ -386,18 +392,18 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
-        expect(response.body).toHaveProperty('ftCharge');
-        expect(response.body).toHaveProperty('subTotal');
-        expect(response.body).toHaveProperty('vat');
-        expect(response.body).toHaveProperty('grandTotal');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('subTotal');
+        expect(response.body.data).toHaveProperty('vat');
+        expect(response.body.data).toHaveProperty('grandTotal');
 
         // Verify calculations: (250 * 280.00) + (200 * 74.14) + (100 * 0) = 70000 + 14828 = 84828
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(84828, 1);
-        expect(response.body.energyCharge).toBeCloseTo(310970, 1); // 100000 * 3.1097
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(84828, 1);
+        expect(response.body.data.energyCharge).toBeCloseTo(310970, 1); // 100000 * 3.1097
       });
 
       test('should calculate bill for 12-24kV TOD', async () => {
@@ -419,8 +425,8 @@ describe('MEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // (200 * 334.33) + (180 * 132.93) + (50 * 0) = 66866 + 23927.4 = 90793.4
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(90793.4, 1);
-        expect(response.body.energyCharge).toBeCloseTo(250168, 1); // 80000 * 3.1271
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(90793.4, 1);
+        expect(response.body.data.energyCharge).toBeCloseTo(250168, 1); // 80000 * 3.1271
       });
 
       test('should calculate bill for <12kV TOD', async () => {
@@ -442,8 +448,8 @@ describe('MEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // (180 * 352.71) + (150 * 210.80) + (80 * 0) = 63487.8 + 31620 = 95107.8
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(95107.8, 1);
-        expect(response.body.energyCharge).toBeCloseTo(190506, 1); // 60000 * 3.1751
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(95107.8, 1);
+        expect(response.body.data.energyCharge).toBeCloseTo(190506, 1); // 60000 * 3.1751
       });
     });
 
@@ -466,8 +472,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(14828, 1); // 200 * 74.14
-        expect(response.body.energyCharge).toBeCloseTo(252320, 1); // (30000 * 4.1025) + (50000 * 2.5849)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(14828, 1); // 200 * 74.14
+        expect(response.body.data.energyCharge).toBeCloseTo(252320, 1); // (30000 * 4.1025) + (50000 * 2.5849)
       });
 
       test('should calculate bill for 12-24kV TOU', async () => {
@@ -488,8 +494,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(23927.4, 1); // 180 * 132.93
-        expect(response.body.energyCharge).toBeCloseTo(208745.5, 1); // (25000 * 4.1839) + (40000 * 2.6037)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(23927.4, 1); // 180 * 132.93
+        expect(response.body.data.energyCharge).toBeCloseTo(208745.5, 1); // (25000 * 4.1839) + (40000 * 2.6037)
       });
 
       test('should calculate bill for <12kV TOU', async () => {
@@ -510,14 +516,14 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(33728, 1); // 160 * 210.80
-        expect(response.body.energyCharge).toBeCloseTo(169701, 1); // (20000 * 4.5297) + (30000 * 2.6369)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(33728, 1); // 160 * 210.80
+        expect(response.body.data.energyCharge).toBeCloseTo(169701, 1); // (20000 * 4.5297) + (30000 * 2.6369)
       });
     });
   });
 
   describe('Type 5 - Specific Business', () => {
-    const baseUrl = '/api/mea/calculate/type-5';
+    const baseUrl = '/api/MEA/calculate/type-5';
 
     describe('Normal Tariff', () => {
       test('should calculate bill for >=69kV', async () => {
@@ -536,17 +542,17 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('calculatedDemandCharge');
-        expect(response.body).toHaveProperty('energyCharge');
-        expect(response.body).toHaveProperty('effectiveDemandCharge');
-        expect(response.body).toHaveProperty('pfCharge');
-        expect(response.body).toHaveProperty('ftCharge');
-        expect(response.body).toHaveProperty('subTotal');
-        expect(response.body).toHaveProperty('vat');
-        expect(response.body).toHaveProperty('grandTotal');
+        expect(response.body.data).toHaveProperty('calculatedDemandCharge');
+        expect(response.body.data).toHaveProperty('energyCharge');
+        expect(response.body.data).toHaveProperty('effectiveDemandCharge');
+        expect(response.body.data).toHaveProperty('pfCharge');
+        expect(response.body.data).toHaveProperty('ftCharge');
+        expect(response.body.data).toHaveProperty('subTotal');
+        expect(response.body.data).toHaveProperty('vat');
+        expect(response.body.data).toHaveProperty('grandTotal');
 
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(28646.8, 1); // 130 * 220.36
-        expect(response.body.energyCharge).toBeCloseTo(155485, 1); // 50000 * 3.1097
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(28646.8, 1); // 130 * 220.36
+        expect(response.body.data.energyCharge).toBeCloseTo(155485, 1); // 50000 * 3.1097
       });
 
       test('should calculate bill for 12-24kV', async () => {
@@ -565,8 +571,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(28167.7, 1); // 110 * 256.07
-        expect(response.body.energyCharge).toBeCloseTo(140719.5, 1); // 45000 * 3.1271
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(28167.7, 1); // 110 * 256.07
+        expect(response.body.data.energyCharge).toBeCloseTo(140719.5, 1); // 45000 * 3.1271
       });
 
       test('should calculate bill for <12kV', async () => {
@@ -585,8 +591,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(30430.4, 1); // 110 * 276.64
-        expect(response.body.energyCharge).toBeCloseTo(142879.5, 1); // 45000 * 3.1751
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(30430.4, 1); // 110 * 276.64
+        expect(response.body.data.energyCharge).toBeCloseTo(142879.5, 1); // 45000 * 3.1751
       });
     });
 
@@ -609,8 +615,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(8896.8, 1); // 120 * 74.14
-        expect(response.body.energyCharge).toBeCloseTo(172521.5, 1); // (20000 * 4.1025) + (35000 * 2.5849)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(8896.8, 1); // 120 * 74.14
+        expect(response.body.data.energyCharge).toBeCloseTo(172521.5, 1); // (20000 * 4.1025) + (35000 * 2.5849)
       });
 
       test('should calculate bill for 12-24kV TOU', async () => {
@@ -631,8 +637,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(13293, 1); // 100 * 132.93
-        expect(response.body.energyCharge).toBeCloseTo(158628.6, 1); // (18000 * 4.1839) + (32000 * 2.6037)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(13293, 1); // 100 * 132.93
+        expect(response.body.data.energyCharge).toBeCloseTo(158628.6, 1); // (18000 * 4.1839) + (32000 * 2.6037)
       });
 
       test('should calculate bill for <12kV TOU', async () => {
@@ -653,8 +659,8 @@ describe('MEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(18972, 1); // 90 * 210.80
-        expect(response.body.energyCharge).toBeCloseTo(141778.7, 1); // (15000 * 4.5297) + (28000 * 2.6369)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(18972, 1); // 90 * 210.80
+        expect(response.body.data.energyCharge).toBeCloseTo(141778.7, 1); // (15000 * 4.5297) + (28000 * 2.6369)
       });
     });
   });
@@ -662,7 +668,7 @@ describe('MEA Electricity Bill Calculation API', () => {
   describe('Power Factor Calculations', () => {
     test('should calculate power factor penalty correctly', async () => {
       const response = await request(server)
-        .post('/api/mea/calculate/type-3')
+        .post('/api/MEA/calculate/type-3')
         .send({
           tariffType: 'normal',
           voltageLevel: '>=69kV',
@@ -677,12 +683,12 @@ describe('MEA Electricity Bill Calculation API', () => {
 
       expect(response.status).toBe(200);
       // Power factor penalty: (120 - 100*0.6197) * 56.07 = (120 - 61.97) * 56.07 = 58.03 * 56.07 = 3252.06
-      expect(response.body.pfCharge).toBeCloseTo(3252.06, 2);
+      expect(response.body.data.pfCharge).toBeCloseTo(3252.06, 2);
     });
 
     test('should have zero power factor penalty when within limits', async () => {
       const response = await request(server)
-        .post('/api/mea/calculate/type-3')
+        .post('/api/MEA/calculate/type-3')
         .send({
           tariffType: 'normal',
           voltageLevel: '>=69kV',
@@ -697,14 +703,14 @@ describe('MEA Electricity Bill Calculation API', () => {
 
       expect(response.status).toBe(200);
       // Power factor penalty: max(0, 50 - 100*0.6197) * 56.07 = max(0, 50 - 61.97) * 56.07 = 0
-      expect(response.body.pfCharge).toBeCloseTo(0);
+      expect(response.body.data.pfCharge).toBeCloseTo(0);
     });
   });
 
   describe('Edge Cases', () => {
     test('should handle zero usage gracefully', async () => {
       const response = await request(server)
-        .post('/api/mea/calculate/type-2')
+        .post('/api/MEA/calculate/type-2')
         .send({
           tariffType: 'normal',
           voltageLevel: '<12kV',
@@ -715,14 +721,14 @@ describe('MEA Electricity Bill Calculation API', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.energyCharge).toBeCloseTo(0);
-      expect(response.body.ftCharge).toBeCloseTo(0);
-      expect(response.body.vat).toBeCloseTo(2.33, 2); // Only service charge * VAT rate
+      expect(response.body.data.energyCharge).toBeCloseTo(0);
+      expect(response.body.data.ftCharge).toBeCloseTo(0);
+      expect(response.body.data.vat).toBeCloseTo(2.33, 2); // Only service charge * VAT rate
     });
 
     test('should handle very high usage values', async () => {
       const response = await request(server)
-        .post('/api/mea/calculate/type-2')
+        .post('/api/MEA/calculate/type-2')
         .send({
           tariffType: 'normal',
           voltageLevel: '<12kV',
@@ -733,8 +739,8 @@ describe('MEA Electricity Bill Calculation API', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.energyCharge).toBeGreaterThan(0);
-      expect(response.body.totalBill).toBeGreaterThan(0);
+      expect(response.body.data.energyCharge).toBeGreaterThan(0);
+      expect(response.body.data.totalBill).toBeGreaterThan(0);
     });
   });
 });
@@ -751,7 +757,7 @@ describe('PEA Electricity Bill Calculation API', () => {
   });
 
   describe('Type 2 - Small Business Service', () => {
-    const baseUrl = '/api/pea/calculate/type-2';
+    const baseUrl = '/api/PEA/calculate/type-2';
 
     describe('Normal Tariff', () => {
       test('should calculate bill for <22kV with 500 kWh', async () => {
@@ -775,9 +781,9 @@ describe('PEA Electricity Bill Calculation API', () => {
         expect(response.body).toHaveProperty('totalBill');
         
         // Verify calculations: 150*3.2484 + 250*4.2218 + 100*4.4217 = 487.26 + 1055.45 + 442.17 = 1984.88
-        expect(response.body.energyCharge).toBeCloseTo(1984.88, 2);
-        expect(response.body.serviceCharge).toBe(33.29);
-        expect(response.body.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
+        expect(response.body.data.energyCharge).toBeCloseTo(1984.88, 2);
+        expect(response.body.data.serviceCharge).toBe(33.29);
+        expect(response.body.data.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
       });
 
       test('should calculate bill for <22kV with 150 kWh (first tier only)', async () => {
@@ -793,8 +799,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(487.26, 2); // 150 * 3.2484
-        expect(response.body.serviceCharge).toBe(33.29);
+        expect(response.body.data.energyCharge).toBeCloseTo(487.26, 2); // 150 * 3.2484
+        expect(response.body.data.serviceCharge).toBe(33.29);
       });
 
       test('should calculate bill for <22kV with 400 kWh (two tiers)', async () => {
@@ -811,7 +817,7 @@ describe('PEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // 150 * 3.2484 + 250 * 4.2218 = 487.26 + 1055.45 = 1542.71
-        expect(response.body.energyCharge).toBeCloseTo(1542.71, 2);
+        expect(response.body.data.energyCharge).toBeCloseTo(1542.71, 2);
       });
 
       test('should calculate bill for 22-33kV with 1000 kWh', async () => {
@@ -827,8 +833,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(3908.6, 2); // 1000 * 3.9086
-        expect(response.body.serviceCharge).toBe(312.24);
+        expect(response.body.data.energyCharge).toBeCloseTo(3908.6, 2); // 1000 * 3.9086
+        expect(response.body.data.serviceCharge).toBe(312.24);
       });
 
       test('should calculate bill for 22-33kV with 500 kWh', async () => {
@@ -844,9 +850,9 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(1954.3, 2); // 500 * 3.9086
-        expect(response.body.serviceCharge).toBe(312.24);
-        expect(response.body.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
+        expect(response.body.data.energyCharge).toBeCloseTo(1954.3, 2); // 500 * 3.9086
+        expect(response.body.data.serviceCharge).toBe(312.24);
+        expect(response.body.data.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
       });
     });
 
@@ -873,9 +879,9 @@ describe('PEA Electricity Bill Calculation API', () => {
         expect(response.body).toHaveProperty('totalBill');
         
         // Verify calculations: (200 * 5.7982) + (300 * 2.6369) = 1159.64 + 791.07 = 1950.71
-        expect(response.body.energyCharge).toBeCloseTo(1950.71, 2);
-        expect(response.body.serviceCharge).toBe(33.29);
-        expect(response.body.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
+        expect(response.body.data.energyCharge).toBeCloseTo(1950.71, 2);
+        expect(response.body.data.serviceCharge).toBe(33.29);
+        expect(response.body.data.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
       });
 
       test('should calculate bill for 22-33kV TOU', async () => {
@@ -893,9 +899,9 @@ describe('PEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // (150 * 5.1135) + (250 * 2.6037) = 767.025 + 650.925 = 1417.95
-        expect(response.body.energyCharge).toBeCloseTo(1417.95, 2);
-        expect(response.body.serviceCharge).toBe(312.24);
-        expect(response.body.ftCharge).toBeCloseTo(78.9, 1); // 400 * 19.72 / 100
+        expect(response.body.data.energyCharge).toBeCloseTo(1417.95, 2);
+        expect(response.body.data.serviceCharge).toBe(312.24);
+        expect(response.body.data.ftCharge).toBeCloseTo(78.9, 1); // 400 * 19.72 / 100
       });
 
       test('should calculate bill for <22kV TOU with equal on/off peak usage', async () => {
@@ -913,8 +919,8 @@ describe('PEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // (250 * 5.7982) + (250 * 2.6369) = 1449.55 + 659.225 = 2108.775
-        expect(response.body.energyCharge).toBeCloseTo(2108.775, 2);
-        expect(response.body.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
+        expect(response.body.data.energyCharge).toBeCloseTo(2108.775, 2);
+        expect(response.body.data.ftCharge).toBeCloseTo(98.60, 2); // 500 * 19.72 / 100
       });
     });
 
@@ -931,6 +937,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: tariffType. This field is mandatory for the calculation.');
       });
 
@@ -946,6 +953,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel. This field is mandatory for the calculation.');
       });
 
@@ -961,6 +969,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang. This field is mandatory for the calculation.');
       });
 
@@ -974,6 +983,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: usage. This field is mandatory for the calculation.');
       });
 
@@ -990,6 +1000,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error');
         expect(response.body.error).toContain('Invalid tariff type');
       });
@@ -1000,6 +1011,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           .send();
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Request body is required and cannot be empty');
       });
     });
@@ -1018,10 +1030,10 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(0);
-        expect(response.body.ftCharge).toBeCloseTo(0);
-        expect(response.body.serviceCharge).toBe(33.29);
-        expect(response.body.vat).toBeCloseTo(2.33, 2); // Only service charge * VAT rate (33.29 * 0.07)
+        expect(response.body.data.energyCharge).toBeCloseTo(0);
+        expect(response.body.data.ftCharge).toBeCloseTo(0);
+        expect(response.body.data.serviceCharge).toBe(33.29);
+        expect(response.body.data.vat).toBeCloseTo(2.33, 2); // Only service charge * VAT rate (33.29 * 0.07)
       });
 
       test('should handle very high usage values for <22kV', async () => {
@@ -1037,11 +1049,11 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeGreaterThan(0);
-        expect(response.body.totalBill).toBeGreaterThan(0);
+        expect(response.body.data.energyCharge).toBeGreaterThan(0);
+        expect(response.body.data.totalBill).toBeGreaterThan(0);
         // For very high usage, most will be at the highest tier (4.4217)
         const expectedEnergyCharge = 150 * 3.2484 + 250 * 4.2218 + (1000000 - 400) * 4.4217;
-        expect(response.body.energyCharge).toBeCloseTo(expectedEnergyCharge, 2);
+        expect(response.body.data.energyCharge).toBeCloseTo(expectedEnergyCharge, 2);
       });
 
       test('should handle very high usage values for 22-33kV', async () => {
@@ -1057,8 +1069,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(3908600, 1); // 1000000 * 3.9086
-        expect(response.body.totalBill).toBeGreaterThan(0);
+        expect(response.body.data.energyCharge).toBeCloseTo(3908600, 1); // 1000000 * 3.9086
+        expect(response.body.data.totalBill).toBeGreaterThan(0);
       });
 
       test('should handle zero FT rate', async () => {
@@ -1074,8 +1086,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.ftCharge).toBeCloseTo(0);
-        expect(response.body.energyCharge).toBeCloseTo(1984.88, 2);
+        expect(response.body.data.ftCharge).toBeCloseTo(0);
+        expect(response.body.data.energyCharge).toBeCloseTo(1984.88, 2);
       });
 
       test('should handle TOU with zero on-peak usage', async () => {
@@ -1092,8 +1104,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(1054.76, 2); // 400 * 2.6369
-        expect(response.body.ftCharge).toBeCloseTo(78.9, 1); // 400 * 19.72 / 100
+        expect(response.body.data.energyCharge).toBeCloseTo(1054.76, 2); // 400 * 2.6369
+        expect(response.body.data.ftCharge).toBeCloseTo(78.9, 1); // 400 * 19.72 / 100
       });
 
       test('should handle TOU with zero off-peak usage', async () => {
@@ -1110,8 +1122,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.energyCharge).toBeCloseTo(1739.46, 2); // 300 * 5.7982
-        expect(response.body.ftCharge).toBeCloseTo(59.2, 1); // 300 * 19.72 / 100
+        expect(response.body.data.energyCharge).toBeCloseTo(1739.46, 2); // 300 * 5.7982
+        expect(response.body.data.ftCharge).toBeCloseTo(59.2, 1); // 300 * 19.72 / 100
       });
     });
 
@@ -1137,12 +1149,12 @@ describe('PEA Electricity Bill Calculation API', () => {
         const vat = (baseTariff + ftCharge) * 0.07; // 1213.82 * 0.07 = 84.9674
         const totalBill = baseTariff + ftCharge + vat; // 1298.7874
         
-        expect(response.body.energyCharge).toBeCloseTo(energyCharge, 2);
-        expect(response.body.serviceCharge).toBe(serviceCharge);
-        expect(response.body.baseTariff).toBeCloseTo(baseTariff, 2);
-        expect(response.body.ftCharge).toBeCloseTo(ftCharge, 2);
-        expect(response.body.vat).toBeCloseTo(vat, 2);
-        expect(response.body.totalBill).toBeCloseTo(totalBill, 2);
+        expect(response.body.data.energyCharge).toBeCloseTo(energyCharge, 2);
+        expect(response.body.data.serviceCharge).toBe(serviceCharge);
+        expect(response.body.data.baseTariff).toBeCloseTo(baseTariff, 2);
+        expect(response.body.data.ftCharge).toBeCloseTo(ftCharge, 2);
+        expect(response.body.data.vat).toBeCloseTo(vat, 2);
+        expect(response.body.data.totalBill).toBeCloseTo(totalBill, 2);
       });
 
       test('should correctly calculate all bill components for TOU tariff', async () => {
@@ -1167,18 +1179,18 @@ describe('PEA Electricity Bill Calculation API', () => {
         const vat = (baseTariff + ftCharge) * 0.07; // 1390.83 * 0.07 = 97.3581
         const totalBill = baseTariff + ftCharge + vat; // 1488.1881
         
-        expect(response.body.energyCharge).toBeCloseTo(energyCharge, 2);
-        expect(response.body.serviceCharge).toBe(serviceCharge);
-        expect(response.body.baseTariff).toBeCloseTo(baseTariff, 2);
-        expect(response.body.ftCharge).toBeCloseTo(ftCharge, 2);
-        expect(response.body.vat).toBeCloseTo(vat, 2);
-        expect(response.body.totalBill).toBeCloseTo(totalBill, 2);
+        expect(response.body.data.energyCharge).toBeCloseTo(energyCharge, 2);
+        expect(response.body.data.serviceCharge).toBe(serviceCharge);
+        expect(response.body.data.baseTariff).toBeCloseTo(baseTariff, 2);
+        expect(response.body.data.ftCharge).toBeCloseTo(ftCharge, 2);
+        expect(response.body.data.vat).toBeCloseTo(vat, 2);
+        expect(response.body.data.totalBill).toBeCloseTo(totalBill, 2);
       });
     });
   });
 
   describe('Type 3 - Medium Business Service', () => {
-    const baseUrl = '/api/pea/calculate/type-3';
+    const baseUrl = '/api/PEA/calculate/type-3';
 
     describe('Normal Tariff', () => {
       test('should calculate bill for >=69kV', async () => {
@@ -1208,9 +1220,9 @@ describe('PEA Electricity Bill Calculation API', () => {
         expect(response.body).toHaveProperty('grandTotal');
 
         // Verify calculations
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(17570, 1); // 100 * 175.70
-        expect(response.body.energyCharge).toBeCloseTo(124388, 1); // 40000 * 3.1097
-        expect(response.body.pfCharge).toBeCloseTo(3252.06, 2); // (120 - 100*0.6197) * 56.07
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(17570, 1); // 100 * 175.70
+        expect(response.body.data.energyCharge).toBeCloseTo(124388, 1); // 40000 * 3.1097
+        expect(response.body.data.pfCharge).toBeCloseTo(3252.06, 2); // (120 - 100*0.6197) * 56.07
       });
 
       test('should calculate bill for 22-33kV', async () => {
@@ -1229,8 +1241,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(15700.8, 1); // 80 * 196.26
-        expect(response.body.energyCharge).toBeCloseTo(94413, 1); // 30000 * 3.1471
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(15700.8, 1); // 80 * 196.26
+        expect(response.body.data.energyCharge).toBeCloseTo(94413, 1); // 30000 * 3.1471
       });
 
       test('should calculate bill for <22kV', async () => {
@@ -1249,8 +1261,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(11075, 1); // 50 * 221.50
-        expect(response.body.energyCharge).toBeCloseTo(63502, 1); // 20000 * 3.1751
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(11075, 1); // 50 * 221.50
+        expect(response.body.data.energyCharge).toBeCloseTo(63502, 1); // 20000 * 3.1751
       });
     });
 
@@ -1273,8 +1285,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(6672.6, 1); // 90 * 74.14
-        expect(response.body.energyCharge).toBeCloseTo(126160, 1); // (15000 * 4.1025) + (25000 * 2.5849)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(6672.6, 1); // 90 * 74.14
+        expect(response.body.data.energyCharge).toBeCloseTo(126160, 1); // (15000 * 4.1025) + (25000 * 2.5849)
       });
 
       test('should calculate bill for 22-33kV TOU', async () => {
@@ -1295,8 +1307,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(9969.75, 1); // 75 * 132.93
-        expect(response.body.energyCharge).toBeCloseTo(97073.4, 1); // (12000 * 4.1839) + (18000 * 2.6037)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(9969.75, 1); // 75 * 132.93
+        expect(response.body.data.energyCharge).toBeCloseTo(97073.4, 1); // (12000 * 4.1839) + (18000 * 2.6037)
       });
 
       test('should calculate bill for <22kV TOU', async () => {
@@ -1317,8 +1329,8 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(13650, 1); // 65 * 210.00
-        expect(response.body.energyCharge).toBeCloseTo(82850.5, 1); // (10000 * 4.3297) + (15000 * 2.6369)
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(13650, 1); // 65 * 210.00
+        expect(response.body.data.energyCharge).toBeCloseTo(82850.5, 1); // (10000 * 4.3297) + (15000 * 2.6369)
       });
     });
 
@@ -1341,8 +1353,8 @@ describe('PEA Electricity Bill Calculation API', () => {
         expect(response.status).toBe(200);
         const calculatedDemand = 50 * 175.70; // 8785
         const minimumDemand = 20000 * 0.70; // 14000
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(calculatedDemand, 1);
-        expect(response.body.effectiveDemandCharge).toBeCloseTo(minimumDemand, 1);
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(calculatedDemand, 1);
+        expect(response.body.data.effectiveDemandCharge).toBeCloseTo(minimumDemand, 1);
       });
     });
 
@@ -1362,6 +1374,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: tariffType. This field is mandatory for the calculation.');
       });
 
@@ -1380,6 +1393,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel. This field is mandatory for the calculation.');
       });
 
@@ -1398,6 +1412,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang. This field is mandatory for the calculation.');
       });
 
@@ -1416,6 +1431,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: peakKvar. This field is mandatory for the calculation.');
       });
 
@@ -1434,6 +1450,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: highestDemandChargeLast12m. This field is mandatory for the calculation.');
       });
 
@@ -1449,6 +1466,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: usage. This field is mandatory for the calculation.');
       });
     });
@@ -1471,7 +1489,7 @@ describe('PEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // Power factor penalty: (120 - 100*0.6197) * 56.07 = (120 - 61.97) * 56.07 = 58.03 * 56.07 = 3252.06
-        expect(response.body.pfCharge).toBeCloseTo(3252.06, 2);
+        expect(response.body.data.pfCharge).toBeCloseTo(3252.06, 2);
       });
 
       test('should have zero power factor penalty when within limits', async () => {
@@ -1491,13 +1509,13 @@ describe('PEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // Power factor penalty: max(0, 50 - 100*0.6197) * 56.07 = max(0, 50 - 61.97) * 56.07 = 0
-        expect(response.body.pfCharge).toBeCloseTo(0);
+        expect(response.body.data.pfCharge).toBeCloseTo(0);
       });
     });
   });
 
   describe('Type 4 - Large Business Service', () => {
-    const baseUrl = '/api/pea/calculate/type-4';
+    const baseUrl = '/api/PEA/calculate/type-4';
 
     describe('TOD Tariff', () => {
       test('should calculate bill for >=69kV TOD', async () => {
@@ -1529,10 +1547,10 @@ describe('PEA Electricity Bill Calculation API', () => {
         expect(response.body).toHaveProperty('grandTotal');
 
         // Verify calculations: (250 * 224.30) + (200 * 29.91) + (100 * 0) = 56075 + 5982 = 62057
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(62057, 1);
-        expect(response.body.energyCharge).toBeCloseTo(310970, 1); // 100000 * 3.1097
-        expect(response.body.serviceCharge).toBe(312.24);
-        expect(response.body.ftCharge).toBeCloseTo(39720, 1); // 100000 * 39.72 / 100
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(62057, 1);
+        expect(response.body.data.energyCharge).toBeCloseTo(310970, 1); // 100000 * 3.1097
+        expect(response.body.data.serviceCharge).toBe(312.24);
+        expect(response.body.data.ftCharge).toBeCloseTo(39720, 1); // 100000 * 39.72 / 100
       });
 
       test('should calculate bill for 22-33kV TOD', async () => {
@@ -1554,9 +1572,9 @@ describe('PEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // Verify calculations: (200 * 285.05) + (150 * 58.88) + (80 * 0) = 57010 + 8832 = 65842
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(65842, 1);
-        expect(response.body.energyCharge).toBeCloseTo(251768, 1); // 80000 * 3.1471
-        expect(response.body.serviceCharge).toBe(312.24);
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(65842, 1);
+        expect(response.body.data.energyCharge).toBeCloseTo(251768, 1); // 80000 * 3.1471
+        expect(response.body.data.serviceCharge).toBe(312.24);
       });
 
       test('should calculate bill for <22kV TOD', async () => {
@@ -1578,9 +1596,9 @@ describe('PEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // Verify calculations: (180 * 332.71) + (120 * 68.22) + (90 * 0) = 59887.8 + 8186.4 = 68074.2
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(68074.2, 1);
-        expect(response.body.energyCharge).toBeCloseTo(222257, 1); // 70000 * 3.1751
-        expect(response.body.serviceCharge).toBe(312.24);
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(68074.2, 1);
+        expect(response.body.data.energyCharge).toBeCloseTo(222257, 1); // 70000 * 3.1751
+        expect(response.body.data.serviceCharge).toBe(312.24);
       });
     });
 
@@ -1603,10 +1621,10 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(14828, 1); // 200 * 74.14
-        expect(response.body.energyCharge).toBeCloseTo(126160, 1); // (15000 * 4.1025) + (25000 * 2.5849)
-        expect(response.body.serviceCharge).toBe(312.24);
-        expect(response.body.ftCharge).toBeCloseTo(15888, 1); // 40000 * 39.72 / 100
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(14828, 1); // 200 * 74.14
+        expect(response.body.data.energyCharge).toBeCloseTo(126160, 1); // (15000 * 4.1025) + (25000 * 2.5849)
+        expect(response.body.data.serviceCharge).toBe(312.24);
+        expect(response.body.data.ftCharge).toBeCloseTo(15888, 1); // 40000 * 39.72 / 100
       });
 
       test('should calculate bill for 22-33kV TOU', async () => {
@@ -1627,10 +1645,10 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(23927.4, 1); // 180 * 132.93
-        expect(response.body.energyCharge).toBeCloseTo(97073.4, 1); // (12000 * 4.1839) + (18000 * 2.6037)
-        expect(response.body.serviceCharge).toBe(312.24);
-        expect(response.body.ftCharge).toBeCloseTo(11916, 1); // 30000 * 39.72 / 100
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(23927.4, 1); // 180 * 132.93
+        expect(response.body.data.energyCharge).toBeCloseTo(97073.4, 1); // (12000 * 4.1839) + (18000 * 2.6037)
+        expect(response.body.data.serviceCharge).toBe(312.24);
+        expect(response.body.data.ftCharge).toBeCloseTo(11916, 1); // 30000 * 39.72 / 100
       });
 
       test('should calculate bill for <22kV TOU', async () => {
@@ -1651,10 +1669,10 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(31500, 1); // 150 * 210.00
-        expect(response.body.energyCharge).toBeCloseTo(82850.5, 1); // (10000 * 4.3297) + (15000 * 2.6369)
-        expect(response.body.serviceCharge).toBe(312.24);
-        expect(response.body.ftCharge).toBeCloseTo(9930, 1); // 25000 * 39.72 / 100
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(31500, 1); // 150 * 210.00
+        expect(response.body.data.energyCharge).toBeCloseTo(82850.5, 1); // (10000 * 4.3297) + (15000 * 2.6369)
+        expect(response.body.data.serviceCharge).toBe(312.24);
+        expect(response.body.data.ftCharge).toBeCloseTo(9930, 1); // 25000 * 39.72 / 100
       });
     });
 
@@ -1679,8 +1697,8 @@ describe('PEA Electricity Bill Calculation API', () => {
         expect(response.status).toBe(200);
         const calculatedDemand = (100 * 224.30) + (80 * 29.91) + (50 * 0); // 22430 + 2392.8 = 24822.8
         const minimumDemand = 80000 * 0.70; // 56000
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(24822.8, 1);
-        expect(response.body.effectiveDemandCharge).toBeCloseTo(minimumDemand, 1);
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(24822.8, 1);
+        expect(response.body.data.effectiveDemandCharge).toBeCloseTo(minimumDemand, 1);
       });
 
       test('should not apply minimum bill when calculated demand is higher', async () => {
@@ -1703,9 +1721,9 @@ describe('PEA Electricity Bill Calculation API', () => {
         expect(response.status).toBe(200);
         const calculatedDemand = 300 * 132.93; // 39879
         const minimumDemand = 20000 * 0.70; // 14000
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(calculatedDemand, 1);
-        expect(response.body.effectiveDemandCharge).toBeCloseTo(calculatedDemand, 1);
-        expect(response.body.effectiveDemandCharge).toBeGreaterThan(minimumDemand);
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(calculatedDemand, 1);
+        expect(response.body.data.effectiveDemandCharge).toBeCloseTo(calculatedDemand, 1);
+        expect(response.body.data.effectiveDemandCharge).toBeGreaterThan(minimumDemand);
       });
     });
 
@@ -1727,6 +1745,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: tariffType. This field is mandatory for the calculation.');
       });
 
@@ -1747,6 +1766,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: voltageLevel. This field is mandatory for the calculation.');
       });
 
@@ -1767,6 +1787,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: ftRateSatang. This field is mandatory for the calculation.');
       });
 
@@ -1787,6 +1808,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: peakKvar. This field is mandatory for the calculation.');
       });
 
@@ -1807,6 +1829,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: highestDemandChargeLast12m. This field is mandatory for the calculation.');
       });
 
@@ -1822,6 +1845,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Missing required field: usage. This field is mandatory for the calculation.');
       });
 
@@ -1843,6 +1867,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Invalid tariff type for Type 4. Must be "tod" or "tou", received: invalid');
       });
 
@@ -1864,6 +1889,7 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('success', false);
         expect(response.body).toHaveProperty('error', 'Invalid voltage level for Type 4 tod. Must be ">=69kV", "22-33kV", or "<22kV", received: invalid');
       });
     });
@@ -1888,7 +1914,7 @@ describe('PEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // Power factor penalty: (200 - 250*0.6197) * 56.07 = (200 - 154.925) * 56.07 = 45.075 * 56.07 = 2523.15
-        expect(response.body.pfCharge).toBeCloseTo(2523.15, 2);
+        expect(response.body.data.pfCharge).toBeCloseTo(2523.15, 2);
       });
 
       test('should have zero power factor penalty when within limits', async () => {
@@ -1910,7 +1936,7 @@ describe('PEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // Power factor penalty: max(0, 100 - 200*0.6197) * 56.07 = max(0, 100 - 123.94) * 56.07 = 0
-        expect(response.body.pfCharge).toBeCloseTo(0);
+        expect(response.body.data.pfCharge).toBeCloseTo(0);
       });
     });
 
@@ -1933,10 +1959,10 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(0);
-        expect(response.body.energyCharge).toBeCloseTo(0);
-        expect(response.body.ftCharge).toBeCloseTo(0);
-        expect(response.body.serviceCharge).toBe(312.24);
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(0);
+        expect(response.body.data.energyCharge).toBeCloseTo(0);
+        expect(response.body.data.ftCharge).toBeCloseTo(0);
+        expect(response.body.data.serviceCharge).toBe(312.24);
       });
 
       test('should handle very high usage values', async () => {
@@ -1957,9 +1983,9 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(210000, 1); // 1000 * 210.00
-        expect(response.body.energyCharge).toBeCloseTo(480175, 1); // (50000 * 4.3297) + (100000 * 2.6369)
-        expect(response.body.ftCharge).toBeCloseTo(59580, 1); // 150000 * 39.72 / 100
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(210000, 1); // 1000 * 210.00
+        expect(response.body.data.energyCharge).toBeCloseTo(480175, 1); // (50000 * 4.3297) + (100000 * 2.6369)
+        expect(response.body.data.ftCharge).toBeCloseTo(59580, 1); // 150000 * 39.72 / 100
       });
 
       test('should handle TOD with zero off-peak demand', async () => {
@@ -1981,8 +2007,8 @@ describe('PEA Electricity Bill Calculation API', () => {
 
         expect(response.status).toBe(200);
         // Demand charge should only include on-peak and partial-peak
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(48645.5, 1); // (150 * 285.05) + (100 * 58.88)
-        expect(response.body.energyCharge).toBeCloseTo(157355, 1); // 50000 * 3.1471
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(48645.5, 1); // (150 * 285.05) + (100 * 58.88)
+        expect(response.body.data.energyCharge).toBeCloseTo(157355, 1); // 50000 * 3.1471
       });
 
       test('should handle TOU with zero off-peak usage', async () => {
@@ -2003,9 +2029,9 @@ describe('PEA Electricity Bill Calculation API', () => {
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(8896.8, 1); // 120 * 74.14
-        expect(response.body.energyCharge).toBeCloseTo(82050, 1); // 20000 * 4.1025
-        expect(response.body.ftCharge).toBeCloseTo(7944, 1); // 20000 * 39.72 / 100
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(8896.8, 1); // 120 * 74.14
+        expect(response.body.data.energyCharge).toBeCloseTo(82050, 1); // 20000 * 4.1025
+        expect(response.body.data.ftCharge).toBeCloseTo(7944, 1); // 20000 * 39.72 / 100
       });
     });
 
@@ -2047,20 +2073,20 @@ describe('PEA Electricity Bill Calculation API', () => {
         const expectedServiceCharge = 312.24;
         const expectedPfCharge = 1457.82; // API returns 1457.82
 
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(expectedDemandCharge, 1);
-        expect(response.body.energyCharge).toBeCloseTo(expectedEnergyCharge, 1);
-        expect(response.body.serviceCharge).toBe(expectedServiceCharge);
-        expect(response.body.ftCharge).toBeCloseTo(expectedFtCharge, 1);
-        expect(response.body.pfCharge).toBeCloseTo(expectedPfCharge, 2);
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(expectedDemandCharge, 1);
+        expect(response.body.data.energyCharge).toBeCloseTo(expectedEnergyCharge, 1);
+        expect(response.body.data.serviceCharge).toBe(expectedServiceCharge);
+        expect(response.body.data.ftCharge).toBeCloseTo(expectedFtCharge, 1);
+        expect(response.body.data.pfCharge).toBeCloseTo(expectedPfCharge, 2);
 
         // Verify subtotal and VAT calculations
         const expectedSubTotal = response.body.effectiveDemandCharge + expectedEnergyCharge + expectedPfCharge + expectedServiceCharge + expectedFtCharge;
         const expectedVat = expectedSubTotal * 0.07;
         const expectedGrandTotal = expectedSubTotal + expectedVat;
 
-        expect(response.body.subTotal).toBeCloseTo(expectedSubTotal, 2);
-        expect(response.body.vat).toBeCloseTo(expectedVat, 5);
-        expect(response.body.grandTotal).toBeCloseTo(expectedGrandTotal, 5);
+        expect(response.body.data.subTotal).toBeCloseTo(expectedSubTotal, 2);
+        expect(response.body.data.vat).toBeCloseTo(expectedVat, 5);
+        expect(response.body.data.grandTotal).toBeCloseTo(expectedGrandTotal, 5);
       });
 
       test('should correctly calculate all bill components for TOU tariff', async () => {
@@ -2100,21 +2126,176 @@ describe('PEA Electricity Bill Calculation API', () => {
         const expectedServiceCharge = 312.24;
         const expectedPfCharge = 448.56; // API returns 448.56
 
-        expect(response.body.calculatedDemandCharge).toBeCloseTo(expectedDemandCharge, 1);
-        expect(response.body.energyCharge).toBeCloseTo(expectedEnergyCharge, 1);
-        expect(response.body.serviceCharge).toBe(expectedServiceCharge);
-        expect(response.body.ftCharge).toBeCloseTo(expectedFtCharge, 1);
-        expect(response.body.pfCharge).toBeCloseTo(expectedPfCharge, 2);
+        expect(response.body.data.calculatedDemandCharge).toBeCloseTo(expectedDemandCharge, 1);
+        expect(response.body.data.energyCharge).toBeCloseTo(expectedEnergyCharge, 1);
+        expect(response.body.data.serviceCharge).toBe(expectedServiceCharge);
+        expect(response.body.data.ftCharge).toBeCloseTo(expectedFtCharge, 1);
+        expect(response.body.data.pfCharge).toBeCloseTo(expectedPfCharge, 2);
 
         // Verify subtotal and VAT calculations
         const expectedSubTotal = response.body.effectiveDemandCharge + expectedEnergyCharge + expectedPfCharge + expectedServiceCharge + expectedFtCharge;
         const expectedVat = expectedSubTotal * 0.07;
         const expectedGrandTotal = expectedSubTotal + expectedVat;
 
-        expect(response.body.subTotal).toBeCloseTo(expectedSubTotal, 2);
-        expect(response.body.vat).toBeCloseTo(expectedVat, 5);
-        expect(response.body.grandTotal).toBeCloseTo(expectedGrandTotal, 5);
+        expect(response.body.data.subTotal).toBeCloseTo(expectedSubTotal, 2);
+        expect(response.body.data.vat).toBeCloseTo(expectedVat, 5);
+        expect(response.body.data.grandTotal).toBeCloseTo(expectedGrandTotal, 5);
       });
+    });
+  });
+});
+
+describe('New API Endpoints', () => {
+  let server;
+
+  beforeAll(() => {
+    server = app.listen(0); // Use random port for testing
+  });
+
+  afterAll((done) => {
+    server.close(done);
+  });
+
+  describe('Health Check', () => {
+    test('should return health status', async () => {
+      const response = await request(server)
+        .get('/api/health');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('message', 'Strategy Pattern API is healthy');
+      expect(response.body).toHaveProperty('version', '3.0.0');
+      expect(response.body).toHaveProperty('features');
+      expect(response.body).toHaveProperty('timestamp');
+    });
+  });
+
+  describe('API Information', () => {
+    test('should return API information', async () => {
+      const response = await request(server)
+        .get('/api/info');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('version', '3.0.0');
+      expect(response.body.data).toHaveProperty('description');
+      expect(response.body.data).toHaveProperty('providers');
+      expect(response.body.data).toHaveProperty('calculationTypes');
+      expect(response.body.data).toHaveProperty('tariffTypes');
+      expect(response.body.data).toHaveProperty('features');
+      expect(response.body.data).toHaveProperty('endpoints');
+      expect(response.body.data).toHaveProperty('examples');
+    });
+  });
+
+  describe('Strategy Discovery', () => {
+    test('should return available strategies for MEA', async () => {
+      const response = await request(server)
+        .get('/api/strategies/MEA');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('provider', 'MEA');
+      expect(response.body.data).toHaveProperty('strategies');
+      expect(response.body.data).toHaveProperty('count');
+      expect(Array.isArray(response.body.data.strategies)).toBe(true);
+    });
+
+    test('should return available strategies for PEA', async () => {
+      const response = await request(server)
+        .get('/api/strategies/PEA');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('provider', 'PEA');
+      expect(response.body.data).toHaveProperty('strategies');
+      expect(response.body.data).toHaveProperty('count');
+      expect(Array.isArray(response.body.data.strategies)).toBe(true);
+    });
+
+    test('should return strategies for calculation type', async () => {
+      const response = await request(server)
+        .get('/api/strategies/calculation-type/type-2');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('calculationType', 'type-2');
+      expect(response.body.data).toHaveProperty('strategies');
+      expect(response.body.data).toHaveProperty('count');
+      expect(Array.isArray(response.body.data.strategies)).toBe(true);
+    });
+
+    test('should return 400 for missing provider', async () => {
+      const response = await request(server)
+        .get('/api/strategies/');
+
+      expect(response.status).toBe(404);
+    });
+
+    test('should return 400 for missing calculation type', async () => {
+      const response = await request(server)
+        .get('/api/strategies/calculation-type/');
+
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe('Combination Validation', () => {
+    test('should validate supported combination', async () => {
+      const response = await request(server)
+        .get('/api/validate?provider=MEA&calculationType=type-2&tariffType=normal&voltageLevel=<12kV');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('provider', 'MEA');
+      expect(response.body.data).toHaveProperty('calculationType', 'type-2');
+      expect(response.body.data).toHaveProperty('tariffType', 'normal');
+      expect(response.body.data).toHaveProperty('voltageLevel', '<12kV');
+      expect(response.body.data).toHaveProperty('isSupported');
+    });
+
+    test('should validate unsupported combination', async () => {
+      const response = await request(server)
+        .get('/api/validate?provider=MEA&calculationType=type-2&tariffType=invalid&voltageLevel=<12kV');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('isSupported', false);
+    });
+
+    test('should return 400 for missing parameters', async () => {
+      const response = await request(server)
+        .get('/api/validate?provider=MEA&calculationType=type-2');
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('success', false);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toContain('All parameters are required');
+    });
+  });
+
+  describe('Service Information', () => {
+    test('should return service information', async () => {
+      const response = await request(server)
+        .get('/api/info');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('version');
+      expect(response.body.data).toHaveProperty('description');
+      expect(response.body.data).toHaveProperty('providers');
+      expect(response.body.data).toHaveProperty('calculationTypes');
+      expect(response.body.data).toHaveProperty('tariffTypes');
+      expect(response.body.data).toHaveProperty('features');
+      expect(response.body.data).toHaveProperty('endpoints');
+      expect(response.body.data).toHaveProperty('examples');
     });
   });
 });
