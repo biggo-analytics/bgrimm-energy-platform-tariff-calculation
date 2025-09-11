@@ -1,17 +1,18 @@
-# รายงานการใช้งาน Strategy Design Pattern
-## ระบบคำนวณค่าไฟฟ้า BGRIM Energy Platform
+# รายงานการใช้งาน Dynamic Strategy Design Pattern
+## ระบบคำนวณค่าไฟฟ้า BGRIM Energy Platform (Version 4.0)
 
 ---
 
 ## สารบัญ
 
 1. [ภาพรวมของระบบ](#ภาพรวมของระบบ)
-2. [การออกแบบ Strategy Pattern](#การออกแบบ-strategy-pattern)
+2. [การออกแบบ Dynamic Strategy Pattern](#การออกแบบ-dynamic-strategy-pattern)
 3. [โครงสร้างของ Strategy Interface](#โครงสร้างของ-strategy-interface)
-4. [Strategy Factory และการจัดการ](#strategy-factory-และการจัดการ)
+4. [Dynamic Strategy Factory และการจัดการ](#dynamic-strategy-factory-และการจัดการ)
 5. [การใช้งาน Strategies แต่ละประเภท](#การใช้งาน-strategies-แต่ละประเภท)
 6. [ตัวอย่างการใช้งานแบบละเอียด](#ตัวอย่างการใช้งานแบบละเอียด)
 7. [การทดสอบและตรวจสอบ](#การทดสอบและตรวจสอบ)
+8. [การเพิ่ม Strategy ใหม่](#การเพิ่ม-strategy-ใหม่)
 
 ---
 
@@ -26,14 +27,20 @@
 
 ### จำนวน Strategy ทั้งหมด
 ```
-MEA Strategies: 15 ตัว
-PEA Strategies: 15 ตัว
-รวมทั้งหมด: 30 ตัว
+MEA Strategies: 20 ตัว
+PEA Strategies: 20 ตัว
+รวมทั้งหมด: 40 ตัว
 ```
+
+### คุณสมบัติใหม่ใน Version 4.0
+- **Dynamic Loading**: โหลด Strategy แบบอัตโนมัติจากไฟล์
+- **File System Discovery**: ค้นหา Strategy จากชื่อไฟล์
+- **Simplified API**: ใช้ชื่อ Tariff Plan แทน 4 parameters
+- **Auto-Discovery**: เพิ่ม Strategy ใหม่ได้โดยไม่ต้องแก้ไขโค้ด
 
 ---
 
-## การออกแบบ Strategy Pattern
+## การออกแบบ Dynamic Strategy Pattern
 
 ### 1. Strategy Interface (ICalculationStrategy)
 
@@ -126,69 +133,93 @@ const {
 
 ---
 
-## Strategy Factory และการจัดการ
+## Dynamic Strategy Factory และการจัดการ
 
-### 1. Strategy Registry
+### 1. File System Discovery
 
-Strategy Factory ใช้ Registry Pattern เพื่อเก็บ Strategy Classes ทั้งหมด:
+Dynamic Strategy Factory ใช้ File System Discovery เพื่อค้นหา Strategy Files อัตโนมัติ:
 
 ```javascript
-const STRATEGY_REGISTRY = {
-  // PEA Strategies
-  'PEA_2.2.1_small_TOU': PEA_2_2_1_small_TOU,
-  'PEA_2.2.2_small_TOU': PEA_2_2_2_small_TOU,
-  'PEA_3.1.1_medium_normal': PEA_3_1_1_medium_normal,
-  // ... และอื่นๆ
+function getAvailableStrategyFiles() {
+  const strategiesDir = __dirname;
+  const files = fs.readdirSync(strategiesDir);
   
-  // MEA Strategies
-  'MEA_2.2.1_small_TOU': MEA_2_2_1_small_TOU,
-  'MEA_2.2.2_small_TOU': MEA_2_2_2_small_TOU,
-  'MEA_3.1.1_medium_normal': MEA_3_1_1_medium_normal,
-  // ... และอื่นๆ
-};
-```
-
-### 2. การสร้าง Strategy
-
-```javascript
-function createStrategy(provider, calculationType, tariffType, voltageLevel) {
-  // 1. ตรวจสอบพารามิเตอร์
-  // 2. แปลงพารามิเตอร์เป็น Strategy ID
-  // 3. ค้นหา Strategy Class จาก Registry
-  // 4. สร้างและคืนค่า Strategy Instance
+  // กรองเฉพาะไฟล์ .js ที่เป็น Strategy
+  const strategyFiles = files
+    .filter(file => {
+      return file.endsWith('.js') && 
+             file !== 'StrategyFactory.js' && 
+             file !== 'ICalculationStrategy.js' &&
+             file !== 'shared-calculation-utils.js';
+    })
+    .map(file => file.replace('.js', '')); // ลบ .js extension
+    
+  return strategyFiles;
 }
 ```
 
-### 3. การแมปพารามิเตอร์
+### 2. Dynamic Loading System
 
-#### การแมปประเภทการคำนวณ:
 ```javascript
-const typeMapping = {
-  'type-2': { baseType: '2.2', size: 'small' },
-  'type-3': { baseType: '3', size: 'medium' },
-  'type-4': { baseType: '4', size: 'large' },
-  'type-5': { baseType: '5', size: 'specific' }
-};
+function loadStrategyClass(strategyFileName) {
+  // ตรวจสอบ cache ก่อน
+  if (strategyCache.has(strategyFileName)) {
+    return strategyCache.get(strategyFileName);
+  }
+
+  // โหลด Strategy แบบ dynamic
+  const strategyPath = path.join(__dirname, `${strategyFileName}.js`);
+  const StrategyClass = require(strategyPath);
+  
+  // เก็บใน cache
+  strategyCache.set(strategyFileName, StrategyClass);
+  
+  return StrategyClass;
+}
 ```
 
-#### การแมประดับแรงดันไฟฟ้า:
+### 3. การสร้าง Strategy (แบบใหม่)
+
 ```javascript
-const voltageMapping = {
-  '<12kV': '3',
-  '12-24kV': '2',
-  '<22kV': '3',
-  '22-33kV': '2',
-  '>=69kV': '1'
-};
+function createStrategy(tariffPlanName) {
+  // 1. ตรวจสอบว่า tariff plan มีอยู่จริง
+  // 2. โหลด Strategy Class แบบ dynamic
+  // 3. สร้างและคืนค่า Strategy Instance
+}
 ```
 
-#### การแมปรูปแบบการคิดค่าไฟฟ้า:
+### 4. Strategy Caching
+
+ระบบใช้ Map เพื่อ cache Strategy Classes ที่โหลดแล้ว:
+
 ```javascript
-const tariffMapping = {
-  'normal': 'normal',
-  'tou': 'TOU',
-  'tod': 'TOD'
-};
+const strategyCache = new Map();
+
+// ตรวจสอบ cache ก่อนโหลดใหม่
+if (strategyCache.has(strategyFileName)) {
+  return strategyCache.get(strategyFileName);
+}
+```
+
+### 5. การค้นหา Strategy
+
+```javascript
+// ค้นหา Strategy ทั้งหมด
+function getAllStrategies() {
+  return getAvailableStrategyFiles();
+}
+
+// ค้นหา Strategy ตาม Provider
+function getStrategiesByProvider(provider) {
+  const allStrategies = getAvailableStrategyFiles();
+  return allStrategies.filter(strategy => strategy.startsWith(provider));
+}
+
+// ค้นหา Strategy ตาม Calculation Type
+function getStrategiesByCalculationType(calculationType) {
+  const allStrategies = getAvailableStrategyFiles();
+  return allStrategies.filter(strategy => strategy.includes(`_${baseType}.`));
+}
 ```
 
 ---
