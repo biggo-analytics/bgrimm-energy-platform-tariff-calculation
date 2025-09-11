@@ -13,15 +13,15 @@ class ElectricityController {
    */
   async calculateBill(ctx) {
     try {
-      const { provider, calculationType } = ctx.params;
+      const { tariffPlanName } = ctx.params;
       const data = ctx.request.body;
 
       // Validate required parameters
-      if (!provider || !calculationType) {
+      if (!tariffPlanName) {
         ctx.status = 400;
         ctx.body = {
           success: false,
-          error: 'Provider and calculation type are required',
+          error: 'Tariff plan name is required',
           timestamp: new Date().toISOString()
         };
         return;
@@ -39,27 +39,23 @@ class ElectricityController {
       }
 
       // Perform calculation using strategy
-      const result = electricityService.calculateBill(provider, calculationType, data);
+      const result = electricityService.calculateBill(tariffPlanName, data);
 
       ctx.status = 200;
       ctx.body = {
         success: true,
         data: result,
         metadata: {
-          provider,
-          calculationType,
-          tariffType: data.tariffType,
-          voltageLevel: data.voltageLevel,
-          serviceVersion: '3.0.0',
-          strategyPattern: 'strategy'
+          tariffPlanName,
+          serviceVersion: '4.0.0',
+          strategyPattern: 'dynamic'
         },
         timestamp: new Date().toISOString()
       };
 
     } catch (error) {
       logger.error('Calculation request failed', {
-        provider: ctx.params.provider,
-        calculationType: ctx.params.calculationType,
+        tariffPlanName: ctx.params.tariffPlanName,
         error: error.message
       });
 
@@ -177,38 +173,93 @@ class ElectricityController {
   }
 
   /**
-   * Validate if a combination is supported
+   * Get all available tariff plans
    * @param {Object} ctx - Koa context
    */
-  async validateCombination(ctx) {
+  async getAllTariffPlans(ctx) {
     try {
-      const { provider, calculationType, tariffType, voltageLevel } = ctx.query;
-
-      if (!provider || !calculationType || !tariffType || !voltageLevel) {
-        ctx.status = 400;
-        ctx.body = {
-          success: false,
-          error: 'All parameters (provider, calculationType, tariffType, voltageLevel) are required',
-          timestamp: new Date().toISOString()
-        };
-        return;
-      }
-
-      const isSupported = electricityService.isCombinationSupported(
-        provider, 
-        calculationType, 
-        tariffType, 
-        voltageLevel
-      );
+      const tariffPlans = electricityService.getAllTariffPlans();
 
       ctx.status = 200;
       ctx.body = {
         success: true,
         data: {
-          provider,
-          calculationType,
-          tariffType,
-          voltageLevel,
+          tariffPlans,
+          count: tariffPlans.length
+        },
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      ctx.status = 500;
+      ctx.body = {
+        success: false,
+        error: 'Failed to retrieve tariff plans',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Get tariff plan information
+   * @param {Object} ctx - Koa context
+   */
+  async getTariffPlanInfo(ctx) {
+    try {
+      const { tariffPlanName } = ctx.params;
+
+      if (!tariffPlanName) {
+        ctx.status = 400;
+        ctx.body = {
+          success: false,
+          error: 'Tariff plan name parameter is required',
+          timestamp: new Date().toISOString()
+        };
+        return;
+      }
+
+      const tariffPlanInfo = electricityService.getTariffPlanInfo(tariffPlanName);
+
+      ctx.status = 200;
+      ctx.body = {
+        success: true,
+        data: tariffPlanInfo,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      ctx.status = 400;
+      ctx.body = {
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Validate if a tariff plan is supported
+   * @param {Object} ctx - Koa context
+   */
+  async validateTariffPlan(ctx) {
+    try {
+      const { tariffPlanName } = ctx.query;
+
+      if (!tariffPlanName) {
+        ctx.status = 400;
+        ctx.body = {
+          success: false,
+          error: 'Tariff plan name parameter is required',
+          timestamp: new Date().toISOString()
+        };
+        return;
+      }
+
+      const isSupported = electricityService.isTariffPlanSupported(tariffPlanName);
+
+      ctx.status = 200;
+      ctx.body = {
+        success: true,
+        data: {
+          tariffPlanName,
           isSupported
         },
         timestamp: new Date().toISOString()
@@ -232,5 +283,7 @@ module.exports = {
   getServiceInfo: (ctx) => electricityController.getServiceInfo(ctx),
   getAvailableStrategies: (ctx) => electricityController.getAvailableStrategies(ctx),
   getStrategiesForCalculationType: (ctx) => electricityController.getStrategiesForCalculationType(ctx),
-  validateCombination: (ctx) => electricityController.validateCombination(ctx)
+  getAllTariffPlans: (ctx) => electricityController.getAllTariffPlans(ctx),
+  getTariffPlanInfo: (ctx) => electricityController.getTariffPlanInfo(ctx),
+  validateTariffPlan: (ctx) => electricityController.validateTariffPlan(ctx)
 };

@@ -1,207 +1,124 @@
 /**
  * Strategy Factory
- * Factory function to select and instantiate the correct strategy class
- * based on provider, calculation type, tariff model, and voltage level
+ * Factory function to dynamically load and instantiate strategy classes
+ * based on tariff plan names from file system
  */
 
+const fs = require('fs');
+const path = require('path');
 const { logger } = require('../utils/logger');
 
-// Import all strategy classes
-const PEA_2_2_1_small_TOU = require('./PEA_2.2.1_small_TOU');
-const PEA_2_2_2_small_TOU = require('./PEA_2.2.2_small_TOU');
-const PEA_3_1_1_medium_normal = require('./PEA_3.1.1_medium_normal');
-const PEA_3_1_2_medium_normal = require('./PEA_3.1.2_medium_normal');
-const PEA_3_1_3_medium_normal = require('./PEA_3.1.3_medium_normal');
-const PEA_3_2_1_medium_TOU = require('./PEA_3.2.1_medium_TOU');
-const PEA_3_2_2_medium_TOU = require('./PEA_3.2.2_medium_TOU');
-const PEA_3_2_3_medium_TOU = require('./PEA_3.2.3_medium_TOU');
-const PEA_4_1_1_large_TOD = require('./PEA_4.1.1_large_TOD');
-const PEA_4_1_2_large_TOD = require('./PEA_4.1.2_large_TOD');
-const PEA_4_1_3_large_TOD = require('./PEA_4.1.3_large_TOD');
-const PEA_4_2_1_large_TOU = require('./PEA_4.2.1_large_TOU');
-const PEA_4_2_2_large_TOU = require('./PEA_4.2.2_large_TOU');
-const PEA_4_2_3_large_TOU = require('./PEA_4.2.3_large_TOU');
-const PEA_5_1_1_specific_TOU = require('./PEA_5.1.1_specific_TOU');
-const PEA_5_1_2_specific_TOU = require('./PEA_5.1.2_specific_TOU');
-const PEA_5_1_3_specific_TOU = require('./PEA_5.1.3_specific_TOU');
-const PEA_5_2_1_specific_TOU = require('./PEA_5.2.1_specific_TOU');
-const PEA_5_2_2_specific_TOU = require('./PEA_5.2.2_specific_TOU');
-const PEA_5_2_3_specific_TOU = require('./PEA_5.2.3_specific_TOU');
-
-const MEA_2_2_1_small_TOU = require('./MEA_2.2.1_small_TOU');
-const MEA_2_2_2_small_TOU = require('./MEA_2.2.2_small_TOU');
-const MEA_3_1_1_medium_normal = require('./MEA_3.1.1_medium_normal');
-const MEA_3_1_2_medium_normal = require('./MEA_3.1.2_medium_normal');
-const MEA_3_1_3_medium_normal = require('./MEA_3.1.3_medium_normal');
-const MEA_3_2_1_medium_TOU = require('./MEA_3.2.1_medium_TOU');
-const MEA_3_2_2_medium_TOU = require('./MEA_3.2.2_medium_TOU');
-const MEA_3_2_3_medium_TOU = require('./MEA_3.2.3_medium_TOU');
-const MEA_4_1_1_large_TOD = require('./MEA_4.1.1_large_TOD');
-const MEA_4_1_2_large_TOD = require('./MEA_4.1.2_large_TOD');
-const MEA_4_1_3_large_TOD = require('./MEA_4.1.3_large_TOD');
-const MEA_4_2_1_large_TOU = require('./MEA_4.2.1_large_TOU');
-const MEA_4_2_2_large_TOU = require('./MEA_4.2.2_large_TOU');
-const MEA_4_2_3_large_TOU = require('./MEA_4.2.3_large_TOU');
-const MEA_5_1_1_specific_normal = require('./MEA_5.1.1_specific_normal');
-const MEA_5_1_2_specific_normal = require('./MEA_5.1.2_specific_normal');
-const MEA_5_1_3_specific_normal = require('./MEA_5.1.3_specific_normal');
-const MEA_5_2_1_specific_TOU = require('./MEA_5.2.1_specific_TOU');
-const MEA_5_2_2_specific_TOU = require('./MEA_5.2.2_specific_TOU');
-const MEA_5_2_3_specific_TOU = require('./MEA_5.2.3_specific_TOU');
-
-// Strategy registry mapping
-const STRATEGY_REGISTRY = {
-  // PEA Strategies
-  'PEA_2.2.1_small_TOU': PEA_2_2_1_small_TOU,
-  'PEA_2.2.2_small_TOU': PEA_2_2_2_small_TOU,
-  'PEA_3.1.1_medium_normal': PEA_3_1_1_medium_normal,
-  'PEA_3.1.2_medium_normal': PEA_3_1_2_medium_normal,
-  'PEA_3.1.3_medium_normal': PEA_3_1_3_medium_normal,
-  'PEA_3.2.1_medium_TOU': PEA_3_2_1_medium_TOU,
-  'PEA_3.2.2_medium_TOU': PEA_3_2_2_medium_TOU,
-  'PEA_3.2.3_medium_TOU': PEA_3_2_3_medium_TOU,
-  'PEA_4.1.1_large_TOD': PEA_4_1_1_large_TOD,
-  'PEA_4.1.2_large_TOD': PEA_4_1_2_large_TOD,
-  'PEA_4.1.3_large_TOD': PEA_4_1_3_large_TOD,
-  'PEA_4.2.1_large_TOU': PEA_4_2_1_large_TOU,
-  'PEA_4.2.2_large_TOU': PEA_4_2_2_large_TOU,
-  'PEA_4.2.3_large_TOU': PEA_4_2_3_large_TOU,
-  'PEA_5.1.1_specific_TOU': PEA_5_1_1_specific_TOU,
-  'PEA_5.1.2_specific_TOU': PEA_5_1_2_specific_TOU,
-  'PEA_5.1.3_specific_TOU': PEA_5_1_3_specific_TOU,
-  'PEA_5.2.1_specific_TOU': PEA_5_2_1_specific_TOU,
-  'PEA_5.2.2_specific_TOU': PEA_5_2_2_specific_TOU,
-  'PEA_5.2.3_specific_TOU': PEA_5_2_3_specific_TOU,
-
-  // MEA Strategies
-  'MEA_2.2.1_small_TOU': MEA_2_2_1_small_TOU,
-  'MEA_2.2.2_small_TOU': MEA_2_2_2_small_TOU,
-  'MEA_3.1.1_medium_normal': MEA_3_1_1_medium_normal,
-  'MEA_3.1.2_medium_normal': MEA_3_1_2_medium_normal,
-  'MEA_3.1.3_medium_normal': MEA_3_1_3_medium_normal,
-  'MEA_3.2.1_medium_TOU': MEA_3_2_1_medium_TOU,
-  'MEA_3.2.2_medium_TOU': MEA_3_2_2_medium_TOU,
-  'MEA_3.2.3_medium_TOU': MEA_3_2_3_medium_TOU,
-  'MEA_4.1.1_large_TOD': MEA_4_1_1_large_TOD,
-  'MEA_4.1.2_large_TOD': MEA_4_1_2_large_TOD,
-  'MEA_4.1.3_large_TOD': MEA_4_1_3_large_TOD,
-  'MEA_4.2.1_large_TOU': MEA_4_2_1_large_TOU,
-  'MEA_4.2.2_large_TOU': MEA_4_2_2_large_TOU,
-  'MEA_4.2.3_large_TOU': MEA_4_2_3_large_TOU,
-  'MEA_5.1.1_specific_normal': MEA_5_1_1_specific_normal,
-  'MEA_5.1.2_specific_normal': MEA_5_1_2_specific_normal,
-  'MEA_5.1.3_specific_normal': MEA_5_1_3_specific_normal,
-  'MEA_5.2.1_specific_TOU': MEA_5_2_1_specific_TOU,
-  'MEA_5.2.2_specific_TOU': MEA_5_2_2_specific_TOU,
-  'MEA_5.2.3_specific_TOU': MEA_5_2_3_specific_TOU
-};
+// Cache for loaded strategies
+const strategyCache = new Map();
 
 /**
- * Create and return a strategy instance based on parameters
- * @param {string} provider - Provider name (MEA or PEA)
- * @param {string} calculationType - Calculation type (type-2, type-3, type-4, type-5)
- * @param {string} tariffType - Tariff type (normal, tou, tod)
- * @param {string} voltageLevel - Voltage level
- * @returns {Object} - Strategy instance
- * @throws {Error} - If strategy not found or parameters invalid
+ * Get all strategy file names from the strategies directory
+ * @returns {Array} - Array of strategy file names (without .js extension)
  */
-function createStrategy(provider, calculationType, tariffType, voltageLevel) {
+function getAvailableStrategyFiles() {
   try {
-    // Validate input parameters
-    if (!provider || !calculationType || !tariffType || !voltageLevel) {
-      throw new Error('All parameters (provider, calculationType, tariffType, voltageLevel) are required');
+    const strategiesDir = __dirname;
+    const files = fs.readdirSync(strategiesDir);
+    
+    // Filter only .js files that are not the factory or interface files
+    const strategyFiles = files
+      .filter(file => {
+        return file.endsWith('.js') && 
+               file !== 'StrategyFactory.js' && 
+               file !== 'ICalculationStrategy.js' &&
+               file !== 'shared-calculation-utils.js';
+      })
+      .map(file => file.replace('.js', '')); // Remove .js extension
+    
+    logger.debug('Found strategy files', { 
+      count: strategyFiles.length, 
+      files: strategyFiles 
+    });
+    
+    return strategyFiles;
+  } catch (error) {
+    logger.error('Failed to read strategy files', { error: error.message });
+    throw new Error(`Failed to read strategy files: ${error.message}`);
+  }
+}
+
+/**
+ * Dynamically load a strategy class by file name
+ * @param {string} strategyFileName - Name of the strategy file (without .js)
+ * @returns {Object} - Strategy class
+ */
+function loadStrategyClass(strategyFileName) {
+  try {
+    // Check cache first
+    if (strategyCache.has(strategyFileName)) {
+      return strategyCache.get(strategyFileName);
     }
 
-    // Normalize provider name
-    const normalizedProvider = provider.toUpperCase();
-    if (!['MEA', 'PEA'].includes(normalizedProvider)) {
-      throw new Error(`Invalid provider: ${provider}. Must be MEA or PEA`);
+    // Load strategy dynamically
+    const strategyPath = path.join(__dirname, `${strategyFileName}.js`);
+    
+    // Check if file exists
+    if (!fs.existsSync(strategyPath)) {
+      throw new Error(`Strategy file not found: ${strategyFileName}.js`);
     }
 
-    // Map calculation type to strategy identifier components
-    const typeMapping = {
-      'type-2': { baseType: '2.2', size: 'small' },
-      'type-3': { baseType: '3', size: 'medium' },
-      'type-4': { baseType: '4', size: 'large' },
-      'type-5': { baseType: '5', size: 'specific' }
-    };
+    // Load the strategy class
+    const StrategyClass = require(strategyPath);
+    
+    // Cache the loaded class
+    strategyCache.set(strategyFileName, StrategyClass);
+    
+    logger.debug('Strategy class loaded', { 
+      strategyFileName, 
+      hasCalculate: typeof StrategyClass.prototype.calculate === 'function' 
+    });
+    
+    return StrategyClass;
+  } catch (error) {
+    logger.error('Failed to load strategy class', { 
+      strategyFileName, 
+      error: error.message 
+    });
+    throw new Error(`Failed to load strategy ${strategyFileName}: ${error.message}`);
+  }
+}
 
-    const typeInfo = typeMapping[calculationType];
-    if (!typeInfo) {
-      throw new Error(`Invalid calculation type: ${calculationType}. Must be type-2, type-3, type-4, or type-5`);
+/**
+ * Create and return a strategy instance based on tariff plan name
+ * @param {string} tariffPlanName - Tariff plan name (strategy file name without .js)
+ * @returns {Object} - Strategy instance
+ * @throws {Error} - If strategy not found or invalid
+ */
+function createStrategy(tariffPlanName) {
+  try {
+    // Validate input parameter
+    if (!tariffPlanName) {
+      throw new Error('Tariff plan name is required');
     }
 
-    // Map voltage level to strategy identifier components
-    const voltageMapping = {
-      '<12kV': '3',
-      '12-24kV': '2',
-      '<22kV': '3',
-      '22-33kV': '2',
-      '>=69kV': '1'
-    };
-
-    const voltageSuffix = voltageMapping[voltageLevel];
-    if (!voltageSuffix) {
-      throw new Error(`Invalid voltage level: ${voltageLevel}`);
+    // Get available strategy files to validate
+    const availableStrategies = getAvailableStrategyFiles();
+    
+    if (!availableStrategies.includes(tariffPlanName)) {
+      throw new Error(`Tariff plan '${tariffPlanName}' not found. Available plans: ${availableStrategies.join(', ')}`);
     }
 
-    // Map tariff type to strategy identifier components
-    const tariffMapping = {
-      'normal': 'normal',
-      'tou': 'TOU',
-      'tod': 'TOD'
-    };
-
-    const tariffSuffix = tariffMapping[tariffType];
-    if (!tariffSuffix) {
-      throw new Error(`Invalid tariff type: ${tariffType}. Must be normal, tou, or tod`);
-    }
-
-    // Build strategy identifier
-    let strategyId;
-    if (calculationType === 'type-2') {
-      // Type 2 has special handling for voltage levels
-      const type2VoltageMapping = {
-        '<12kV': '1',
-        '12-24kV': '2',
-        '<22kV': '1',
-        '22-33kV': '2'
-      };
-      const type2VoltageSuffix = type2VoltageMapping[voltageLevel];
-      strategyId = `${normalizedProvider}_2.2.${type2VoltageSuffix}_small_${tariffSuffix}`;
-    } else {
-      // Type 3, 4, 5 use the base type with voltage suffix
-      // For TOU, use .2. prefix; for TOD and normal, use .1. prefix
-      const tariffPrefix = (tariffSuffix === 'TOU') ? '2' : '1';
-      strategyId = `${normalizedProvider}_${typeInfo.baseType}.${tariffPrefix}.${voltageSuffix}_${typeInfo.size}_${tariffSuffix}`;
-    }
-
-    // Get strategy class from registry
-    const StrategyClass = STRATEGY_REGISTRY[strategyId];
-    if (!StrategyClass) {
-      throw new Error(`Strategy not found: ${strategyId}. Available strategies: ${Object.keys(STRATEGY_REGISTRY).join(', ')}`);
-    }
+    // Load strategy class dynamically
+    const StrategyClass = loadStrategyClass(tariffPlanName);
 
     // Create and return strategy instance
     const strategy = new StrategyClass();
     
     logger.debug('Strategy created successfully', {
-      strategyId,
-      provider: normalizedProvider,
-      calculationType,
-      tariffType,
-      voltageLevel,
-      description: strategy.getDescription()
+      tariffPlanName,
+      description: strategy.getDescription ? strategy.getDescription() : 'No description available'
     });
 
     return strategy;
 
   } catch (error) {
     logger.error('Failed to create strategy', {
-      provider,
-      calculationType,
-      tariffType,
-      voltageLevel,
+      tariffPlanName,
       error: error.message
     });
     throw error;
@@ -209,27 +126,28 @@ function createStrategy(provider, calculationType, tariffType, voltageLevel) {
 }
 
 /**
- * Get all available strategies
- * @returns {Array} - Array of strategy identifiers
+ * Get all available tariff plans
+ * @returns {Array} - Array of tariff plan names
  */
 function getAllStrategies() {
-  return Object.keys(STRATEGY_REGISTRY);
+  return getAvailableStrategyFiles();
 }
 
 /**
- * Get strategies by provider
+ * Get tariff plans by provider
  * @param {string} provider - Provider name (MEA or PEA)
- * @returns {Array} - Array of strategy identifiers for the provider
+ * @returns {Array} - Array of tariff plan names for the provider
  */
 function getStrategiesByProvider(provider) {
   const normalizedProvider = provider.toUpperCase();
-  return Object.keys(STRATEGY_REGISTRY).filter(id => id.startsWith(normalizedProvider));
+  const allStrategies = getAvailableStrategyFiles();
+  return allStrategies.filter(strategy => strategy.startsWith(normalizedProvider));
 }
 
 /**
- * Get strategies by calculation type
+ * Get tariff plans by calculation type
  * @param {string} calculationType - Calculation type (type-2, type-3, type-4, type-5)
- * @returns {Array} - Array of strategy identifiers for the calculation type
+ * @returns {Array} - Array of tariff plan names for the calculation type
  */
 function getStrategiesByCalculationType(calculationType) {
   const typeMapping = {
@@ -244,23 +162,44 @@ function getStrategiesByCalculationType(calculationType) {
     return [];
   }
   
-  return Object.keys(STRATEGY_REGISTRY).filter(id => id.includes(`_${baseType}.`));
+  const allStrategies = getAvailableStrategyFiles();
+  return allStrategies.filter(strategy => strategy.includes(`_${baseType}.`));
 }
 
 /**
- * Validate if a combination of parameters is supported
- * @param {string} provider - Provider name
- * @param {string} calculationType - Calculation type
- * @param {string} tariffType - Tariff type
- * @param {string} voltageLevel - Voltage level
- * @returns {boolean} - True if combination is supported
+ * Validate if a tariff plan is supported
+ * @param {string} tariffPlanName - Tariff plan name
+ * @returns {boolean} - True if tariff plan is supported
  */
-function isCombinationSupported(provider, calculationType, tariffType, voltageLevel) {
+function isTariffPlanSupported(tariffPlanName) {
   try {
-    createStrategy(provider, calculationType, tariffType, voltageLevel);
+    createStrategy(tariffPlanName);
     return true;
   } catch (error) {
     return false;
+  }
+}
+
+/**
+ * Get tariff plan information
+ * @param {string} tariffPlanName - Tariff plan name
+ * @returns {Object} - Tariff plan information
+ */
+function getTariffPlanInfo(tariffPlanName) {
+  try {
+    const strategy = createStrategy(tariffPlanName);
+    return {
+      name: tariffPlanName,
+      description: strategy.getDescription ? strategy.getDescription() : 'No description available',
+      supported: true
+    };
+  } catch (error) {
+    return {
+      name: tariffPlanName,
+      description: 'Not found',
+      supported: false,
+      error: error.message
+    };
   }
 }
 
@@ -269,5 +208,7 @@ module.exports = {
   getAllStrategies,
   getStrategiesByProvider,
   getStrategiesByCalculationType,
-  isCombinationSupported
+  isTariffPlanSupported,
+  getTariffPlanInfo,
+  getAvailableStrategyFiles
 };

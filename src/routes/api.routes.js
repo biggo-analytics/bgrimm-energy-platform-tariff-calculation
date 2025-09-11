@@ -10,34 +10,37 @@ const router = new Router({
   prefix: '/api' // Main API with strategy pattern
 });
 
-// Universal calculation endpoint that works for both MEA and PEA
-router.post('/:provider/calculate/:calculationType', electricityController.calculateBill);
+// Universal calculation endpoint using tariff plan name
+router.post('/calculate/:tariffPlanName', electricityController.calculateBill);
 
 // Service information endpoint
 router.get('/info', electricityController.getServiceInfo);
 
-// Strategy discovery endpoints
-router.get('/strategies/:provider', electricityController.getAvailableStrategies);
-router.get('/strategies/calculation-type/:calculationType', electricityController.getStrategiesForCalculationType);
+// Tariff plan discovery endpoints
+router.get('/tariff-plans', electricityController.getAllTariffPlans);
+router.get('/tariff-plans/:tariffPlanName', electricityController.getTariffPlanInfo);
+router.get('/tariff-plans/:provider', electricityController.getAvailableStrategies);
+router.get('/tariff-plans/calculation-type/:calculationType', electricityController.getStrategiesForCalculationType);
 
 // Validation endpoint
-router.get('/validate', electricityController.validateCombination);
+router.get('/validate', electricityController.validateTariffPlan);
 
 // API Health Check and Information
 router.get('/health', async (ctx) => {
   ctx.status = 200;
   ctx.body = {
     success: true,
-    message: 'Strategy Pattern API is healthy',
-    version: '3.0.0',
+    message: 'Dynamic Strategy Pattern API is healthy',
+    version: '4.0.0',
     features: [
-      'Strategy Pattern Implementation',
-      'Unified Strategy Location',
+      'Dynamic Strategy Pattern Implementation',
+      'File System Based Strategy Discovery',
+      'Auto-Loading Strategy Classes',
       'Shared Calculation Utilities',
       'Configuration-Driven Strategies',
       'Enhanced Error Handling',
-      'Strategy Discovery APIs',
-      'Combination Validation'
+      'Tariff Plan Discovery APIs',
+      'Dynamic Validation'
     ],
     timestamp: new Date().toISOString()
   };
@@ -49,38 +52,37 @@ router.get('/info', async (ctx) => {
   ctx.body = {
     success: true,
     data: {
-      version: '3.0.0',
-      description: 'Strategy Pattern Implementation for Electricity Tariff Calculation',
+      version: '4.0.0',
+      description: 'Dynamic Strategy Pattern Implementation for Electricity Tariff Calculation',
       providers: ['MEA', 'PEA'],
-      calculationTypes: ['type-2', 'type-3', 'type-4', 'type-5'],
-      tariffTypes: ['normal', 'tou', 'tod'],
       features: {
-        strategyPattern: true,
-        unifiedStrategyLocation: true,
+        dynamicStrategyPattern: true,
+        fileSystemBasedDiscovery: true,
+        autoLoadingStrategyClasses: true,
         sharedCalculationUtils: true,
         configurationDriven: true,
         maintainableCode: true,
         enhancedValidation: true,
-        strategyDiscovery: true,
-        combinationValidation: true
+        tariffPlanDiscovery: true,
+        dynamicValidation: true
       },
       endpoints: {
-        calculate: '/api/{provider}/calculate/{calculationType}',
+        calculate: '/api/calculate/{tariffPlanName}',
         info: '/api/info',
         health: '/api/health',
-        strategies: {
-          byProvider: '/api/strategies/{provider}',
-          byCalculationType: '/api/strategies/calculation-type/{calculationType}'
+        tariffPlans: {
+          all: '/api/tariff-plans',
+          byName: '/api/tariff-plans/{tariffPlanName}',
+          byProvider: '/api/tariff-plans/{provider}',
+          byCalculationType: '/api/tariff-plans/calculation-type/{calculationType}'
         },
-        validate: '/api/validate?provider={provider}&calculationType={type}&tariffType={tariff}&voltageLevel={voltage}'
+        validate: '/api/validate?tariffPlanName={tariffPlanName}'
       },
       examples: {
         calculate: {
-          url: '/api/MEA/calculate/type-2',
+          url: '/api/calculate/MEA_2.2.1_small_TOU',
           method: 'POST',
           body: {
-            tariffType: 'tou',
-            voltageLevel: '<12kV',
             ftRateSatang: 39.72,
             usage: {
               on_peak_kwh: 200,
@@ -89,7 +91,7 @@ router.get('/info', async (ctx) => {
           }
         },
         validate: {
-          url: '/api/validate?provider=PEA&calculationType=type-3&tariffType=normal&voltageLevel=22-33kV',
+          url: '/api/validate?tariffPlanName=PEA_3.1.1_medium_normal',
           method: 'GET'
         }
       }
@@ -106,22 +108,23 @@ router.get('/compare', async (ctx) => {
     data: {
       current: {
         endpoint: '/api',
-        description: 'Strategy Pattern implementation',
+        description: 'Dynamic Strategy Pattern implementation',
         features: [
-          'Strategy pattern',
-          'Unified strategy location',
+          'Dynamic strategy pattern',
+          'File system based discovery',
+          'Auto-loading strategy classes',
           'Shared calculation utilities',
           'Configuration-driven strategies',
           'Enhanced maintainability',
-          'Strategy discovery APIs',
-          'Combination validation',
+          'Tariff plan discovery APIs',
+          'Dynamic validation',
           '42 individual strategy classes'
         ]
       },
       migration: {
         status: 'Complete',
         recommendation: 'Use current API for all integrations',
-        note: 'Legacy APIs have been removed and replaced with strategy pattern'
+        note: 'Legacy APIs have been removed and replaced with dynamic strategy pattern'
       }
     },
     timestamp: new Date().toISOString()
