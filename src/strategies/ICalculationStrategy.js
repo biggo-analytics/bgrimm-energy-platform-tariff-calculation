@@ -80,23 +80,7 @@ class ICalculationStrategy {
       throw new Error('Input data is required');
     }
 
-    const { tariffType, voltageLevel, usage } = data;
-
-    if (!tariffType) {
-      throw new Error('Tariff type is required');
-    }
-
-    if (!voltageLevel) {
-      throw new Error('Voltage level is required');
-    }
-
-    if (tariffType !== this.getTariffModel()) {
-      throw new Error(`Tariff type mismatch. Expected ${this.getTariffModel()}, got ${tariffType}`);
-    }
-
-    if (voltageLevel !== this.getVoltageLevel()) {
-      throw new Error(`Voltage level mismatch. Expected ${this.getVoltageLevel()}, got ${voltageLevel}`);
-    }
+    const { usage } = data;
 
     // Validate usage field exists
     if (!usage) {
@@ -164,8 +148,9 @@ class ICalculationStrategy {
    * @throws {Error} - If validation fails
    */
   validateUsageFields(data) {
-    const { usage, tariffType } = data;
+    const { usage } = data;
     const calculationType = this.getCalculationType();
+    const tariffType = this.getTariffModel();
 
     // Get the base calculation type (e.g., "2" from "2.2.1")
     const baseType = calculationType.split('.')[0];
