@@ -978,6 +978,3 @@ describe('Electricity Service Integration', () => {
   });
 });
 ```
-
-**เวอร์ชัน**: 3.0.0  
-**ผู้จัดทำ**: BGRIM Energy Platform Development Team
